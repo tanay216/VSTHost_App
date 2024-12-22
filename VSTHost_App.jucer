@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="cPEt5Y" name="VSTHost_App" projectType="guiapp" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
+  <MAINGROUP id="l9CN2X" name="VSTHost_App">
+    <GROUP id="{11C4BD75-CF17-0105-2F86-B6C295FABAAA}" name="Source">
+      <FILE id="sOAVcX" name="Exporter.cpp" compile="1" resource="0" file="Source/Exporter.cpp"/>
+      <FILE id="DWd5hL" name="Exporter.h" compile="0" resource="0" file="Source/Exporter.h"/>
+      <FILE id="atO7We" name="VSTPluginComponent.cpp" compile="1" resource="0"
+            file="Source/VSTPluginComponent.cpp"/>
+      <FILE id="g4EOIv" name="VSTPluginComponent.h" compile="0" resource="0"
+            file="Source/VSTPluginComponent.h"/>
+      <FILE id="kinPMa" name="AudioFileManager.cpp" compile="1" resource="0"
+            file="Source/AudioFileManager.cpp"/>
+      <FILE id="vVwZwD" name="AudioFileManager.h" compile="0" resource="0"
+            file="Source/AudioFileManager.h"/>
+      <FILE id="Gbha86" name="VSTPluginHost.cpp" compile="1" resource="0"
+            file="Source/VSTPluginHost.cpp"/>
+      <FILE id="nsddRZ" name="VSTPluginHost.h" compile="0" resource="0" file="Source/VSTPluginHost.h"/>
+      <FILE id="hfp6KG" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="wSC5Lz" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+      <FILE id="DuWFzl" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_PLUGINHOST_VST3="1"/>
+  <EXPORTFORMATS>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="VSTHost_App"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="VSTHost_App"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="C:/Programs/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="C:/Programs/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="C:/Programs/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="C:/Programs/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="C:/Programs/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="C:/Programs/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="C:/Programs/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="C:/Programs/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="C:/Programs/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="C:/Programs/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="C:/Programs/JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2022>
+  </EXPORTFORMATS>
+</JUCERPROJECT>
