@@ -270,7 +270,7 @@ void VSTPluginComponent::handleBusChange(AudioProcessor* pluginInstance, AudioBu
     AudioProcessor::BusesLayout newLayout;
 
     
-    if (inputLayoutNumber >= 5 && inputLayoutNumber < 7) {
+    /*if (inputLayoutNumber >= 5 && inputLayoutNumber < 7) {
 
         newLayout.inputBuses.add(AudioChannelSet::create7point1());
         newLayout.outputBuses.add(AudioChannelSet::create7point1());
@@ -279,7 +279,9 @@ void VSTPluginComponent::handleBusChange(AudioProcessor* pluginInstance, AudioBu
 
         newLayout.inputBuses.add(AudioChannelSet::create7point1());
         newLayout.outputBuses.add(AudioChannelSet::create7point1());
-    }
+    }*/
+    newLayout.inputBuses.add(AudioChannelSet::create7point1());
+    newLayout.outputBuses.add(AudioChannelSet::create7point1());
 
  
     if (pluginInstance->setBusesLayout(newLayout))
@@ -568,6 +570,7 @@ void VSTPluginComponent::processMultiChannelAudio(AudioBuffer<float>& audioBuffe
         // Map input channels to plugin input
         juce::AudioBuffer<float> pluginInputBuffer(pluginInputChannels, numSamples);
         pluginInputBuffer.clear();
+        std::cout << "channelsToProcess: " << channelsToProcess << std::endl;
         for (int ch = 0; ch < channelsToProcess; ++ch) {
             pluginInputBuffer.copyFrom(ch, 0, blockBuffer, ch, 0, numSamples);
         }
