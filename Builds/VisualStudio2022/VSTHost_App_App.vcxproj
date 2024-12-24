@@ -141,6 +141,7 @@
     <Lib/>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\MultiChannelComponent.cpp"/>
     <ClCompile Include="..\..\Source\Exporter.cpp"/>
     <ClCompile Include="..\..\Source\VSTPluginComponent.cpp"/>
     <ClCompile Include="..\..\Source\AudioFileManager.cpp"/>
@@ -2816,6 +2817,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\MultiChannelComponent.h"/>
     <ClInclude Include="..\..\Source\Exporter.h"/>
     <ClInclude Include="..\..\Source\VSTPluginComponent.h"/>
     <ClInclude Include="..\..\Source\AudioFileManager.h"/>

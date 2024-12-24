@@ -664,6 +664,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\MultiChannelComponent.cpp">
+      <Filter>VSTHost_App\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Exporter.cpp">
       <Filter>VSTHost_App\Source</Filter>
     </ClCompile>
@@ -3519,6 +3522,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\MultiChannelComponent.h">
+      <Filter>VSTHost_App\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Exporter.h">
       <Filter>VSTHost_App\Source</Filter>
     </ClInclude>

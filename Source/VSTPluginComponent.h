@@ -65,6 +65,9 @@ public:
     void processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames);
     const AudioBuffer<float>& getMonoOutputBuffer() const;  // Getter for monoOutputBuffer
     const AudioBuffer<float>& getStereoOutputBuffer() const; // Getter for stereoOutputBuffer
+    void VSTPluginComponent::handleMultichannelConfiguration(int configId, AudioBuffer<float>& audioBuffer);
+    void VSTPluginComponent::resizeAudioBuffer(const AudioProcessor::BusesLayout& layout, AudioBuffer<float>& audioBuffer);
+    String VSTPluginComponent::getLayoutDescription(int configId);
     
 
     ~VSTPluginComponent();

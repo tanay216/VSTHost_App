@@ -15,6 +15,7 @@ class MainComponent  : public juce::AudioAppComponent,
                         public juce::Button::Listener, 
                         public juce::Component,
                         public juce::ListBox
+                       
                         
                        
 {
@@ -36,6 +37,7 @@ public:
     void buttonClicked(juce::Button* button) override;
 
     juce::AudioProcessorEditor* getPluginEditor();
+   // void MainComponent::handleChannelConfigurationChange(int configId);
     void closePluginEditor();
 
 
@@ -50,7 +52,7 @@ private:
     //==============================================================================
     bool pluginLoaded = false;
     
-    
+    juce::AudioDeviceManager audioDeviceManager;
     VSTPluginHost pluginHost;
     AudioFileManager audioFileManager;
     VSTPluginComponent vstPluginComponent;
@@ -85,6 +87,7 @@ private:
     
 
     juce::ComboBox pluginListDropdown;
+    juce::ComboBox channelConfigDropdown;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

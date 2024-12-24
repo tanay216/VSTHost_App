@@ -4,6 +4,10 @@
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <MAINGROUP id="l9CN2X" name="VSTHost_App">
     <GROUP id="{11C4BD75-CF17-0105-2F86-B6C295FABAAA}" name="Source">
+      <FILE id="MGeJmQ" name="MultiChannelComponent.cpp" compile="1" resource="0"
+            file="Source/MultiChannelComponent.cpp"/>
+      <FILE id="PhZ8Sc" name="MultiChannelComponent.h" compile="0" resource="0"
+            file="Source/MultiChannelComponent.h"/>
       <FILE id="sOAVcX" name="Exporter.cpp" compile="1" resource="0" file="Source/Exporter.cpp"/>
       <FILE id="DWd5hL" name="Exporter.h" compile="0" resource="0" file="Source/Exporter.h"/>
       <FILE id="atO7We" name="VSTPluginComponent.cpp" compile="1" resource="0"

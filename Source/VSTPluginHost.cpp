@@ -21,6 +21,7 @@
     }
     void VSTPluginHost::initialiseAudio()
     {
+
         audioDeviceManager->initialise(0, 2, nullptr, true);
         audioDeviceManager->addAudioCallback(&audioSourcePlayer);
         audioSourcePlayer.setSource(&transportSource);

@@ -21,6 +21,20 @@ MainComponent::MainComponent()
     juce::Component::addAndMakeVisible(unloadPluginButton);
     juce::Component::addAndMakeVisible(ShowEditorButton);
 
+    // Configure the multichannel configuration dropdown
+    juce::Component::addAndMakeVisible(channelConfigDropdown);
+    channelConfigDropdown.addItem("Stereo (2.0)", 1);
+    channelConfigDropdown.addItem("Surround (5.1)", 2);
+    channelConfigDropdown.addItem("Surround (7.1)", 3);
+    channelConfigDropdown.setSelectedId(1); // Default to Stereo
+    channelConfigDropdown.onChange = [this]()
+        {
+            
+            vstPluginComponent.handleMultichannelConfiguration(channelConfigDropdown.getSelectedId(), audioBuffer);
+            vstPluginComponent.getLayoutDescription(channelConfigDropdown.getSelectedId());
+           
+        };
+
     // Audio file list setup
    // audioFileListBox.setModel(this); // This component will handle the interaction
    // audioFileListBox.setMultipleSelectionEnabled(false); // Disable multiple selections
@@ -56,12 +70,12 @@ MainComponent::MainComponent()
         && !juce::RuntimePermissions::isGranted(juce::RuntimePermissions::recordAudio))
     {
         juce::RuntimePermissions::request(juce::RuntimePermissions::recordAudio,
-            [&](bool granted) { setAudioChannels(granted ? 8 : 0, 8); });
+            [&](bool granted) { setAudioChannels(granted ? 2 : 0, 2); });
     }
     else
     {
         // Specify the number of input and output channels that we want to open
-        setAudioChannels(8, 8);
+        setAudioChannels(2, 2);
     }
 }
 
@@ -88,7 +102,7 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
             juce::MidiBuffer midiBuffer;
 
             //std::cout << "Buffer Channels: " << bufferToFill.buffer->getNumChannels() << std::endl;
-            
+           
             auto busLayout = vstPluginComponent.pluginInstance->getBusesLayout();
             
            /* std::cout << "====================" << std::endl;
@@ -154,6 +168,7 @@ void MainComponent::resized()
     int buttonWidth = 200; // Custom width for buttons
     auto area = juce::Component::getLocalBounds().reduced(10);
 
+    channelConfigDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
     scanPluginButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
     loadAudioButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
     pluginListDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
@@ -165,6 +180,7 @@ void MainComponent::resized()
     unloadPluginButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(area.getWidth() - 210));
    // audioFileListBox.setBounds(area.removeFromTop(200).withWidth(200).withX(area.getWidth() - 210)); // Position the list to the top right
     
+
     if (pluginEditor != nullptr && pluginEditor->isVisible()) 
     {
         // Adjust height and position as needed
@@ -294,7 +310,7 @@ void MainComponent::buttonClicked(juce::Button* button)
         int selectedIndex = pluginListDropdown.getSelectedId() - 1; // Adjust for 1-based indexing
         if (selectedIndex >= 0 && selectedIndex < vstPluginComponent.pluginList.getNumTypes())
         {
-            vstPluginComponent.handleBusChange(vstPluginComponent.pluginInstance.get(), audioBuffer);
+          //  vstPluginComponent.handleBusChange(vstPluginComponent.pluginInstance.get(), audioBuffer);
             vstPluginComponent.refreshPlugin(selectedIndex, vstPluginComponent.pluginInstance.get());
         }
     }
@@ -350,6 +366,32 @@ void MainComponent::buttonClicked(juce::Button* button)
 const std::string MainComponent::getLoadedAudiFileNames() {
     return loadedAudioFileNames;
 }
+
+//void MainComponent::handleChannelConfigurationChange(int configId)
+//{
+//    switch (configId)
+//    {
+//    case 1: // Stereo (2.0)
+//        setAudioChannels(2, 2);
+//        break;
+//
+//    case 2: // Surround (5.1)
+//        setAudioChannels(6, 6);
+//        break;
+//
+//    case 3: // Surround (7.1)
+//        setAudioChannels(8, 8);
+//        break;
+//
+//    default:
+//        jassertfalse; // Invalid configuration ID
+//        break;
+//    }
+//
+//    std::cout<<"Channel configuration changed: " << configId  << std::endl;
+//    
+//
+//}
 
 // VST Plugin Editor Window ==============================================================================
 
