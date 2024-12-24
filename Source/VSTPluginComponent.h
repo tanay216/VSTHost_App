@@ -39,6 +39,7 @@ private:
     AudioBuffer<float> monoOutputBuffer;
     AudioBuffer<float> stereoOutputBuffer;
     juce::AudioChannelSet inputBus;
+    
 
     
     double sampleRate = 44100.0;
@@ -56,13 +57,16 @@ public:
     KnownPluginList pluginList;
     void loadPlugin(int pluginIndex);
     void handleBusChange(AudioProcessor* pluginInstance, AudioBuffer<float> audioBuffer);
-    void refreshPlugin(int pluginIndex);
+    void refreshPlugin(int pluginIndex, AudioProcessor* pluginInstance);
+    void debugBusAndChannelInfo(AudioProcessor* pluginInstance);
     void processAudioWithPlugin(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames);
     void processMonoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames);
     void processStereoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames);
     void processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames);
     const AudioBuffer<float>& getMonoOutputBuffer() const;  // Getter for monoOutputBuffer
     const AudioBuffer<float>& getStereoOutputBuffer() const; // Getter for stereoOutputBuffer
+    
+
     ~VSTPluginComponent();
 
     static VSTPluginComponent& getInstance();

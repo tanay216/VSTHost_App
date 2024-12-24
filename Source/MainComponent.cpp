@@ -8,6 +8,9 @@ MainComponent::MainComponent()
     // you add any child components.
     formatManager.registerBasicFormats();
 
+    juce::Component::addAndMakeVisible(viewport);
+    viewport.setViewedComponent(&contentComponent, false);
+
     juce::Component::addAndMakeVisible(scanPluginButton);
     juce::Component::addAndMakeVisible(loadAudioButton);
     juce::Component::addAndMakeVisible(playButton);
@@ -53,12 +56,12 @@ MainComponent::MainComponent()
         && !juce::RuntimePermissions::isGranted(juce::RuntimePermissions::recordAudio))
     {
         juce::RuntimePermissions::request(juce::RuntimePermissions::recordAudio,
-            [&](bool granted) { setAudioChannels(granted ? 2 : 0, 2); });
+            [&](bool granted) { setAudioChannels(granted ? 8 : 0, 8); });
     }
     else
     {
         // Specify the number of input and output channels that we want to open
-        setAudioChannels(2, 2);
+        setAudioChannels(8, 8);
     }
 }
 
@@ -83,7 +86,17 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
         {
             try{
             juce::MidiBuffer midiBuffer;
+
+            //std::cout << "Buffer Channels: " << bufferToFill.buffer->getNumChannels() << std::endl;
+            
+            auto busLayout = vstPluginComponent.pluginInstance->getBusesLayout();
+            
+           /* std::cout << "====================" << std::endl;
+            std::cout << "Input Channels: " << busLayout.getNumChannels(true, 0) << std::endl;
+            std::cout << "Output Channels: " << busLayout.getNumChannels(true, 0) << std::endl;
+            std::cout << "====================" << std::endl;*/
             vstPluginComponent.pluginInstance->processBlock(*bufferToFill.buffer, midiBuffer);
+            
             if (!pluginLoaded)
             {
                 pluginLoaded = true;
@@ -156,7 +169,12 @@ void MainComponent::resized()
     {
         // Adjust height and position as needed
         pluginEditor->setBounds(10, area.getY() + 30, area.getWidth(), 200); 
+        
+        pluginEditor->setBounds(0, 0, pluginEditor->getWidth(), pluginEditor->getHeight()); // Adjust bounds
+        pluginEditorViewport->setViewedComponent(pluginEditor.get(), true); // Refresh viewport
     }
+
+    
 }
 
 void MainComponent::buttonClicked(juce::Button* button)
@@ -277,7 +295,7 @@ void MainComponent::buttonClicked(juce::Button* button)
         if (selectedIndex >= 0 && selectedIndex < vstPluginComponent.pluginList.getNumTypes())
         {
             vstPluginComponent.handleBusChange(vstPluginComponent.pluginInstance.get(), audioBuffer);
-            vstPluginComponent.refreshPlugin(selectedIndex);
+            vstPluginComponent.refreshPlugin(selectedIndex, vstPluginComponent.pluginInstance.get());
         }
     }
 
@@ -299,8 +317,16 @@ void MainComponent::buttonClicked(juce::Button* button)
                 if (pluginEditor == nullptr)
                 {
                     pluginEditor.reset(vstPluginComponent.pluginInstance->createEditorIfNeeded());
-                    juce::Component::addAndMakeVisible(pluginEditor.get());
-                    pluginEditor->setBounds(10, 250, 780, 300); // Adjust as needed
+                    //juce::Component::addAndMakeVisible(pluginEditor.get());
+                    //pluginEditor->setBounds(10, 250, 780, 300); // Adjust as needed
+
+                    // Add the viewport
+                    pluginEditorViewport = std::make_unique<juce::Viewport>();
+                    juce::Component::addAndMakeVisible(pluginEditorViewport.get());
+
+                    pluginEditorViewport->setViewedComponent(pluginEditor.get(), true); // Attach the editor to the viewport
+                    pluginEditorViewport->setScrollBarsShown(true, true); // Enable scrollbars
+                    pluginEditorViewport->setBounds(10, 250, 780, 300);  // Set initial viewport bounds
                 }
                 else
                 {

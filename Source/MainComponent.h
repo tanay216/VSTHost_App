@@ -69,7 +69,10 @@ private:
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::AudioProcessorPlayer pluginPlayer;
     juce::AudioFormatManager formatManager;
+    std::unique_ptr<juce::Viewport> pluginEditorViewport;
 
+    juce::Viewport viewport;                     // Viewport for scrolling
+    juce::Component contentComponent;            // Holds all buttons and UI elements
     juce::TextButton scanPluginButton { "Scan Plugins" };
     juce::TextButton loadAudioButton { "Load Audio File" };
    // juce::ListBox audioFileListBox{ "Audio File List" }; // ListBox for displaying audio files
