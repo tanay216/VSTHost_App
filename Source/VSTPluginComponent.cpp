@@ -148,57 +148,57 @@ void VSTPluginComponent::loadPlugin(int pluginIndex)
     }
 }
 
-void VSTPluginComponent::handleBusChange(AudioProcessor* pluginInstance, AudioBuffer<float> audioBuffer)
-{
-    std::cout << "=======================" << std::endl;
-    std::cout << "handleBusChange called" << std::endl;
-    // Query the current layout
-    auto currentLayout = pluginInstance->getBusesLayout();
-   // int inputLayoutNumber = currentLayout.getChannelSet(true, 0).size();
-
-    std::cout << "Current Plugin Input Layout: " << currentLayout.getChannelSet(true, 0).getDescription() << std::endl;
-    std::cout << "Current Plugin Output Layout: " << currentLayout.getChannelSet(false, 0).getDescription() << std::endl;
-   
-   AudioProcessor::BusesLayout newLayout;
-    
-    newLayout.inputBuses.clear();
-    newLayout.outputBuses.clear();
-    
-    newLayout.inputBuses.add(AudioChannelSet::create7point1());
-    newLayout.outputBuses.add(AudioChannelSet::create7point1());
-    pluginInstance->setBusesLayout(newLayout);
-   // pluginInstance->getBusCount(true);
-
-    int NewInputChannels = newLayout.getMainInputChannels();
-    int NewOutputChannels = newLayout.getMainInputChannels();
-   // std::cout << "New Main Input Channels: " << NewInputChannels << std::endl;
-   //std::cout << "New Main Output Channels: " << NewOutputChannels << std::endl;
-
- 
-    if (pluginInstance->setBusesLayout(newLayout))
-    {
-        std::cout << "Successfully changed to 7.1 layout" << std::endl;
-        std::cout << "Current Plugin Input Layout: " << pluginInstance->getBusesLayout().getChannelSet(true, 0).getDescription() << std::endl;
-        std::cout << "Current Plugin Output Layout: " << pluginInstance->getBusesLayout().getChannelSet(false, 0).getDescription() << std::endl;
-        
-       auto numInputChannels = pluginInstance->getTotalNumInputChannels();
-       auto numOutputChannels = pluginInstance->getTotalNumOutputChannels();
-
-       // audioBuffer.setSize(std::max(numInputChannels, numOutputChannels), blockSize);
-
-        //DBG("Buffer resized for " + String(numInputChannels) + " input channels and " +
-            //String(numOutputChannels) + " output channels.");
-       // std::cout << "Buffer resized for " << String(numInputChannels) << "in channels and, "<< String(numOutputChannels)<<"output channnels." << std::endl;
-    }
-    else
-    {
-        //DBG("Failed to change bus layout.");
-        std::cout << "Failed to change bus layput" << std::endl;
-        auto layouts = pluginInstance->getBusesLayout();
-        std::cout << "Current input layout: " << layouts.getChannelSet(true, 0).getDescription() << std::endl;
-        std::cout << "Current output layout: " << layouts.getChannelSet(false, 0).getDescription() << std::endl;
-    }
-}
+//void VSTPluginComponent::handleBusChange(AudioProcessor* pluginInstance, AudioBuffer<float> audioBuffer)
+//{
+//    std::cout << "=======================" << std::endl;
+//    std::cout << "handleBusChange called" << std::endl;
+//    // Query the current layout
+//    auto currentLayout = pluginInstance->getBusesLayout();
+//   // int inputLayoutNumber = currentLayout.getChannelSet(true, 0).size();
+//
+//    std::cout << "Current Plugin Input Layout: " << currentLayout.getChannelSet(true, 0).getDescription() << std::endl;
+//    std::cout << "Current Plugin Output Layout: " << currentLayout.getChannelSet(false, 0).getDescription() << std::endl;
+//   
+//   AudioProcessor::BusesLayout newLayout;
+//    
+//    newLayout.inputBuses.clear();
+//    newLayout.outputBuses.clear();
+//    
+//    newLayout.inputBuses.add(AudioChannelSet::create7point1());
+//    newLayout.outputBuses.add(AudioChannelSet::create7point1());
+//    pluginInstance->setBusesLayout(newLayout);
+//   // pluginInstance->getBusCount(true);
+//
+//    int NewInputChannels = newLayout.getMainInputChannels();
+//    int NewOutputChannels = newLayout.getMainInputChannels();
+//   // std::cout << "New Main Input Channels: " << NewInputChannels << std::endl;
+//   //std::cout << "New Main Output Channels: " << NewOutputChannels << std::endl;
+//
+// 
+//    if (pluginInstance->setBusesLayout(newLayout))
+//    {
+//        std::cout << "Successfully changed to 7.1 layout" << std::endl;
+//        std::cout << "Current Plugin Input Layout: " << pluginInstance->getBusesLayout().getChannelSet(true, 0).getDescription() << std::endl;
+//        std::cout << "Current Plugin Output Layout: " << pluginInstance->getBusesLayout().getChannelSet(false, 0).getDescription() << std::endl;
+//        
+//       auto numInputChannels = pluginInstance->getTotalNumInputChannels();
+//       auto numOutputChannels = pluginInstance->getTotalNumOutputChannels();
+//
+//       // audioBuffer.setSize(std::max(numInputChannels, numOutputChannels), blockSize);
+//
+//        //DBG("Buffer resized for " + String(numInputChannels) + " input channels and " +
+//            //String(numOutputChannels) + " output channels.");
+//       // std::cout << "Buffer resized for " << String(numInputChannels) << "in channels and, "<< String(numOutputChannels)<<"output channnels." << std::endl;
+//    }
+//    else
+//    {
+//        //DBG("Failed to change bus layout.");
+//        std::cout << "Failed to change bus layput" << std::endl;
+//        auto layouts = pluginInstance->getBusesLayout();
+//        std::cout << "Current input layout: " << layouts.getChannelSet(true, 0).getDescription() << std::endl;
+//        std::cout << "Current output layout: " << layouts.getChannelSet(false, 0).getDescription() << std::endl;
+//    }
+//}
 
 void VSTPluginComponent::refreshPlugin(int pluginIndex, AudioProcessor* pluginInstance)
 {
@@ -488,75 +488,176 @@ void VSTPluginComponent::processStereoAudio(AudioBuffer<float>& audioBuffer, con
 
 }
 
+//void VSTPluginComponent::processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames)
+//{
+//    std::cout << "================================" << std::endl;
+//    std::cout << "Processing multichannel audio..." << std::endl;
+//
+//    if (!pluginInstance)
+//
+//    {
+//        std::cerr << "No plugin instance available for processing!" << std::endl;
+//        return;
+//    }
+//
+//    int inputChannels = audioBuffer.getNumChannels();
+//    int pluginInputChannels = pluginInstance->getTotalNumInputChannels();
+//    int pluginOutputChannels = pluginInstance->getTotalNumOutputChannels();
+//    std::cout << "Input Channels: " << inputChannels << ", Plugin Inputs: " << pluginInputChannels << ", Plugin Outputs: " << pluginOutputChannels << std::endl;
+//
+//    if (pluginInputChannels < inputChannels) {
+//        std::cerr << "Plugin cannot handle all input channels. " << pluginInputChannels << " channels." << std::endl;
+//    }
+//
+//    int channelsToProcess = std::min(audioBuffer.getNumChannels(), pluginInstance->getTotalNumInputChannels());
+//
+//    // Create an output buffer
+//    juce::AudioBuffer<float> multichannelOutputBuffer(pluginOutputChannels, audioBuffer.getNumSamples());
+//    multichannelOutputBuffer.clear();
+//
+//    // Create a MidiBuffer (no MIDI in this case)
+//    MidiBuffer midiBuffer;
+//
+//    for (int pos = 0; pos < audioBuffer.getNumSamples(); pos += blockSize)
+//    {
+//        int numSamples = std::min(blockSize, audioBuffer.getNumSamples() - pos);
+//
+//        // Process each group of channels through the plugin
+//        for (int groupStart = 0; groupStart < inputChannels; groupStart += pluginInputChannels)
+//        {
+//            int channelsToProcess = std::min(pluginInputChannels, inputChannels - groupStart);
+//
+//            // Create buffers for plugin I/O
+//            juce::AudioBuffer<float> pluginInputBuffer(pluginInputChannels, numSamples);
+//            juce::AudioBuffer<float> pluginOutputBuffer(pluginOutputChannels, numSamples);
+//            pluginInputBuffer.clear();
+//            pluginOutputBuffer.clear();
+//
+//            // Copy from input to plugin input buffer
+//            for (int ch = 0; ch < channelsToProcess; ++ch)
+//            {
+//                pluginInputBuffer.copyFrom(ch, 0, audioBuffer, groupStart + ch, pos, numSamples);
+//            }
+//
+//            // Process through the plugin
+//            pluginInstance->processBlock(pluginInputBuffer, midiBuffer);
+//
+//            // Copy plugin output back to main output buffer
+//            for (int ch = 0; ch < channelsToProcess; ++ch)
+//            {
+//                multichannelOutputBuffer.copyFrom(groupStart + ch, pos, pluginInputBuffer, ch, 0, numSamples);
+//            }
+//        }
+//    }
+//
+//    std::cout << "Multichannel processing complete." << std::endl;
+//    std::cout << "================================" << std::endl;
+//
+//    // Export the output buffer
+//    //std::cout << "Audio Exporting Started." << std::endl;
+//    exporter.exportAudioToFile(multichannelOutputBuffer, sampleRate, loadedAudioFileNames);
+//}
+
 void VSTPluginComponent::processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames)
 {
-    std::cout << "================================" << std::endl;
-    std::cout << "Processing multichannel audio..." << std::endl;
-
+    std::cerr << "================================" << std::endl;
     if (!pluginInstance)
-
     {
         std::cerr << "No plugin instance available for processing!" << std::endl;
         return;
     }
 
-    int inputChannels = audioBuffer.getNumChannels();
-    int pluginInputChannels = pluginInstance->getTotalNumInputChannels();
-    int pluginOutputChannels = pluginInstance->getTotalNumOutputChannels();
-    std::cout << "Input Channels: " << inputChannels << ", Plugin Inputs: " << pluginInputChannels << ", Plugin Outputs: " << pluginOutputChannels << std::endl;
+    auto currentLayout = pluginInstance->getBusesLayout();
+    std::cout << "Multi-channel audio processing started. Current layout: " << currentLayout.getChannelSet(true, 0).getDescription() << ", num channels: " << currentLayout.getNumChannels(true, 0) << std::endl;
+    std::cout << "audioBuffer sampleSize: " << audioBuffer.getNumSamples() << std::endl;
+    std::cout << "audioBuffer RMS for channel 1: " << audioBuffer.getRMSLevel(1, 0, audioBuffer.getNumSamples()) << std::endl;
+    std::cout << "audioBuffer RMS for channel 3: " << audioBuffer.getRMSLevel(3, 0, audioBuffer.getNumSamples()) << std::endl;
+    int numInputChannels = audioBuffer.getNumChannels();
+    int numPluginInputChannels = pluginInstance->getMainBusNumInputChannels();
+    int numPluginOutputChannels = pluginInstance->getMainBusNumOutputChannels();
 
-    if (pluginInputChannels < inputChannels) {
-        std::cerr << "Plugin cannot handle all input channels. " << pluginInputChannels << " channels." << std::endl;
+    if (numInputChannels > numPluginInputChannels)
+    {
+        std::cerr << "Warning: Input file has more channels than the plugin supports! Some channels may not be processed." << std::endl;
     }
 
-    int channelsToProcess = std::min(audioBuffer.getNumChannels(), pluginInstance->getTotalNumInputChannels());
+    // Create a buffer for plugin processing
+    juce::AudioBuffer<float> pluginInputBuffer(numPluginInputChannels, audioBuffer.getNumSamples());
+    
 
-    // Create an output buffer
-    juce::AudioBuffer<float> multichannelOutputBuffer(pluginOutputChannels, audioBuffer.getNumSamples());
-    multichannelOutputBuffer.clear();
+    // Clear buffers
+    pluginInputBuffer.clear();
+   
 
-    // Create a MidiBuffer (no MIDI in this case)
-    MidiBuffer midiBuffer;
+	// Create a MidiBuffer (no MIDI in this case)
+	MidiBuffer midiBuffer;
 
-    for (int pos = 0; pos < audioBuffer.getNumSamples(); pos += blockSize)
+    // Map input buffer channels to plugin input channels
+    for (int busIdx = 0; busIdx < pluginInstance->getBusCount(true); ++busIdx)
     {
-        int numSamples = std::min(blockSize, audioBuffer.getNumSamples() - pos);
+        auto* inputBus = pluginInstance->getBus(true, busIdx);
+        std::cout << "Bus " << busIdx << ": " << inputBus->getCurrentLayout().getDescription() << std::endl;
+        std::cout << "Bus Size " << inputBus->getCurrentLayout().size() << std::endl;
+        if (!inputBus)
+            continue;
 
-        // Process each group of channels through the plugin
-        for (int groupStart = 0; groupStart < inputChannels; groupStart += pluginInputChannels)
+       // auto layout = inputBus->getCurrentLayout();
+        for (int ch = 0; ch < inputBus->getCurrentLayout().size(); ++ch)
         {
-            int channelsToProcess = std::min(pluginInputChannels, inputChannels - groupStart);
-
-            // Create buffers for plugin I/O
-            juce::AudioBuffer<float> pluginInputBuffer(pluginInputChannels, numSamples);
-            juce::AudioBuffer<float> pluginOutputBuffer(pluginOutputChannels, numSamples);
-            pluginInputBuffer.clear();
-            pluginOutputBuffer.clear();
-
-            // Copy from input to plugin input buffer
-            for (int ch = 0; ch < channelsToProcess; ++ch)
+            int processBlockIndex = inputBus->getChannelIndexInProcessBlockBuffer(ch);
+            std::cout << "Input Process Block Index: " << processBlockIndex << std::endl;
+            pluginInputBuffer.copyFrom(processBlockIndex, 0, audioBuffer, ch, 0, audioBuffer.getNumSamples());
+            std::cout << "pluginInputBuffer sample size: " << pluginInputBuffer.getNumSamples() << std::endl;
+            std::cout << "pluginInputBuffer RMS for channel "<< ch << ": " << pluginInputBuffer.getRMSLevel(ch, 0, pluginInputBuffer.getNumSamples()) << std::endl;
+          /*  if (processBlockIndex < numPluginInputChannels && ch < numInputChannels)
             {
-                pluginInputBuffer.copyFrom(ch, 0, audioBuffer, groupStart + ch, pos, numSamples);
-            }
+                
+                
+            }*/
+        }
+        std::cout << "pluginInputBuffer RMS for channel 1: " << pluginInputBuffer.getRMSLevel(1, 0, pluginInputBuffer.getNumSamples()) << std::endl;
+        std::cout << "pluginInputBuffer RMS for channel 3: " << pluginInputBuffer.getRMSLevel(3, 0, pluginInputBuffer.getNumSamples()) << std::endl;
+        
+    }
 
-            // Process through the plugin
-            pluginInstance->processBlock(pluginInputBuffer, midiBuffer);
+    pluginInstance->processBlock(pluginInputBuffer, midiBuffer);
+    for (int ch = 0; ch < pluginInputBuffer.getNumChannels(); ++ch) {
+        std::cout << "Post-processBlock RMS for channel " << ch << ": "
+            << pluginInputBuffer.getRMSLevel(ch, 0, pluginInputBuffer.getNumSamples()) << std::endl;
+    }
 
-            // Copy plugin output back to main output buffer
-            for (int ch = 0; ch < channelsToProcess; ++ch)
+
+    AudioBuffer<float> multioutputBuffer;
+    // Map plugin output channels back to the output buffer
+    for (int busIdx = 0; busIdx < pluginInstance->getBusCount(false); ++busIdx)
+    {
+        auto* outputBus = pluginInstance->getBus(false, busIdx);
+        std::cout << "Output Bus " << busIdx << ": " << outputBus->getCurrentLayout().getDescription() << std::endl;
+        if (!outputBus)
+            continue;
+        multioutputBuffer = AudioBuffer<float>(outputBus->getCurrentLayout().size(), audioBuffer.getNumSamples());
+
+        //auto layout = outputBus->getCurrentLayout();
+        for (int ch = 0; ch < outputBus->getCurrentLayout().size(); ++ch)
+        {
+            int processBlockIndex = outputBus->getChannelIndexInProcessBlockBuffer(ch);
+            std::cout << "Output Process Block Index: " << processBlockIndex << std::endl;
+            if (processBlockIndex < numPluginOutputChannels)
             {
-                multichannelOutputBuffer.copyFrom(groupStart + ch, pos, pluginInputBuffer, ch, 0, numSamples);
+                multioutputBuffer.copyFrom(ch, 0, pluginInputBuffer, processBlockIndex, 0, pluginInputBuffer.getNumSamples());
+                std::cout<<"multioutputBuffer sample size: " << multioutputBuffer.getNumSamples() << std::endl;
+                
             }
         }
+        std::cout << "multioutputBuffer RMS for channel 1: " << multioutputBuffer.getRMSLevel(1, 0, multioutputBuffer.getNumSamples()) << std::endl;
+        std::cout << "multioutputBuffer RMS for channel 3: " << multioutputBuffer.getRMSLevel(3, 0, multioutputBuffer.getNumSamples()) << std::endl;
     }
 
-    std::cout << "Multichannel processing complete." << std::endl;
-    std::cout << "================================" << std::endl;
-
-    // Export the output buffer
-    //std::cout << "Audio Exporting Started." << std::endl;
-    exporter.exportAudioToFile(multichannelOutputBuffer, sampleRate, loadedAudioFileNames);
+    // Export the processed audio
+    exporter.exportAudioToFile(multioutputBuffer, sampleRate, loadedAudioFileNames);
 }
+
+
 const AudioBuffer<float>& VSTPluginComponent::getMonoOutputBuffer() const {
     return monoOutputBuffer;
 }
@@ -565,7 +666,7 @@ const AudioBuffer<float>& VSTPluginComponent::getStereoOutputBuffer() const {
     return stereoOutputBuffer;
 }
 
-void VSTPluginComponent::handleMultichannelConfiguration(int configId, AudioBuffer<float>& audioBuffer)
+void VSTPluginComponent::handleMultichannelConfiguration(int configId)
 {
     AudioPluginFormatManager formatManager;
     formatManager.addDefaultFormats();
@@ -583,22 +684,25 @@ void VSTPluginComponent::handleMultichannelConfiguration(int configId, AudioBuff
     {
     case 1: // Stereo (2.0)
         newLayout.inputBuses.clear();
-        newLayout.outputBuses.clear();
         newLayout.inputBuses.add(AudioChannelSet::mono());
+
+        newLayout.outputBuses.clear();
         newLayout.outputBuses.add(AudioChannelSet::stereo());
         break;
 
     case 2: // Surround (5.1)
         newLayout.inputBuses.clear();
-        newLayout.outputBuses.clear();
         newLayout.inputBuses.add(AudioChannelSet::create5point1());
+
+        newLayout.outputBuses.clear();
         newLayout.outputBuses.add(AudioChannelSet::create5point1());
         break;
 
     case 3: // Surround (7.1)
         newLayout.inputBuses.clear();
-        newLayout.outputBuses.clear();
         newLayout.inputBuses.add(AudioChannelSet::create7point1());
+
+        newLayout.outputBuses.clear();
         newLayout.outputBuses.add(AudioChannelSet::create7point1());
         break;
 
@@ -611,30 +715,31 @@ void VSTPluginComponent::handleMultichannelConfiguration(int configId, AudioBuff
     if (pluginInstance->setBusesLayout(newLayout))
     {
         std::cout << "Successfully changed to the " << getLayoutDescription(configId) << " layout." << std::endl;
+        pluginInstance->prepareToPlay(sampleRate, blockSize);
     }
     else
     {
         std::cerr << "Failed to change bus layout." << std::endl;
     }
 
-    // Resize the buffer to match the new layout
-    resizeAudioBuffer(newLayout, audioBuffer);
-
     // After setting the new layout, handle the audio processing
-    pluginInstance->releaseResources();
-    pluginInstance->prepareToPlay(sampleRate, blockSize);
+  //  pluginInstance->updateHostDisplay();
+   // pluginInstance->reset();
+    
+    
+   pluginInstance->prepareToPlay(sampleRate, blockSize);
 }
 
-void VSTPluginComponent::resizeAudioBuffer(const AudioProcessor::BusesLayout& layout, AudioBuffer<float>& audioBuffer)
-{
-    const int numInputChannels = layout.getNumChannels(true, 0); // First input bus
-    const int numOutputChannels = layout.getNumChannels(false, 0); // First output bus
-
-    audioBuffer.setSize(numInputChannels, numOutputChannels);
-    //audioBuffer.clear();
-    std::cout << "Resized buffer for " << numInputChannels << " input channels and "
-        << numOutputChannels << " output channels." << std::endl;
-}
+//void VSTPluginComponent::resizeAudioBuffer(const AudioProcessor::BusesLayout& layout, AudioBuffer<float>& audioBuffer)
+//{
+//    const int numInputChannels = layout.getNumChannels(true, 0); // First input bus
+//    const int numOutputChannels = layout.getNumChannels(false, 0); // First output bus
+//
+//    audioBuffer.setSize(numInputChannels, numOutputChannels);
+//    //audioBuffer.clear();
+//    std::cout << "Resized buffer for " << numInputChannels << " input channels and "
+//        << numOutputChannels << " output channels." << std::endl;
+//}
 
 
 String VSTPluginComponent::getLayoutDescription(int configId)

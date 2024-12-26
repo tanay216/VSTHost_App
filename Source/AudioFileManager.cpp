@@ -86,6 +86,7 @@ AudioBuffer<float> AudioFileManager::loadAudioFile(const File& audioFile)
         std::cerr << "Error: Unsupported or Corrupted audio file!" << std::endl;
         return {};
     }
+    
 
     audioBuffer.clear();
     audioBuffer.setSize(reader->numChannels, (int)reader->lengthInSamples);
@@ -96,7 +97,7 @@ AudioBuffer<float> AudioFileManager::loadAudioFile(const File& audioFile)
     std::cout << "Loaded audio file: " << audioFile.getFileName() << std::endl;
     std::cout << "Sample Rate: " << reader->sampleRate << ", Channels (Mono/Stereo): " << reader->numChannels
         << ", Length: " << reader->lengthInSamples << " samples, Duration: " << durationInSeconds << " seconds" << std::endl;
-
+    fileSampleRate = reader->sampleRate;
 
     loadedAudioFileNames = audioFile.getFileName().toStdString(); // Store the name of the loaded audio file
 
@@ -107,10 +108,7 @@ AudioBuffer<float> AudioFileManager::loadAudioFile(const File& audioFile)
     }
     std::cout << "Loaded" << std::endl;
 
-  return audioBuffer;
-   // VSTPluginHost vstPluginHost;
-   
-   // vstPluginHost.processAudioWithPlugin(audioBuffer);
+    return audioBuffer;
 
 }
 

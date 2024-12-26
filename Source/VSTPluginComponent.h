@@ -46,6 +46,7 @@ private:
     int blockSize = 512;
     const PluginDescription* selectedPlugin = nullptr;
     bool isMono = false;
+    AudioBuffer<float> pluginBuffer;
 
 public:
 
@@ -56,7 +57,7 @@ public:
     
     KnownPluginList pluginList;
     void loadPlugin(int pluginIndex);
-    void handleBusChange(AudioProcessor* pluginInstance, AudioBuffer<float> audioBuffer);
+   // void handleBusChange(AudioProcessor* pluginInstance, AudioBuffer<float> audioBuffer);
     void refreshPlugin(int pluginIndex, AudioProcessor* pluginInstance);
     void debugBusAndChannelInfo(AudioProcessor* pluginInstance);
     void processAudioWithPlugin(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames);
@@ -65,8 +66,8 @@ public:
     void processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames);
     const AudioBuffer<float>& getMonoOutputBuffer() const;  // Getter for monoOutputBuffer
     const AudioBuffer<float>& getStereoOutputBuffer() const; // Getter for stereoOutputBuffer
-    void VSTPluginComponent::handleMultichannelConfiguration(int configId, AudioBuffer<float>& audioBuffer);
-    void VSTPluginComponent::resizeAudioBuffer(const AudioProcessor::BusesLayout& layout, AudioBuffer<float>& audioBuffer);
+    void VSTPluginComponent::handleMultichannelConfiguration(int configId);
+   /* void VSTPluginComponent::resizeAudioBuffer(const AudioProcessor::BusesLayout& layout);*/
     String VSTPluginComponent::getLayoutDescription(int configId);
     
 

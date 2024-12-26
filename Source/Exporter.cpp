@@ -155,8 +155,13 @@ void Exporter::exportStereoAudio(const AudioBuffer<float>& buffer, double sample
 
 void Exporter::exportMultiChannelAudio(const AudioBuffer<float>& buffer, double sampleRate) {
 
+    std::cout << "=======================================" << std::endl;
     std::cout << "Exporting Multi Channel audio to file..." << std::endl;
     std::cout << "Multi Channel Audio Channels"<< buffer.getNumChannels() << std::endl;
+
+    std::cout << "buffer sample size: " << buffer.getNumSamples() << std::endl;
+    std::cout << "buffer RMS for channel 1: " << buffer.getRMSLevel(1, 0, buffer.getNumSamples()) << std::endl;
+    std::cout << "buffer RMS for channel 3: " << buffer.getRMSLevel(3, 0, buffer.getNumSamples()) << std::endl;
 
     File outputDir(outputDirPath);; // Specify the output file path
     File outputFile(outputDir.getChildFile(outputFileName));  // Use the new filename
@@ -176,15 +181,15 @@ void Exporter::exportMultiChannelAudio(const AudioBuffer<float>& buffer, double 
 
     }
     // Prepare an output stream
-    std::unique_ptr<FileOutputStream> stereoOutputStream(outputFile.createOutputStream());
-    if (!stereoOutputStream)
+    std::unique_ptr<FileOutputStream> MultiOutputStream(outputFile.createOutputStream());
+    if (!MultiOutputStream)
     {
         std::cerr << "Failed to create output stream for " << outputFileName << std::endl;
         return;
     }
     // Set up the WAV format writer
 
-    std::unique_ptr<AudioFormatWriter> writer(wavFormat.createWriterFor(stereoOutputStream.get(),
+    std::unique_ptr<AudioFormatWriter> writer(wavFormat.createWriterFor(MultiOutputStream.get(),
         44100, // Sample rate
         buffer.getNumChannels(), // Number of channels
         16, // Bits per sample
@@ -196,7 +201,7 @@ void Exporter::exportMultiChannelAudio(const AudioBuffer<float>& buffer, double 
         return;
     }
     // Release the ownership of the stereoOutputStream to the writer
-    stereoOutputStream.release();
+    MultiOutputStream.release();
 
     // Write the buffer to the file
     if (!writer->writeFromAudioSampleBuffer(buffer, 0, buffer.getNumSamples()))

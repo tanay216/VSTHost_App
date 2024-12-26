@@ -30,7 +30,8 @@ MainComponent::MainComponent()
     channelConfigDropdown.onChange = [this]()
         {
             
-            vstPluginComponent.handleMultichannelConfiguration(channelConfigDropdown.getSelectedId(), audioBuffer);
+            vstPluginComponent.handleMultichannelConfiguration(channelConfigDropdown.getSelectedId());
+           
             vstPluginComponent.getLayoutDescription(channelConfigDropdown.getSelectedId());
            
         };
@@ -175,7 +176,7 @@ void MainComponent::resized()
     playButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
     stopButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
     exportAudioButton.setBounds(area.removeFromTop(60).withWidth(buttonWidth).withX(10));
-    refreshPluginDetailsButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+    refreshPluginDetailsButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(area.getWidth() - 210));
     ShowEditorButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
     unloadPluginButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(area.getWidth() - 210));
    // audioFileListBox.setBounds(area.removeFromTop(200).withWidth(200).withX(area.getWidth() - 210)); // Position the list to the top right
@@ -214,6 +215,8 @@ void MainComponent::buttonClicked(juce::Button* button)
 
         std::cout << "Loading audio" << std::endl;
         std::cout << "====================" << std::endl;
+        //vstPluginComponent.pluginInstance->releaseResources();
+        //vstPluginComponent.pluginInstance->prepareToPlay(sampleRate, audioBuffer.getNumSamples());
         fileChooser = std::make_unique<juce::FileChooser>("Select an audio file", juce::File(), "*.wav");
 
         // Launch the file chooser asynchronously
@@ -367,31 +370,7 @@ const std::string MainComponent::getLoadedAudiFileNames() {
     return loadedAudioFileNames;
 }
 
-//void MainComponent::handleChannelConfigurationChange(int configId)
-//{
-//    switch (configId)
-//    {
-//    case 1: // Stereo (2.0)
-//        setAudioChannels(2, 2);
-//        break;
-//
-//    case 2: // Surround (5.1)
-//        setAudioChannels(6, 6);
-//        break;
-//
-//    case 3: // Surround (7.1)
-//        setAudioChannels(8, 8);
-//        break;
-//
-//    default:
-//        jassertfalse; // Invalid configuration ID
-//        break;
-//    }
-//
-//    std::cout<<"Channel configuration changed: " << configId  << std::endl;
-//    
-//
-//}
+
 
 // VST Plugin Editor Window ==============================================================================
 

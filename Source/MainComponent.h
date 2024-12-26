@@ -51,6 +51,7 @@ public:
 private:
     //==============================================================================
     bool pluginLoaded = false;
+    double sampleRate = 44100.0;
     
     juce::AudioDeviceManager audioDeviceManager;
     VSTPluginHost pluginHost;

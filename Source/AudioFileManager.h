@@ -17,6 +17,7 @@
 #include <vector>
 #include <iostream>  
 
+
 using namespace juce;
 
 class AudioFileManager
@@ -42,8 +43,10 @@ public:
 
 private:
     juce::AudioFormatManager formatManager;
-    
+   // std::unique_ptr<AudioFormatReader> reader;
     std::string loadedAudioFileNames;
+    double fileSampleRate = 0.0;
+    
 };
 
 #endif // AUDIOFILEMANAGER_H
