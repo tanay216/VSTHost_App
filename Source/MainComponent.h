@@ -42,6 +42,7 @@ public:
 
 
     const std::string getLoadedAudiFileNames();
+    
 
     /*int getNumRows() override;
     void paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected);
@@ -62,11 +63,13 @@ private:
     
     juce::AudioBuffer<float> audioBuffer;
     std::string loadedAudioFileNames;
-    juce::Array<juce::String> audioFileNames; // Array to store loaded audio files
+    juce::StringArray audioFileNames; // Array to store loaded audio files
     std::unique_ptr<juce::AudioProcessorEditor> pluginEditor; // Plugin editor
+    juce::Array<juce::AudioBuffer<float>> audioBuffers;
 
 
     juce::AudioTransportSource transportSource;
+    juce::HashMap<std::string, std::unique_ptr<juce::AudioTransportSource>> audioTransportSources;
     juce::AudioSourcePlayer audioSourcePlayer;
     //juce::AudioFormatReaderSource* readerSource = nullptr;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
@@ -79,6 +82,8 @@ private:
     juce::TextButton scanPluginButton { "Scan Plugins" };
     juce::TextButton loadAudioButton { "Load Audio File" };
    // juce::ListBox audioFileListBox{ "Audio File List" }; // ListBox for displaying audio files
+    juce::TreeView audioFileTree { "Audio File Tree" };
+    juce::TextButton deleteButton{ "X" };
     juce::TextButton playButton { "Play" };
     juce::TextButton stopButton { "Stop" };
     juce::TextButton exportAudioButton { "Export Processed Audio" };
@@ -91,4 +96,29 @@ private:
     juce::ComboBox channelConfigDropdown;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
+};
+
+class AudioFileTreeItem : public juce::TreeViewItem
+{
+public:
+
+    
+
+    explicit AudioFileTreeItem(std::string& fileName) : fileName(fileName), deleteButton("X") {}
+    
+
+    bool mightContainSubItems() override { return false; }
+    void paintItem(juce::Graphics& g, int width, int height) override
+    {
+        g.setColour(juce::Colours::black);
+        g.drawText(fileName, 2, 0, width - 4, height, juce::Justification::centredLeft);
+
+    }
+
+    
+
+private:
+    std::string fileName;
+    juce::TextButton deleteButton;
+
 };

@@ -61,3 +61,16 @@ Builds/VisualStudio2022/x64/Debug/App/VSTHost_App_App.tlog/VSTHost_App_App.lastb
 Builds/VisualStudio2022/x64/Debug/App/VSTHost_App_App.vcxproj.FileListAbsolute.txt
 Builds/VisualStudio2022/x64/Debug/App/VSTPluginComponent.obj
 Builds/VisualStudio2022/x64/Debug/App/VSTPluginHost.obj
+*.ipch
+*.opendb
+Builds/VisualStudio2022/.vs/VSTHost_App/FileContentIndex/0fc6ec4e-33fe-4983-99c7-5b5e6ef8f016.vsidx
+Builds/VisualStudio2022/.vs/VSTHost_App/FileContentIndex/6e408d1c-fec7-4481-b33b-5d26fd483559.vsidx
+Builds/VisualStudio2022/.vs/VSTHost_App/FileContentIndex/77f97ce2-2913-45b5-a86c-231aa86434ce.vsidx
+Builds/VisualStudio2022/.vs/VSTHost_App/FileContentIndex/99eab11a-b64c-4b2c-9810-9575f4052eb2.vsidx
+Builds/VisualStudio2022/.vs/VSTHost_App/FileContentIndex/d3f575f0-3d44-4e41-8716-4cc7345529ab.vsidx
+Builds/VisualStudio2022/.vs/VSTHost_App/FileContentIndex/d75f91e6-6209-4e96-85bf-876219cb3803.vsidx
+Builds/VisualStudio2022/.vs/VSTHost_App/v17/Browse.VC.db-shm
+Builds/VisualStudio2022/.vs/VSTHost_App/v17/Browse.VC.db-wal
+Builds/VisualStudio2022/.vs/VSTHost_App/FileContentIndex/99eab11a-b64c-4b2c-9810-9575f4052eb2.vsidx
+Builds/VisualStudio2022/.vs/VSTHost_App/FileContentIndex/77f97ce2-2913-45b5-a86c-231aa86434ce.vsidx
+Builds/VisualStudio2022/.vs/VSTHost_App/FileContentIndex/0fc6ec4e-33fe-4983-99c7-5b5e6ef8f016.vsidx

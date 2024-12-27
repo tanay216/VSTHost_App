@@ -93,6 +93,8 @@ AudioBuffer<float> AudioFileManager::loadAudioFile(const File& audioFile)
     reader->read(&audioBuffer, 0, (int)reader->lengthInSamples, 0, true, true);
     float durationInSeconds = static_cast<float>(reader->lengthInSamples) / reader->sampleRate;
 
+    loadedBuffers.push_back(audioBuffer);
+    loadedFiles.push_back(audioFile);
 
     std::cout << "Loaded audio file: " << audioFile.getFileName() << std::endl;
     std::cout << "Sample Rate: " << reader->sampleRate << ", Channels (Mono/Stereo): " << reader->numChannels

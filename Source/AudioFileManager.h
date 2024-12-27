@@ -38,6 +38,8 @@ public:
     }
     
     AudioBuffer<float> audioBuffer;
+    std::vector<juce::AudioBuffer<float>> loadedBuffers;
+    std::vector<juce::File> loadedFiles;
     
 
 
