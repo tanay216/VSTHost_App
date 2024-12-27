@@ -11,13 +11,13 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent  : public juce::AudioAppComponent,
-                        public juce::Button::Listener, 
-                        public juce::Component,
-                        public juce::ListBox
-                       
-                        
-                       
+class MainComponent : public juce::AudioAppComponent,
+    public juce::Button::Listener,
+    public juce::Component,
+    public juce::ListBox
+
+
+
 {
 public:
     //==============================================================================
@@ -25,24 +25,24 @@ public:
     ~MainComponent() override;
 
     //==============================================================================
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
-    void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;
+    void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
+    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
     void releaseResources() override;
 
     //==============================================================================
-    
-    
-    void paint (juce::Graphics& g) override;
+
+
+    void paint(juce::Graphics& g) override;
     void resized() override;
     void buttonClicked(juce::Button* button) override;
 
     juce::AudioProcessorEditor* getPluginEditor();
-   // void MainComponent::handleChannelConfigurationChange(int configId);
+    // void MainComponent::handleChannelConfigurationChange(int configId);
     void closePluginEditor();
 
 
     const std::string getLoadedAudiFileNames();
-    
+
 
     /*int getNumRows() override;
     void paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected);
@@ -53,19 +53,20 @@ private:
     //==============================================================================
     bool pluginLoaded = false;
     double sampleRate = 44100.0;
-    
+
     juce::AudioDeviceManager audioDeviceManager;
     VSTPluginHost pluginHost;
     AudioFileManager audioFileManager;
     VSTPluginComponent vstPluginComponent;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::Array<juce::File> loadedFiles; // Array to store loaded audio files
-    
+
     juce::AudioBuffer<float> audioBuffer;
     std::string loadedAudioFileNames;
     juce::StringArray audioFileNames; // Array to store loaded audio files
     std::unique_ptr<juce::AudioProcessorEditor> pluginEditor; // Plugin editor
     juce::Array<juce::AudioBuffer<float>> audioBuffers;
+    juce::Array<juce::AudioFormatReaderSource*> readerSources;
 
 
     juce::AudioTransportSource transportSource;
@@ -79,33 +80,33 @@ private:
 
     juce::Viewport viewport;                     // Viewport for scrolling
     juce::Component contentComponent;            // Holds all buttons and UI elements
-    juce::TextButton scanPluginButton { "Scan Plugins" };
-    juce::TextButton loadAudioButton { "Load Audio File" };
-   // juce::ListBox audioFileListBox{ "Audio File List" }; // ListBox for displaying audio files
-    juce::TreeView audioFileTree { "Audio File Tree" };
+    juce::TextButton scanPluginButton{ "Scan Plugins" };
+    juce::TextButton loadAudioButton{ "Load Audio File" };
+    // juce::ListBox audioFileListBox{ "Audio File List" }; // ListBox for displaying audio files
+    juce::TreeView audioFileTree{ "Audio File Tree" };
     juce::TextButton deleteButton{ "X" };
-    juce::TextButton playButton { "Play" };
-    juce::TextButton stopButton { "Stop" };
-    juce::TextButton exportAudioButton { "Export Processed Audio" };
-    juce::TextButton refreshPluginDetailsButton { "Refresh Plugin Details" };
+    juce::TextButton playButton{ "Play" };
+    juce::TextButton stopButton{ "Stop" };
+    juce::TextButton exportAudioButton{ "Export Processed Audio" };
+    juce::TextButton refreshPluginDetailsButton{ "Refresh Plugin Details" };
     juce::TextButton unloadPluginButton{ "X Remove Plugin" };
-    juce::TextButton ShowEditorButton { "Show Plugin UI" };
-    
+    juce::TextButton ShowEditorButton{ "Show Plugin UI" };
+
 
     juce::ComboBox pluginListDropdown;
     juce::ComboBox channelConfigDropdown;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
 
 class AudioFileTreeItem : public juce::TreeViewItem
 {
 public:
 
-    
 
-    explicit AudioFileTreeItem(std::string& fileName) : fileName(fileName), deleteButton("X") {}
-    
+
+    explicit AudioFileTreeItem(std::string& fileName, std::function<void()> onPlayCallback) : fileName(fileName), onPlayCallback(std::move(onPlayCallback)),deleteButton("X") {}
+
 
     bool mightContainSubItems() override { return false; }
     void paintItem(juce::Graphics& g, int width, int height) override
@@ -115,10 +116,22 @@ public:
 
     }
 
-    
+    void itemClicked(const juce::MouseEvent& e) override
+    {
+        // Play the audio file when clicked
+        std::cout << "Playing audio file: " << fileName << std::endl;
+        if (onPlayCallback)
+        {
+            onPlayCallback(); // Trigger the callback for playback
+        }
+
+    }
+
+
 
 private:
     std::string fileName;
     juce::TextButton deleteButton;
+    std::function<void()> onPlayCallback;
 
 };

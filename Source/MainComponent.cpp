@@ -24,8 +24,10 @@ MainComponent::MainComponent()
     audioFileTree.setColour(juce::TreeView::backgroundColourId, juce::Colours::antiquewhite);
     audioFileTree.setDefaultOpenness(true);
     std::string rootName = "Root";
-    auto rootItem = std::make_unique<AudioFileTreeItem>(rootName);
+    auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr);
     audioFileTree.setRootItem(rootItem.release());
+    audioFileTree.setInterceptsMouseClicks(true, true); // Enable clicks globally
+    audioFileTree.setWantsKeyboardFocus(true);
        
 
     // Configure the multichannel configuration dropdown
@@ -175,7 +177,7 @@ void MainComponent::resized()
     int buttonHeight = 30; // Custom height for buttons
     int buttonWidth = 200; // Custom width for buttons
     auto area = juce::Component::getLocalBounds().reduced(10);
-    auto treeViewArea = area.removeFromRight(300).withHeight(300).withWidth(250);
+    auto treeViewArea = area.removeFromRight(300).withHeight(300).withWidth(300);
 
     audioFileTree.setBounds(treeViewArea);
     channelConfigDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
@@ -219,105 +221,197 @@ void MainComponent::buttonClicked(juce::Button* button)
         }
 
     }
+    //else if (button == &loadAudioButton)
+    //{
+    //    std::cout << "Loading audio" << std::endl;
+    //    std::cout << "====================" << std::endl;
+    //    //vstPluginComponent.pluginInstance->releaseResources();
+    //    //vstPluginComponent.pluginInstance->prepareToPlay(sampleRate, audioBuffer.getNumSamples());
+    //    fileChooser = std::make_unique<juce::FileChooser>("Select an audio file", juce::File(), "*.wav");
+    //    // Launch the file chooser asynchronously
+    //    fileChooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::canSelectMultipleItems,
+    //        [this](const juce::FileChooser& chooser)
+    //        {
+    //            auto selectedFiles = chooser.getResults(); // Get all selected files
+    //            audioFileNames.clear();
+    //            audioBuffers.clear();
+    //            readerSources.clear();
+    //            transportSources.clear(); 
+    //            if (!selectedFiles.isEmpty())
+    //            {
+    //                std::cout << "Selected files:" << std::endl;
+    //                // Iterate through selected files
+    //                for (int i = 0; i < selectedFiles.size(); ++i)
+    //                {
+    //                    const auto& file = selectedFiles[i];
+    //                    // Display the name of the file
+    //                    std::cout << "[" << i << "] " << file.getFileName() << std::endl;
+    //                    loadedAudioFileNames = file.getFileName().toStdString();
+    //                    // Load the selected file using AudioFileManager
+    //                    audioFileManager.loadAudioFile(file);
+    //                    audioFileNames.add(loadedAudioFileNames);
+    //                    juce::AudioBuffer<float> fileBuffer;
+    //                    /*auto& sourceBuffer = audioFileManager.getAudioBuffer();
+    //                    fileBuffer.setSize(sourceBuffer.getNumChannels(), sourceBuffer.getNumSamples());
+    //                    for (int channel = 0; channel < sourceBuffer.getNumChannels(); ++channel)
+    //                    {
+    //                        fileBuffer.copyFrom(channel, 0, sourceBuffer, channel, 0, sourceBuffer.getNumSamples());
+    //                    }*/
+    //                    fileBuffer.makeCopyOf(audioFileManager.getAudioBuffer());
+    //                    // Store the buffer for this file in the audioBuffers Array
+    //                    audioBuffers.add(fileBuffer);
+    //                    auto* reader = formatManager.createReaderFor(file);
+    //                    transportSourceSampleRate = reader->sampleRate;
+    //                    if (reader != nullptr)
+    //                    {
+    //                        readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
+    //                        auto readerSourcePtr = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
+    //                        readerSources.push_back(std::move(readerSourcePtr));
+    //                        auto transportSourcePtr = std::make_unique<juce::AudioTransportSource>();
+    //                        transportSources.push_back(std::move(transportSourcePtr));
+    //                        //transportSource.start();
+    //                    }
+    //                }
+    //                auto* rootItem = audioFileTree.getRootItem();
+    //                if (rootItem != nullptr)
+    //                {
+    //                    for (int i = 0; i < audioFileNames.size(); ++i)
+    //                    {
+    //                        auto item = std::make_unique<AudioFileTreeItem>(audioFileNames[i].toStdString(), formatManager);
+    //                        rootItem->addSubItem(item.release());
+    //                        transportSources[i]->setSource(readerSources[i].get(),
+    //                            0,                // buffer size (default)
+    //                            nullptr,          // no time-stretching
+    //                            transportSourceSampleRate);
+    //                        std::cout<<"Length in seconds: " << transportSources[i].get()->getLengthInSeconds()<< std::endl;
+    //                    }
+    //                }
+    //                else
+    //                {
+    //                    std::cout << "Root item for TreeView not initialized!" << std::endl;
+    //                }
+    //                audioFileTree.getRootItem()->treeHasChanged();
+    //                audioFileTree.repaint();
+    //                std::cout << "All selected files loaded." << std::endl;
+    //            }
+    //            else
+    //            {
+    //                for (int i = 0; i < selectedFiles.size(); ++i)
+    //                {
+    //                    const auto& file = selectedFiles[i];
+    //                    // Display the name of the file
+    //                    std::cout << "No file selected or invalid file." << file.getFileName() << std::endl;
+    //                    std::cout << "[" << i << "] " << file.getFileName() << std::endl;
+    //                }
+    //            }
+    //        });
+    //}
+
     else if (button == &loadAudioButton)
-    {
+  {
 
-        std::cout << "Loading audio" << std::endl;
-        std::cout << "====================" << std::endl;
-        //vstPluginComponent.pluginInstance->releaseResources();
-        //vstPluginComponent.pluginInstance->prepareToPlay(sampleRate, audioBuffer.getNumSamples());
-        fileChooser = std::make_unique<juce::FileChooser>("Select an audio file", juce::File(), "*.wav");
+      std::cout << "Loading audio" << std::endl;
+      std::cout << "====================" << std::endl;
+      
+      fileChooser = std::make_unique<juce::FileChooser>("Select an audio file", juce::File(), "*.wav");
 
-        // Launch the file chooser asynchronously
-        fileChooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::canSelectMultipleItems,
-            [this](const juce::FileChooser& chooser)
-            {
-                auto selectedFiles = chooser.getResults(); // Get all selected files
-                audioFileNames.clear();
-                audioBuffers.clear();
+      // Launch the file chooser asynchronously
+      fileChooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::canSelectMultipleItems,
+          [this](const juce::FileChooser& chooser)
+          {
+              auto selectedFiles = chooser.getResults(); // Get all selected files
+              audioFileNames.clear();
+              audioBuffers.clear();
 
-                if (!selectedFiles.isEmpty())
-                {
-                    std::cout << "Selected files:" << std::endl;
+              if (!selectedFiles.isEmpty())
+              {
+                  std::cout << "Selected files:" << std::endl;
 
-                    // Iterate through selected files
-                    for (int i = 0; i < selectedFiles.size(); ++i)
-                    {
-                        const auto& file = selectedFiles[i];
+                  // Iterate through selected files
+                  for (int i = 0; i < selectedFiles.size(); ++i)
+                  {
+                      const auto& file = selectedFiles[i];
 
-                        // Display the name of the file
-                        std::cout << "[" << i << "] " << file.getFileName() << std::endl;
-                        loadedAudioFileNames = file.getFileName().toStdString();
+                      // Display the name of the file
+                      std::cout << "[" << i << "] " << file.getFileName() << std::endl;
+                      loadedAudioFileNames = file.getFileName().toStdString();
 
-                        // Load the selected file using AudioFileManager
-                        audioFileManager.loadAudioFile(file);
-                        audioFileNames.add(loadedAudioFileNames);
-                        juce::AudioBuffer<float> fileBuffer;
-                        /*auto& sourceBuffer = audioFileManager.getAudioBuffer();
-                        fileBuffer.setSize(sourceBuffer.getNumChannels(), sourceBuffer.getNumSamples());
-                        for (int channel = 0; channel < sourceBuffer.getNumChannels(); ++channel)
-                        {
-                            fileBuffer.copyFrom(channel, 0, sourceBuffer, channel, 0, sourceBuffer.getNumSamples());
-                        }*/
-                        fileBuffer.makeCopyOf(audioFileManager.getAudioBuffer());
+                      // Load the selected file using AudioFileManager
+                      audioFileManager.loadAudioFile(file);
+                      audioFileNames.add(loadedAudioFileNames);
+                      juce::AudioBuffer<float> fileBuffer;
+                     
+                      fileBuffer.makeCopyOf(audioFileManager.getAudioBuffer());
 
-                        // Store the buffer for this file in the audioBuffers Array
-                        audioBuffers.add(fileBuffer);
+                      // Store the buffer for this file in the audioBuffers Array
+                      audioBuffers.add(fileBuffer);
 
 
-                        auto* reader = formatManager.createReaderFor(file);
-                        if (reader != nullptr)
-                        {
-                            readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
-                            //transportSource.setSource(readerSource.get(),
-                            //    0,                // buffer size (default)
-                            //    nullptr,          // no time-stretching
-                            //    reader->sampleRate);
-                        }
-                        
-                        
-                            
-                            
-                        
-                        
-                    }
-                   
-                    auto* rootItem = audioFileTree.getRootItem();
-                    if (rootItem != nullptr)
-                    {
+                      auto* reader = formatManager.createReaderFor(file);
+                      if (reader != nullptr)
+                      {
+                          readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
+                          //transportSource.setSource(readerSource.get(),
+                          //    0,                // buffer size (default)
+                          //    nullptr,          // no time-stretching
+                          //    reader->sampleRate);
+                      }
 
-                        for (int i = 0; i < audioFileNames.size(); ++i)
-                        {
-                            auto item = std::make_unique<AudioFileTreeItem>(audioFileNames[i].toStdString());
-                            rootItem->addSubItem(item.release());
-                        }
-                    }
-                    else
-                    {
-                        std::cout << "Root item for TreeView not initialized!" << std::endl;
-                    }
-                    audioFileTree.getRootItem()->treeHasChanged();
-                    audioFileTree.repaint();
-                    
-                   
 
-                    std::cout << "All selected files loaded." << std::endl;
-                }
-                else
-                {
-                    for (int i = 0; i < selectedFiles.size(); ++i)
-                    {
-                        const auto& file = selectedFiles[i];
 
-                        // Display the name of the file
-                        std::cout << "No file selected or invalid file." << file.getFileName() << std::endl;
-                        std::cout << "[" << i << "] " << file.getFileName() << std::endl;
-                    }
-                }
-            });
+
+
+
+                  }
+
+                  auto* rootItem = audioFileTree.getRootItem();
+                  if (rootItem != nullptr)
+                  {
+
+                      for (int i = 0; i < audioFileNames.size(); ++i)
+                      {
+                           auto& fileName = audioFileNames[i].toStdString();
+
+                          // Capture the file buffer in the callback
+                          auto playCallback = [this, i]()
+                              {
+                                  if (i < audioBuffers.size())
+                                  {
+                                      transportSource.setSource(new juce::MemoryAudioSource(audioBuffers[i], true));
+                                      transportSource.start();
+                                  }
+                              };
+                          auto item = std::make_unique<AudioFileTreeItem>(fileName, playCallback);
+                          rootItem->addSubItem(item.release());
+                      }
+                  }
+                  else
+                  {
+                      std::cout << "Root item for TreeView not initialized!" << std::endl;
+                  }
+                  audioFileTree.getRootItem()->treeHasChanged();
+                  audioFileTree.repaint();
+
+
+
+                  std::cout << "All selected files loaded." << std::endl;
+              }
+              else
+              {
+                  for (int i = 0; i < selectedFiles.size(); ++i)
+                  {
+                      const auto& file = selectedFiles[i];
+
+                      // Display the name of the file
+                      std::cout << "No file selected or invalid file." << file.getFileName() << std::endl;
+                      std::cout << "[" << i << "] " << file.getFileName() << std::endl;
+                  }
+              }
+          });
 
 
     }
+
     else if (button == &playButton)
     {
        /* if (readerSource != nullptr && !transportSource.isPlaying())
