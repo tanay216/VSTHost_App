@@ -66,7 +66,7 @@ private:
     juce::StringArray audioFileNames; // Array to store loaded audio files
     std::unique_ptr<juce::AudioProcessorEditor> pluginEditor; // Plugin editor
     juce::Array<juce::AudioBuffer<float>> audioBuffers;
-    juce::Array<juce::AudioFormatReaderSource*> readerSources;
+    std::vector<std::unique_ptr<juce::AudioFormatReaderSource>> readerSources;
 
 
     juce::AudioTransportSource transportSource;
