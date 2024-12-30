@@ -342,19 +342,29 @@ void MainComponent::buttonClicked(juce::Button* button)
                     {
                         const auto& file = selectedFiles[i];
 
-                        // Display the name of the file
-                        std::cout << "[" << i << "] " << file.getFileName() << std::endl;
-                        loadedAudioFileNames = file.getFileName().toStdString();
+                        
+                        if (!audioFileNames.contains(file.getFileName()))
+                        {
+                            // Display the name of the file
+                            std::cout << "[" << i << "] " << file.getFileName() << std::endl;
+                            loadedAudioFileNames = file.getFileName().toStdString();
 
-                        // Load the selected file using AudioFileManager
-                        audioFileManager.loadAudioFile(file);
-                        audioFileNames.add(loadedAudioFileNames);
-                        juce::AudioBuffer<float> fileBuffer;
+                            // Load the selected file using AudioFileManager
+                            audioFileManager.loadAudioFile(file);
+                            audioFileNames.add(loadedAudioFileNames);
+                            juce::AudioBuffer<float> fileBuffer;
 
-                        fileBuffer.makeCopyOf(audioFileManager.getAudioBuffer());
+                            fileBuffer.makeCopyOf(audioFileManager.getAudioBuffer());
 
-                        // Store the buffer for this file in the audioBuffers Array
-                        audioBuffers.add(fileBuffer);
+                            // Store the buffer for this file in the audioBuffers Array
+                            audioBuffers.add(fileBuffer);
+                        }
+                        else
+                        {
+                            std::cout << "Skipping duplicate file: " << file.getFileName() << std::endl;
+                            continue;
+                        }
+                        
 
 
                         auto* reader = formatManager.createReaderFor(file);

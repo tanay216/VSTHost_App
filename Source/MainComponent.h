@@ -67,6 +67,8 @@ private:
     std::unique_ptr<juce::AudioProcessorEditor> pluginEditor; // Plugin editor
     juce::Array<juce::AudioBuffer<float>> audioBuffers;
     std::vector<std::unique_ptr<juce::AudioFormatReaderSource>> readerSources;
+    std::set<juce::String> loadedFilePaths;
+    std::unordered_set<std::string> loadedTreeItems;
 
 
     juce::AudioTransportSource transportSource;
@@ -99,39 +101,52 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
 
-class AudioFileTreeItem : public juce::TreeViewItem
+class AudioFileTreeItem : public juce::TreeViewItem,
+						  public juce::Component
 {
 public:
-
-
-
-    explicit AudioFileTreeItem(std::string& fileName, std::function<void()> onPlayCallback) : fileName(fileName), onPlayCallback(std::move(onPlayCallback)),deleteButton("X") {}
-
-
+    explicit AudioFileTreeItem(std::string& fileName, std::function<void()> onPlayCallback) : fileName(fileName), onPlayCallback(std::move(onPlayCallback)), onRemoveCallback(std::move(onRemoveCallback)), deleteButton("X") {}
     bool mightContainSubItems() override { return false; }
     void paintItem(juce::Graphics& g, int width, int height) override
     {
         g.setColour(juce::Colours::black);
         g.drawText(fileName, 2, 0, width - 4, height, juce::Justification::centredLeft);
+        g.drawText(deleteButton.getName(), 2, 0, width - 4, height, juce::Justification::centredRight);
 
+    }
+    void resized() override
+    {
+        deleteButton.setBounds(getWidth() - 30, 2, 28, getItemHeight() - 4);
     }
 
     void itemClicked(const juce::MouseEvent& e) override
     {
         // Play the audio file when clicked
-        std::cout << "Playing audio file: " << fileName << std::endl;
+        std::cout << "Item Clicked " << std::endl;
         if (onPlayCallback)
         {
+            std::cout << "Playing audio file: " << fileName << std::endl;
             onPlayCallback(); // Trigger the callback for playback
+        }
+        
+        else if (!deleteButton.getBounds().contains(e.getPosition()))
+        {
+            std::cout << "Removing File: " << fileName << std::endl;
+           // onPlayCallback(); // Trigger the callback for playback
+            onRemoveCallback();
         }
 
     }
 
 
-
 private:
     std::string fileName;
-    juce::TextButton deleteButton;
     std::function<void()> onPlayCallback;
+
+    juce::TextButton deleteButton;
+    std::function<void()> onRemoveCallback;
+    
+
+
 
 };
