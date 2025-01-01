@@ -101,52 +101,410 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
 
-class AudioFileTreeItem : public juce::TreeViewItem,
-						  public juce::Component
+//class AudioFileTreeItem : public juce::TreeViewItem,
+//						  public juce::Component,
+//                            public juce::Button::Listener
+//{
+//public:
+//    explicit AudioFileTreeItem(std::string& fileName, std::function<void()> onPlayCallback) : fileName(fileName), onPlayCallback(std::move(onPlayCallback)) {
+//        
+//       
+//       
+//    }
+//    bool mightContainSubItems() override { return false; }
+//    void paintItem(juce::Graphics& g, int width, int height) override
+//    {
+//        g.fillAll(juce::Colours::lightgrey);
+//        g.setColour(juce::Colours::black);
+//        g.drawText(fileName, 2, 0, width - 4, height, juce::Justification::centredLeft);
+//
+//    }
+//    void resized() override
+//    {
+//      
+//    }
+//
+//    void itemClicked(const juce::MouseEvent& e) override
+//    {
+//        // Play the audio file when clicked
+//        //std::cout << "Item Clicked " << std::endl;
+//
+//        std::cout << "Playing audio file: " << fileName << std::endl;
+//        if (onPlayCallback) {
+//            onPlayCallback(); // Trigger playback callback
+//        }
+//       
+//
+//    }
+//
+//
+//private:
+//    std::string fileName;
+//    std::function<void()> onPlayCallback;
+//
+//}; // VEry old
+
+//class AudioFileTreeItem : public juce::TreeViewItem
+//{
+//public:
+//    explicit AudioFileTreeItem(const std::string& fileName,
+//        std::function<void()> onPlayCallback,
+//        std::function<void()> onRemoveCallback)
+//        : fileName(fileName),
+//        onPlayCallback(std::move(onPlayCallback)),
+//        onRemoveCallback(std::move(onRemoveCallback)) // Update this
+//    {
+//    }
+//
+//    bool mightContainSubItems() override { return false; }
+//
+//    void paintItem(juce::Graphics& g, int width, int height) override
+//    {
+//        g.fillAll(juce::Colours::lightgrey);
+//        g.setColour(juce::Colours::black);
+//        g.drawText(fileName, 2, 0, width - 30, height, juce::Justification::centredLeft);
+//    }
+//
+//    
+//
+//    // Create a custom component for the item
+//    std::unique_ptr<juce::Component> createItemComponent() override
+//    {
+//        // Return a custom component for the tree view item
+//       // return std::make_unique<ItemComponent>(fileName, onPlayCallback, onRemoveCallback);
+//
+//        return std::make_unique<ItemComponent>(
+//            fileName,
+//            onPlayCallback,
+//            [this]() { // Wrap lambda inside another lambda
+//                if (onRemoveCallback)
+//                    onRemoveCallback(this); // Pass 'this' correctly
+//            });
+//
+//    }
+//
+//private:
+//    std::string fileName;
+//    std::function<void()> onPlayCallback;
+//    std::function<void()> onRemoveCallback:
+//
+//    // Inner component for displaying the item
+//    class ItemComponent : public juce::Component,
+//        public juce::Button::Listener
+//    {
+//    public:
+//        ItemComponent(const std::string& name,
+//            std::function<void()> onPlay,
+//            std::function<void()> onRemove)
+//            :fileName(name), onPlayCallback(std::move(onPlay)),
+//            onRemoveCallback(std::move(onRemove))
+//        {
+//            // Label for displaying the file name
+//            //fileLabel.setText(name, juce::dontSendNotification);
+//           // fileLabel.setJustificationType(juce::Justification::centredLeft);
+//           // addAndMakeVisible(fileLabel);
+//
+//
+//            addNewButtons(removeButton, "X");
+//            addNewButtons(bypassButton, "Bypass");
+//            addNewButtons(testButton, "test");
+//
+//            
+//        }
+//
+//        void addNewButtons(juce::TextButton& button, const juce::String &ButtonText ) {
+//
+//            button.setButtonText(ButtonText);
+//            button.addListener(this);
+//            addAndMakeVisible(button);
+//            
+//        }
+//
+//       
+//
+//        void resized() override
+//        {
+//            auto bounds = getLocalBounds();
+//            fileLabel.setBounds(bounds.removeFromLeft(bounds.getWidth() - 130)); // File label
+//            bypassButton.setBounds(bounds.removeFromRight(50));
+//            removeButton.setBounds(bounds.removeFromRight(30));
+//            testButton.setBounds(bounds.removeFromRight(30));
+//            
+//                         
+//        }
+//
+//        void buttonClicked(juce::Button* button) override
+//        {
+//            if (button == &removeButton)
+//            {
+//                if (onRemoveCallback)
+//                    onRemoveCallback(); // Trigger remove callback
+//            }
+//            else if (button == &bypassButton)
+//            {
+//                std::cout << "Bypass button clicked" << std::endl;
+//            }
+//            else if (button == &testButton)
+//            {
+//                std::cout << "Test button clicked" << std::endl;
+//            }
+//            
+//        }
+//
+//        void mouseDown(const juce::MouseEvent& e) override
+//        {
+//            // Play the audio file when clicked
+//            //std::cout << "Item Clicked " << std::endl;
+//
+//            std::cout << "Playing audio file: " << fileName << std::endl;
+//            if (onPlayCallback) {
+//                onPlayCallback(); // Trigger playback callback
+//            }
+//
+//
+//        }
+//
+//    private:
+//        juce::Label fileLabel;
+//        std::string fileName;
+//        juce::TextButton removeButton;
+//        juce::TextButton bypassButton;
+//        juce::TextButton testButton;
+//        
+//
+//        std::function<void()> onPlayCallback;
+//        std::function<void()> onRemoveCallback;
+//    };
+//}; // New solution
+
+
+
+class AudioFileTreeItem : public juce::TreeViewItem
 {
 public:
-    explicit AudioFileTreeItem(std::string& fileName, std::function<void()> onPlayCallback) : fileName(fileName), onPlayCallback(std::move(onPlayCallback)), onRemoveCallback(std::move(onRemoveCallback)), deleteButton("X") {}
+    explicit AudioFileTreeItem(const std::string& fileName,
+        std::function<void()> onPlayCallback,
+        std::function<void(AudioFileTreeItem*)> onRemoveCallback)
+        : fileName(fileName),
+        onPlayCallback(std::move(onPlayCallback)),
+        onRemoveCallback(std::move(onRemoveCallback)) // Update this to match the correct type
+    {
+    }
+
     bool mightContainSubItems() override { return false; }
+
     void paintItem(juce::Graphics& g, int width, int height) override
     {
+        g.fillAll(juce::Colours::lightgrey);
         g.setColour(juce::Colours::black);
-        g.drawText(fileName, 2, 0, width - 4, height, juce::Justification::centredLeft);
-        g.drawText(deleteButton.getName(), 2, 0, width - 4, height, juce::Justification::centredRight);
-
+        g.drawText(fileName, 2, 0, width - 30, height, juce::Justification::centredLeft);
     }
-    void resized() override
+
+    // Create a custom component for the item
+    std::unique_ptr<juce::Component> createItemComponent() override
     {
-        deleteButton.setBounds(getWidth() - 30, 2, 28, getItemHeight() - 4);
+        // Return a custom component for the tree view item
+        return std::make_unique<ItemComponent>(
+            fileName,
+            onPlayCallback,
+            [this]() { // Wrap lambda inside another lambda
+                if (onRemoveCallback)
+                    onRemoveCallback(this); // Pass 'this' correctly
+            });
     }
-
-    void itemClicked(const juce::MouseEvent& e) override
-    {
-        // Play the audio file when clicked
-        std::cout << "Item Clicked " << std::endl;
-        if (onPlayCallback)
-        {
-            std::cout << "Playing audio file: " << fileName << std::endl;
-            onPlayCallback(); // Trigger the callback for playback
-        }
-        
-        else if (!deleteButton.getBounds().contains(e.getPosition()))
-        {
-            std::cout << "Removing File: " << fileName << std::endl;
-           // onPlayCallback(); // Trigger the callback for playback
-            onRemoveCallback();
-        }
-
-    }
-
 
 private:
     std::string fileName;
     std::function<void()> onPlayCallback;
+    std::function<void(AudioFileTreeItem*)> onRemoveCallback; // Corrected the type to match the lambda callback
 
-    juce::TextButton deleteButton;
-    std::function<void()> onRemoveCallback;
-    
+    // Inner component for displaying the item
+    class ItemComponent : public juce::Component,
+        public juce::Button::Listener
+    {
+    public:
+        ItemComponent(const std::string& name,
+            std::function<void()> onPlay,
+            std::function<void()> onRemove)
+            : fileName(name), onPlayCallback(std::move(onPlay)),
+            onRemoveCallback(std::move(onRemove))
+        {
+            addNewButtons(removeButton, "X");
+            addNewButtons(bypassButton, "Bypass");
+            addNewButtons(testButton, "test");
+        }
 
+        void addNewButtons(juce::TextButton& button, const juce::String& ButtonText)
+        {
+            button.setButtonText(ButtonText);
+            button.addListener(this);
+            addAndMakeVisible(button);
+        }
 
+        void resized() override
+        {
+            auto bounds = getLocalBounds();
+            fileLabel.setBounds(bounds.removeFromLeft(bounds.getWidth() - 130)); // File label
+            bypassButton.setBounds(bounds.removeFromRight(50));
+            removeButton.setBounds(bounds.removeFromRight(30));
+            testButton.setBounds(bounds.removeFromRight(30));
+        }
 
+        void buttonClicked(juce::Button* button) override
+        {
+            if (button == &removeButton)
+            {
+                if (onRemoveCallback)
+                    onRemoveCallback(); // Trigger remove callback
+            }
+            else if (button == &bypassButton)
+            {
+                std::cout << "Bypass button clicked" << std::endl;
+            }
+            else if (button == &testButton)
+            {
+                std::cout << "Test button clicked" << std::endl;
+            }
+        }
+
+        void mouseDown(const juce::MouseEvent& e) override
+        {
+            // Play the audio file when clicked
+            std::cout << "Playing audio file: " << fileName << std::endl;
+            if (onPlayCallback)
+            {
+                onPlayCallback(); // Trigger playback callback
+            }
+        }
+
+    private:
+        juce::Label fileLabel;
+        std::string fileName;
+        juce::TextButton removeButton;
+        juce::TextButton bypassButton;
+        juce::TextButton testButton;
+
+        std::function<void()> onPlayCallback;
+        std::function<void()> onRemoveCallback;
+    };
 };
+
+
+
+//class AudioFileTreeItem : public juce::TreeViewItem
+//{
+//public:
+//    explicit AudioFileTreeItem(const std::string& fileName,
+//        std::function<void()> onPlayCallback,
+//        std::function<void(AudioFileTreeItem*)> onRemoveCallback) // Correct callback type
+//        : fileName(fileName),
+//        onPlayCallback(std::move(onPlayCallback)),
+//        onRemoveCallback(std::move(onRemoveCallback)) // Move semantics
+//    {
+//    }
+//
+//    bool mightContainSubItems() override { return false; }
+//
+//    void paintItem(juce::Graphics& g, int width, int height) override
+//    {
+//        g.fillAll(juce::Colours::lightgrey);
+//        g.setColour(juce::Colours::black);
+//        g.drawText(fileName, 2, 0, width - 30, height, juce::Justification::centredLeft);
+//    }
+//
+//    // Create a custom component for the item
+//    std::unique_ptr<juce::Component> createItemComponent() override
+//    {
+//        // Correct the lambda to pass 'this' correctly
+//        return std::make_unique<ItemComponent>(
+//            fileName,
+//            onPlayCallback,
+//            [this]() { // Wrap lambda inside another lambda
+//                if (onRemoveCallback)
+//                    onRemoveCallback(this); // Pass 'this' as the argument (AudioFileTreeItem*)
+//            });
+//    }
+//
+//private:
+//    std::string fileName;
+//    std::function<void()> onPlayCallback;
+//    std::function<void(AudioFileTreeItem*)> onRemoveCallback; // Correct callback type
+//
+//    // Inner component for displaying the item
+//    class ItemComponent : public juce::Component,
+//        public juce::Button::Listener
+//    {
+//    public:
+//        ItemComponent(const std::string& name,
+//            std::function<void()> onPlay,
+//            std::function<void()> onRemove)
+//            : fileName(name),
+//            onPlayCallback(std::move(onPlay)),
+//            onRemoveCallback(std::move(onRemove))
+//        {
+//            // Create buttons
+//            addNewButton(removeButton, "X");
+//            addNewButton(bypassButton, "Bypass");
+//            addNewButton(testButton, "Test");
+//        }
+//
+//        void addNewButton(juce::TextButton& button, const juce::String& buttonText)
+//        {
+//            button.setButtonText(buttonText);
+//            button.addListener(this);
+//            addAndMakeVisible(button);
+//        }
+//
+//        void resized() override
+//        {
+//            auto bounds = getLocalBounds();
+//            bypassButton.setBounds(bounds.removeFromRight(50));
+//            removeButton.setBounds(bounds.removeFromRight(30));
+//            testButton.setBounds(bounds.removeFromRight(30));
+//        }
+//
+//        void buttonClicked(juce::Button* button) override
+//        {
+//            if (button == &removeButton)
+//            {
+//                if (onRemoveCallback)
+//                    onRemoveCallback(); // Trigger remove callback
+//            }
+//            else if (button == &bypassButton)
+//            {
+//                std::cout << "Bypass button clicked" << std::endl;
+//            }
+//            else if (button == &testButton)
+//            {
+//                std::cout << "Test button clicked" << std::endl;
+//            }
+//        }
+//
+//        void mouseDown(const juce::MouseEvent&) override
+//        {
+//            // Play the audio file when clicked
+//            std::cout << "Playing audio file: " << fileName << std::endl;
+//            if (onPlayCallback)
+//                onPlayCallback(); // Trigger playback callback
+//        }
+//
+//    private:
+//        std::string fileName;
+//        juce::TextButton removeButton;
+//        juce::TextButton bypassButton;
+//        juce::TextButton testButton;
+//
+//        std::function<void()> onPlayCallback;
+//        std::function<void()> onRemoveCallback;
+//    };
+//};
+
+
+
+
+
+
+
+
+
+

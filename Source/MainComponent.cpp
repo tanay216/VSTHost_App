@@ -24,7 +24,7 @@ MainComponent::MainComponent()
     audioFileTree.setColour(juce::TreeView::backgroundColourId, juce::Colours::antiquewhite);
     audioFileTree.setDefaultOpenness(true);
     std::string rootName = "Root";
-    auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr);
+    auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr, nullptr);
     audioFileTree.setRootItem(rootItem.release());
     audioFileTree.setInterceptsMouseClicks(true, true); // Enable clicks globally
     audioFileTree.setWantsKeyboardFocus(true);
@@ -387,9 +387,13 @@ void MainComponent::buttonClicked(juce::Button* button)
                         {
                             auto& fileName = audioFileNames[i].toStdString();
 
+
                             // Capture the file buffer in the callback
+                            //auto removeCallback = []() { std::cout << "Removing audio file...\n"; };
+                            
+
                             auto playCallback = [this, i]()
-                                {
+                            {
                                     if (i < audioBuffers.size())
                                     {
                                         /*transportSource.setSource(new juce::MemoryAudioSource(audioBuffers[i], true));
@@ -419,9 +423,92 @@ void MainComponent::buttonClicked(juce::Button* button)
 
                                         //transportSource.start();
                                     }
+                            };
+                            auto removeCallback = [this, rootItem](AudioFileTreeItem* item)
+                                {
+                                    if (item != nullptr && rootItem != nullptr)
+                                    {
+                                        // Iterate through sub-items to find the correct index
+                                        for (int i = 0; i < rootItem->getNumSubItems(); ++i)
+                                        {
+                                            if (rootItem->getSubItem(i) == item) // Compare pointers
+                                            {
+                                                rootItem->removeSubItem(i, true); // Remove the item at index i
+                                                std::cout << "Removed item at index: " << i << std::endl;
+
+                                                // Remove corresponding entries from arrays
+// 
+                                                break; // Exit loop after removing the item
+                                            }
+
+                                            
+
+                                        }
+                                    }
+                                    else
+                                    {
+                                        std::cout << "Item or rootItem is null" << std::endl;
+                                    }
                                 };
-                            auto item = std::make_unique<AudioFileTreeItem>(fileName, playCallback);
+
+                            //auto removeCallback = [this, rootItem, i]()
+                            //    {
+                            //        if (rootItem != nullptr)
+                            //        {
+                            //            // Loop through sub-items to find the one to remove
+                            //            for (int j = 0; j < rootItem->getNumSubItems(); ++j)
+                            //            {
+                            //                auto* subItem = dynamic_cast<AudioFileTreeItem*>(rootItem->getSubItem(j));
+                            //                if (subItem != nullptr && j == i) // Match the index
+                            //                {
+                            //                    rootItem->removeSubItem(j, true); // Remove from tree
+                            //                    std::cout << "Removed item at index: " << j << std::endl;
+                            //                    // Remove corresponding entries from arrays
+                            //                    if (i < audioBuffers.size() && i < audioFileNames.size())
+                            //                    {
+                            //                        audioBuffers.remove(i);           // Remove buffer
+                            //                        audioFileNames.remove(i);         // Remove filename
+                            //                        std::cout << "Removed buffer and filename at index: " << i << std::endl;
+                            //                    }
+                            //                    else
+                            //                    {
+                            //                        std::cout << "Index out of bounds for buffers or filenames." << std::endl;
+                            //                    }
+                            //                    break; // Exit loop after removal
+                            //                }
+                            //            }
+                            //        }
+                            //        else
+                            //        {
+                            //            std::cout << "RootItem is null." << std::endl;
+                            //        }
+                            //    };
+                            
+                            
+                            
+                            //auto removeCallback = [this, rootItem](AudioFileTreeItem* item) {
+                            //    // Wrap the function in another lambda that takes no arguments
+                            //    return [this, item, rootItem]() {
+                            //        if (item != nullptr && rootItem != nullptr) {
+                            //            for (int i = 0; i < rootItem->getNumSubItems(); ++i) {
+                            //                if (rootItem->getSubItem(i) == item) {
+                            //                    rootItem->removeSubItem(i, true);
+                            //                    std::cout << "Removed item at index: " << i << std::endl;
+                            //                    break;
+                            //                }
+                            //            }
+                            //        }
+                            //        };
+                            //    };
+
+
+
+
+
+                            //Add Item to the TreeView
+                            auto item = std::make_unique<AudioFileTreeItem>(fileName, playCallback, removeCallback);
                             rootItem->addSubItem(item.release());
+
                         }
                     }
                     else
