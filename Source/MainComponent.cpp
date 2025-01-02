@@ -231,233 +231,133 @@ void MainComponent::buttonClicked(juce::Button* button)
         }
 
     }
-    //else if (button == &loadAudioButton)
-    //{
-    //    std::cout << "Loading audio" << std::endl;
-    //    std::cout << "====================" << std::endl;
-    //    //vstPluginComponent.pluginInstance->releaseResources();
-    //    //vstPluginComponent.pluginInstance->prepareToPlay(sampleRate, audioBuffer.getNumSamples());
-    //    fileChooser = std::make_unique<juce::FileChooser>("Select an audio file", juce::File(), "*.wav");
-    //    // Launch the file chooser asynchronously
-    //    fileChooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::canSelectMultipleItems,
-    //        [this](const juce::FileChooser& chooser)
-    //        {
-    //            auto selectedFiles = chooser.getResults(); // Get all selected files
-    //            audioFileNames.clear();
-    //            audioBuffers.clear();
-    //            readerSources.clear();
-    //            transportSources.clear(); 
-    //            if (!selectedFiles.isEmpty())
-    //            {
-    //                std::cout << "Selected files:" << std::endl;
-    //                // Iterate through selected files
-    //                for (int i = 0; i < selectedFiles.size(); ++i)
-    //                {
-    //                    const auto& file = selectedFiles[i];
-    //                    // Display the name of the file
-    //                    std::cout << "[" << i << "] " << file.getFileName() << std::endl;
-    //                    loadedAudioFileNames = file.getFileName().toStdString();
-    //                    // Load the selected file using AudioFileManager
-    //                    audioFileManager.loadAudioFile(file);
-    //                    audioFileNames.add(loadedAudioFileNames);
-    //                    juce::AudioBuffer<float> fileBuffer;
-    //                    /*auto& sourceBuffer = audioFileManager.getAudioBuffer();
-    //                    fileBuffer.setSize(sourceBuffer.getNumChannels(), sourceBuffer.getNumSamples());
-    //                    for (int channel = 0; channel < sourceBuffer.getNumChannels(); ++channel)
-    //                    {
-    //                        fileBuffer.copyFrom(channel, 0, sourceBuffer, channel, 0, sourceBuffer.getNumSamples());
-    //                    }*/
-    //                    fileBuffer.makeCopyOf(audioFileManager.getAudioBuffer());
-    //                    // Store the buffer for this file in the audioBuffers Array
-    //                    audioBuffers.add(fileBuffer);
-    //                    auto* reader = formatManager.createReaderFor(file);
-    //                    transportSourceSampleRate = reader->sampleRate;
-    //                    if (reader != nullptr)
-    //                    {
-    //                        readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
-    //                        auto readerSourcePtr = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
-    //                        readerSources.push_back(std::move(readerSourcePtr));
-    //                        auto transportSourcePtr = std::make_unique<juce::AudioTransportSource>();
-    //                        transportSources.push_back(std::move(transportSourcePtr));
-    //                        //transportSource.start();
-    //                    }
-    //                }
-    //                auto* rootItem = audioFileTree.getRootItem();
-    //                if (rootItem != nullptr)
-    //                {
-    //                    for (int i = 0; i < audioFileNames.size(); ++i)
-    //                    {
-    //                        auto item = std::make_unique<AudioFileTreeItem>(audioFileNames[i].toStdString(), formatManager);
-    //                        rootItem->addSubItem(item.release());
-    //                        transportSources[i]->setSource(readerSources[i].get(),
-    //                            0,                // buffer size (default)
-    //                            nullptr,          // no time-stretching
-    //                            transportSourceSampleRate);
-    //                        std::cout<<"Length in seconds: " << transportSources[i].get()->getLengthInSeconds()<< std::endl;
-    //                    }
-    //                }
-    //                else
-    //                {
-    //                    std::cout << "Root item for TreeView not initialized!" << std::endl;
-    //                }
-    //                audioFileTree.getRootItem()->treeHasChanged();
-    //                audioFileTree.repaint();
-    //                std::cout << "All selected files loaded." << std::endl;
-    //            }
-    //            else
-    //            {
-    //                for (int i = 0; i < selectedFiles.size(); ++i)
-    //                {
-    //                    const auto& file = selectedFiles[i];
-    //                    // Display the name of the file
-    //                    std::cout << "No file selected or invalid file." << file.getFileName() << std::endl;
-    //                    std::cout << "[" << i << "] " << file.getFileName() << std::endl;
-    //                }
-    //            }
-    //        });
-    //}
+
+    /* Curent Working Playback and Duplicate File loading Fix */
 
     else if (button == &loadAudioButton)
     {
-
         std::cout << "Loading audio" << std::endl;
         std::cout << "====================" << std::endl;
-
         fileChooser = std::make_unique<juce::FileChooser>("Select an audio file", juce::File(), "*.wav");
-
         // Launch the file chooser asynchronously
         fileChooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::canSelectMultipleItems,
             [this](const juce::FileChooser& chooser)
             {
                 auto selectedFiles = chooser.getResults(); // Get all selected files
                 //audioFileNames.clear();
-               // audioBuffers.clear();
-
+                // audioBuffers.clear();
                 if (!selectedFiles.isEmpty())
                 {
                     std::cout << "Selected files:" << std::endl;
-
                     // Iterate through selected files
-                    for (int i = 0; i < selectedFiles.size(); ++i)
-                    {
-                        const auto& file = selectedFiles[i];
-
-                        
-                        if (!audioFileNames.contains(file.getFileName()))
+                   // for (int i = 0; i < selectedFiles.size(); ++i)
+                   // {
+                        for (const auto& file : selectedFiles)
                         {
-                            // Display the name of the file
-                            std::cout << "[" << i << "] " << file.getFileName() << std::endl;
-                            loadedAudioFileNames = file.getFileName().toStdString();
-
-                            // Load the selected file using AudioFileManager
-                            audioFileManager.loadAudioFile(file);
-                            audioFileNames.add(file.getFileName().toStdString());
-                            juce::AudioBuffer<float> fileBuffer;
-
-                            fileBuffer.makeCopyOf(audioFileManager.getAudioBuffer());
-
-                            // Store the buffer for this file in the audioBuffers Array
-                            audioBuffers.add(fileBuffer);
-                            getAudioBuffersList();
-
-                            auto* rootItem = audioFileTree.getRootItem();
-                            if (rootItem != nullptr)
+                           // const auto& file = selectedFiles[i];
+                        
+                            if (!audioFileNames.contains(file.getFileName()))
                             {
+                                // Display the name of the file
+                                std::cout << "["  << "] " << file.getFileName() << std::endl;
+                                loadedAudioFileNames = file.getFileName().toStdString();
+                                // Load the selected file using AudioFileManager
+                                audioFileManager.loadAudioFile(file);
+                                audioFileNames.add(file.getFileName().toStdString());
+                                juce::AudioBuffer<float> fileBuffer;
+                                fileBuffer.makeCopyOf(audioFileManager.getAudioBuffer());
+                                // Store the buffer for this file in the audioBuffers Array
+                                audioBuffers.add(fileBuffer);
+                                getAudioBuffersList();
+                                auto* rootItem = audioFileTree.getRootItem();
+                                if (rootItem != nullptr)
+                                {
                                 
-                               // for (int i = 0; i < audioFileNames.size(); ++i)
-                                    auto audioBufferIndex = audioBuffers.size()-1;
-                                    auto& fileName = audioFileNames[i].toStdString();
-                                    auto playCallback = [this, audioBufferIndex]()
-                                        {
-                                            if (audioBufferIndex < audioBuffers.size())
+                                    // for (int i = 0; i < audioFileNames.size(); ++i)
+                                        auto audioBufferIndex = audioBuffers.size()-1;
+                                       // auto& fileName = audioFileNames[i].toStdString();
+                                        auto fileName =file.getFileName().toStdString();
+                                        auto playCallback = [this, audioBufferIndex]()
                                             {
-                                                /*transportSource.setSource(new juce::MemoryAudioSource(audioBuffers[i], true));
-                                                transportSource.start();*/
-
-                                                auto& buffer = audioBuffers[audioBufferIndex];
-
-                                                // Check if the file is mono and dynamically handle playback
-                                                if (buffer.getNumChannels() == 1) // Mono file
+                                                if (audioBufferIndex < audioBuffers.size())
                                                 {
-                                                    // Create a stereo buffer for playback only
-                                                    juce::AudioBuffer<float> stereoBuffer(2, buffer.getNumSamples());
-
-                                                    // Duplicate mono data to both left and right channels
-                                                    stereoBuffer.copyFrom(0, 0, buffer, 0, 0, buffer.getNumSamples()); // Left
-                                                    stereoBuffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples()); // Right
-
-                                                    // Use the stereo buffer only for playback
-                                                    transportSource.setSource(new juce::MemoryAudioSource(stereoBuffer, true));
-                                                    transportSource.start();
-                                                }
-                                                else // Already stereo or multichannel
-                                                {
-                                                    transportSource.setSource(new juce::MemoryAudioSource(buffer, true));
-                                                    transportSource.start();
-                                                }
-
-                                                //transportSource.start();
-                                            }
-                                        };
-                                    auto removeCallback = [this, rootItem, audioBufferIndex](AudioFileTreeItem* item)
-                                        {
-                                            std::cout << "=====================" << std::endl;
-                                            std::cout << "Remove CallBack " << std::endl;
-                                            if (item != nullptr && rootItem != nullptr)
-                                            {
-                                                // Iterate through sub-items to find the correct index
-                                                for (int i = 0; i < rootItem->getNumSubItems(); ++i)
-                                                {
-                                                    
-                                                    if (rootItem->getSubItem(i) == item) // Compare pointers
+                                                    auto& buffer = audioBuffers[audioBufferIndex];
+                                                    // Check if the file is mono and dynamically handle playback
+                                                    if (buffer.getNumChannels() == 1) // Mono file
                                                     {
-                                                        rootItem->removeSubItem(i, true); // Remove the item at index i
-                                                        std::cout << "Removed item at index: " << i << std::endl;
-                                                        break; // Exit loop after removing the item
+                                                        // Create a stereo buffer for playback only
+                                                        juce::AudioBuffer<float> stereoBuffer(2, buffer.getNumSamples());
+                                                        // Duplicate mono data to both left and right channels
+                                                        stereoBuffer.copyFrom(0, 0, buffer, 0, 0, buffer.getNumSamples()); // Left
+                                                        stereoBuffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples()); // Right
+                                                        // Use the stereo buffer only for playback
+                                                        transportSource.setSource(new juce::MemoryAudioSource(stereoBuffer, true));
+                                                        transportSource.start();
                                                     }
+                                                    else // Already stereo or multichannel
+                                                    {
+                                                        transportSource.setSource(new juce::MemoryAudioSource(buffer, true));
+                                                        transportSource.start();
+                                                    }
+                                                    //transportSource.start();
+                                                }
+                                            };
+                                        auto removeCallback = [this, rootItem, audioBufferIndex](AudioFileTreeItem* item)
+                                            {
+                                                std::cout << "Removing item at index: " << audioBufferIndex << std::endl;
+                                                // Remove corresponding buffers and filenames
+                                                if (audioBufferIndex < audioBuffers.size())
+                                                {
                                                     audioBuffers.remove(audioBufferIndex);
                                                     audioFileNames.remove(audioBufferIndex);
                                                     getAudioBuffersList();
-
-
-
                                                 }
-                                            }
-                                            else
-                                            {
-                                                std::cout << "Item or rootItem is null" << std::endl;
-                                            }
-                                        };
-                                    //Add Item to the TreeView
-                                    auto item = std::make_unique<AudioFileTreeItem>(audioFileNames[i].toStdString(), playCallback, removeCallback);
-                                    rootItem->addSubItem(item.release());
-
+                                                else {
+                							        std::cout << "Index out of range" << std::endl;
+                                                }
+                                                if (item != nullptr && rootItem != nullptr)
+                                                {
+                                                    // Remove item from tree view
+                                                    for (int i = 0; i < rootItem->getNumSubItems(); ++i)
+                                                    {
+                                                        if (rootItem->getSubItem(i) == item)
+                                                        {
+                                                            rootItem->removeSubItem(i, true); // Remove from tree
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                else {
+                							        std::cout << "Item or rootItem is null" << std::endl;
+                                                }
+                                            };
+                                        auto item = std::make_unique<AudioFileTreeItem>(fileName, playCallback, removeCallback);
+                                        rootItem->addSubItem(item.release());
                                 
+                                }
+                                else
+                                {
+                                    std::cout << "Root item for TreeView not initialized!" << std::endl;
+                                }
+                            
                             }
                             else
                             {
-                                std::cout << "Root item for TreeView not initialized!" << std::endl;
+                                std::cout << "Skipping duplicate file: " << file.getFileName() << std::endl;
+                                getAudioBuffersList();
+                                continue;
                             }
-                            
+                            auto* reader = formatManager.createReaderFor(file);
+                            if (reader != nullptr)
+                            {
+                                readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
+                                //transportSource.setSource(readerSource.get(),
+                                //    0,                // buffer size (default)
+                                //    nullptr,          // no time-stretching
+                                //    reader->sampleRate);
+                            }
                         }
-                        else
-                        {
-                            std::cout << "Skipping duplicate file: " << file.getFileName() << std::endl;
-                            getAudioBuffersList();
-                            continue;
-                        }
-
-                        auto* reader = formatManager.createReaderFor(file);
-                        if (reader != nullptr)
-                        {
-                            readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
-                            //transportSource.setSource(readerSource.get(),
-                            //    0,                // buffer size (default)
-                            //    nullptr,          // no time-stretching
-                            //    reader->sampleRate);
-                        }
-
-                    }
+                   // }
                     
                     
                     audioFileTree.getRootItem()->treeHasChanged();
@@ -469,16 +369,15 @@ void MainComponent::buttonClicked(juce::Button* button)
                     for (int i = 0; i < selectedFiles.size(); ++i)
                     {
                         const auto& file = selectedFiles[i];
-
                         // Display the name of the file
                         std::cout << "No file selected or invalid file." << file.getFileName() << std::endl;
                         std::cout << "[" << i << "] " << file.getFileName() << std::endl;
                     }
                 }
             });
-
-
     }
+
+
 
     else if (button == &playButton)
     {
