@@ -333,7 +333,7 @@ private:
         {
             addNewButtons(removeButton, "X");
             addNewButtons(bypassButton, "Bypass");
-            addNewButtons(testButton, "test");
+           
         }
 
         void addNewButtons(juce::TextButton& button, const juce::String& ButtonText)
@@ -349,7 +349,7 @@ private:
             fileLabel.setBounds(bounds.removeFromLeft(bounds.getWidth() - 130)); // File label
             bypassButton.setBounds(bounds.removeFromRight(50));
             removeButton.setBounds(bounds.removeFromRight(30));
-            testButton.setBounds(bounds.removeFromRight(30));
+           
         }
 
         void buttonClicked(juce::Button* button) override
@@ -363,10 +363,7 @@ private:
             {
                 std::cout << "Bypass button clicked" << std::endl;
             }
-            else if (button == &testButton)
-            {
-                std::cout << "Test button clicked" << std::endl;
-            }
+           
         }
 
         void mouseDown(const juce::MouseEvent& e) override
@@ -384,7 +381,7 @@ private:
         std::string fileName;
         juce::TextButton removeButton;
         juce::TextButton bypassButton;
-        juce::TextButton testButton;
+       
 
         std::function<void()> onPlayCallback;
         std::function<void()> onRemoveCallback;
