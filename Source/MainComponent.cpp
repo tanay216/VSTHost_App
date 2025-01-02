@@ -351,21 +351,101 @@ void MainComponent::buttonClicked(juce::Button* button)
 
                             // Load the selected file using AudioFileManager
                             audioFileManager.loadAudioFile(file);
-                            audioFileNames.add(loadedAudioFileNames);
+                            audioFileNames.add(file.getFileName().toStdString());
                             juce::AudioBuffer<float> fileBuffer;
 
                             fileBuffer.makeCopyOf(audioFileManager.getAudioBuffer());
 
                             // Store the buffer for this file in the audioBuffers Array
                             audioBuffers.add(fileBuffer);
+                            getAudioBuffersList();
+
+                            auto* rootItem = audioFileTree.getRootItem();
+                            if (rootItem != nullptr)
+                            {
+                                
+                               // for (int i = 0; i < audioFileNames.size(); ++i)
+                                    auto audioBufferIndex = audioBuffers.size()-1;
+                                    auto& fileName = audioFileNames[i].toStdString();
+                                    auto playCallback = [this, audioBufferIndex]()
+                                        {
+                                            if (audioBufferIndex < audioBuffers.size())
+                                            {
+                                                /*transportSource.setSource(new juce::MemoryAudioSource(audioBuffers[i], true));
+                                                transportSource.start();*/
+
+                                                auto& buffer = audioBuffers[audioBufferIndex];
+
+                                                // Check if the file is mono and dynamically handle playback
+                                                if (buffer.getNumChannels() == 1) // Mono file
+                                                {
+                                                    // Create a stereo buffer for playback only
+                                                    juce::AudioBuffer<float> stereoBuffer(2, buffer.getNumSamples());
+
+                                                    // Duplicate mono data to both left and right channels
+                                                    stereoBuffer.copyFrom(0, 0, buffer, 0, 0, buffer.getNumSamples()); // Left
+                                                    stereoBuffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples()); // Right
+
+                                                    // Use the stereo buffer only for playback
+                                                    transportSource.setSource(new juce::MemoryAudioSource(stereoBuffer, true));
+                                                    transportSource.start();
+                                                }
+                                                else // Already stereo or multichannel
+                                                {
+                                                    transportSource.setSource(new juce::MemoryAudioSource(buffer, true));
+                                                    transportSource.start();
+                                                }
+
+                                                //transportSource.start();
+                                            }
+                                        };
+                                    auto removeCallback = [this, rootItem, audioBufferIndex](AudioFileTreeItem* item)
+                                        {
+                                            std::cout << "=====================" << std::endl;
+                                            std::cout << "Remove CallBack " << std::endl;
+                                            if (item != nullptr && rootItem != nullptr)
+                                            {
+                                                // Iterate through sub-items to find the correct index
+                                                for (int i = 0; i < rootItem->getNumSubItems(); ++i)
+                                                {
+                                                    
+                                                    if (rootItem->getSubItem(i) == item) // Compare pointers
+                                                    {
+                                                        rootItem->removeSubItem(i, true); // Remove the item at index i
+                                                        std::cout << "Removed item at index: " << i << std::endl;
+                                                        break; // Exit loop after removing the item
+                                                    }
+                                                    audioBuffers.remove(audioBufferIndex);
+                                                    audioFileNames.remove(audioBufferIndex);
+                                                    getAudioBuffersList();
+
+
+
+                                                }
+                                            }
+                                            else
+                                            {
+                                                std::cout << "Item or rootItem is null" << std::endl;
+                                            }
+                                        };
+                                    //Add Item to the TreeView
+                                    auto item = std::make_unique<AudioFileTreeItem>(audioFileNames[i].toStdString(), playCallback, removeCallback);
+                                    rootItem->addSubItem(item.release());
+
+                                
+                            }
+                            else
+                            {
+                                std::cout << "Root item for TreeView not initialized!" << std::endl;
+                            }
+                            
                         }
                         else
                         {
                             std::cout << "Skipping duplicate file: " << file.getFileName() << std::endl;
+                            getAudioBuffersList();
                             continue;
                         }
-                        
-
 
                         auto* reader = formatManager.createReaderFor(file);
                         if (reader != nullptr)
@@ -378,148 +458,10 @@ void MainComponent::buttonClicked(juce::Button* button)
                         }
 
                     }
-
-                    auto* rootItem = audioFileTree.getRootItem();
-                    if (rootItem != nullptr)
-                    {
-
-                        for (int i = 0; i < audioFileNames.size(); ++i)
-                        {
-                            auto& fileName = audioFileNames[i].toStdString();
-
-
-                            // Capture the file buffer in the callback
-                            //auto removeCallback = []() { std::cout << "Removing audio file...\n"; };
-                            
-
-                            auto playCallback = [this, i]()
-                            {
-                                    if (i < audioBuffers.size())
-                                    {
-                                        /*transportSource.setSource(new juce::MemoryAudioSource(audioBuffers[i], true));
-                                        transportSource.start();*/
-
-                                        auto& buffer = audioBuffers[i];
-
-                                        // Check if the file is mono and dynamically handle playback
-                                        if (buffer.getNumChannels() == 1) // Mono file
-                                        {
-                                            // Create a stereo buffer for playback only
-                                            juce::AudioBuffer<float> stereoBuffer(2, buffer.getNumSamples());
-
-                                            // Duplicate mono data to both left and right channels
-                                            stereoBuffer.copyFrom(0, 0, buffer, 0, 0, buffer.getNumSamples()); // Left
-                                            stereoBuffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples()); // Right
-
-                                            // Use the stereo buffer only for playback
-                                            transportSource.setSource(new juce::MemoryAudioSource(stereoBuffer, true));
-                                            transportSource.start();
-                                        }
-                                        else // Already stereo or multichannel
-                                        {
-                                            transportSource.setSource(new juce::MemoryAudioSource(buffer, true));
-                                            transportSource.start();
-                                        }
-
-                                        //transportSource.start();
-                                    }
-                            };
-                            auto removeCallback = [this, rootItem](AudioFileTreeItem* item)
-                                {
-                                    if (item != nullptr && rootItem != nullptr)
-                                    {
-                                        // Iterate through sub-items to find the correct index
-                                        for (int i = 0; i < rootItem->getNumSubItems(); ++i)
-                                        {
-                                            if (rootItem->getSubItem(i) == item) // Compare pointers
-                                            {
-                                                rootItem->removeSubItem(i, true); // Remove the item at index i
-                                                std::cout << "Removed item at index: " << i << std::endl;
-
-                                                // Remove corresponding entries from arrays
-// 
-                                                break; // Exit loop after removing the item
-                                            }
-
-                                            
-
-                                        }
-                                    }
-                                    else
-                                    {
-                                        std::cout << "Item or rootItem is null" << std::endl;
-                                    }
-                                };
-
-                            //auto removeCallback = [this, rootItem, i]()
-                            //    {
-                            //        if (rootItem != nullptr)
-                            //        {
-                            //            // Loop through sub-items to find the one to remove
-                            //            for (int j = 0; j < rootItem->getNumSubItems(); ++j)
-                            //            {
-                            //                auto* subItem = dynamic_cast<AudioFileTreeItem*>(rootItem->getSubItem(j));
-                            //                if (subItem != nullptr && j == i) // Match the index
-                            //                {
-                            //                    rootItem->removeSubItem(j, true); // Remove from tree
-                            //                    std::cout << "Removed item at index: " << j << std::endl;
-                            //                    // Remove corresponding entries from arrays
-                            //                    if (i < audioBuffers.size() && i < audioFileNames.size())
-                            //                    {
-                            //                        audioBuffers.remove(i);           // Remove buffer
-                            //                        audioFileNames.remove(i);         // Remove filename
-                            //                        std::cout << "Removed buffer and filename at index: " << i << std::endl;
-                            //                    }
-                            //                    else
-                            //                    {
-                            //                        std::cout << "Index out of bounds for buffers or filenames." << std::endl;
-                            //                    }
-                            //                    break; // Exit loop after removal
-                            //                }
-                            //            }
-                            //        }
-                            //        else
-                            //        {
-                            //            std::cout << "RootItem is null." << std::endl;
-                            //        }
-                            //    };
-                            
-                            
-                            
-                            //auto removeCallback = [this, rootItem](AudioFileTreeItem* item) {
-                            //    // Wrap the function in another lambda that takes no arguments
-                            //    return [this, item, rootItem]() {
-                            //        if (item != nullptr && rootItem != nullptr) {
-                            //            for (int i = 0; i < rootItem->getNumSubItems(); ++i) {
-                            //                if (rootItem->getSubItem(i) == item) {
-                            //                    rootItem->removeSubItem(i, true);
-                            //                    std::cout << "Removed item at index: " << i << std::endl;
-                            //                    break;
-                            //                }
-                            //            }
-                            //        }
-                            //        };
-                            //    };
-
-
-
-
-
-                            //Add Item to the TreeView
-                            auto item = std::make_unique<AudioFileTreeItem>(fileName, playCallback, removeCallback);
-                            rootItem->addSubItem(item.release());
-
-                        }
-                    }
-                    else
-                    {
-                        std::cout << "Root item for TreeView not initialized!" << std::endl;
-                    }
+                    
+                    
                     audioFileTree.getRootItem()->treeHasChanged();
                     audioFileTree.repaint();
-
-
-
                     std::cout << "All selected files loaded." << std::endl;
                 }
                 else
@@ -644,6 +586,31 @@ void MainComponent::buttonClicked(juce::Button* button)
     }
 
 
+}
+
+void MainComponent::getAudioBuffersList() {
+
+    std::cout << "---------------------" << std::endl;
+    std::cout << "Audio Buffers Content:" << std::endl;
+    
+    for (int i = 0; i < audioBuffers.size(); ++i)
+    {
+        
+
+        if (audioBuffers[i].getNumSamples() != 0) // Ensure the buffer is valid
+        {
+            std::cout << "Name: " << audioFileNames[i].toStdString() << std::endl;
+            std::cout << "  Buffer " << i << ":" << std::endl;
+            std::cout << "  Channels: " << audioBuffers[i].getNumChannels() << std::endl;
+            std::cout << "  Samples: " << audioBuffers[i].getNumSamples() << std::endl;
+
+           
+        }
+        else
+        {
+            std::cout << "  Null buffer at index " << i << std::endl;
+        }
+    }
 }
 
 

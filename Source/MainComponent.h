@@ -40,6 +40,8 @@ public:
     // void MainComponent::handleChannelConfigurationChange(int configId);
     void closePluginEditor();
 
+    void getAudioBuffersList();
+
 
     const std::string getLoadedAudiFileNames();
 
