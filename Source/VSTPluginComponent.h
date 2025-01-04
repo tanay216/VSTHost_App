@@ -33,6 +33,8 @@ private:
     std::unique_ptr<AudioDeviceManager> audioDeviceManager;
     Exporter exporter;
     juce::AudioProcessor* pluginProcessor;
+    AudioSourcePlayer audioSourcePlayer;
+    AudioTransportSource transportSource;
  
     
    // AudioBuffer<float> audioBuffer;
@@ -51,6 +53,11 @@ private:
 public:
 
     VSTPluginComponent();
+
+    void initialiseAudio();
+    void populateAudioDeviceDropdowns();
+    void changeAudioDevice(bool isInput);
+
 
     std::unique_ptr<AudioPluginInstance> pluginInstance;
     void scanPlugins(const juce::String& pluginFilePath);

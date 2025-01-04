@@ -15,6 +15,105 @@ VSTPluginComponent::VSTPluginComponent() {
     audioDeviceManager = std::make_unique<AudioDeviceManager>();
 }
 
+void VSTPluginComponent::initialiseAudio()
+{
+
+    audioDeviceManager->initialise(0, 2, nullptr, true);
+    audioDeviceManager->addAudioCallback(&audioSourcePlayer);
+    audioSourcePlayer.setSource(&transportSource);
+    auto* device = audioDeviceManager->getCurrentAudioDevice();
+    sampleRate = device->getCurrentSampleRate();
+    blockSize = device->getCurrentBufferSizeSamples();
+    std::cout << "===============================" << std::endl;
+    std::cout << "Audio Device Initialised:" << std::endl;
+    std::cout << "  Device Name: " << device->getName() << std::endl;
+    std::cout << "  Type: " << device->getTypeName() << std::endl;
+    std::cout << "  Sample Rate: " << sampleRate << std::endl;
+    std::cout << "  Block Size: " << blockSize << " samples" << std::endl;
+    std::cout << "  Input Channels: " << device->getActiveInputChannels().toString(2) << std::endl;
+    std::cout << "  Output Channels: " << device->getActiveOutputChannels().toString(2) << std::endl;
+    std::cout << "===============================" << std::endl;
+
+}
+
+//void VSTPluginComponent::populateAudioDeviceDropdowns()
+//{
+//    // Get available devices
+//    const juce::OwnedArray<juce::AudioIODeviceType> availableDevices = audioDeviceManager->getAvailableDeviceTypes();
+//
+//    // Populate dropdowns using MainComponent dropdowns
+//    auto& inputDropdown = mainComponent.getInputDeviceDropdown();
+//    auto& outputDropdown = mainComponent.getOutputDeviceDropdown();
+//    
+//    // Clear dropdowns
+//    inputDropdown.clear();
+//    outputDropdown.clear();
+//
+//    int inputIndex = 1, outputIndex = 1;
+//
+//    for (auto* type : availableDevices)
+//    {
+//        type->scanForDevices(); // Scan for devices
+//        auto inputDevices = type->getDeviceNames(true);  // Input devices
+//        auto outputDevices = type->getDeviceNames(false); // Output devices
+//
+//        for (auto& name : inputDevices)
+//        {
+//            outputDropdown.addItem(name, inputIndex++);
+//        }
+//
+//        for (auto& name : outputDevices)
+//        {
+//            outputDropdown.addItem(name, outputIndex++);
+//        }
+//    }
+//
+//    // Set current selections
+//    auto* currentDevice = audioDeviceManager->getCurrentAudioDevice();
+//    if (currentDevice != nullptr)
+//    {
+//        outputDropdown.setSelectedItemIndex(0);  // Default to first input
+//        outputDropdown.setSelectedItemIndex(0); // Default to first output
+//    }
+//}
+//
+//void VSTPluginComponent::changeAudioDevice(bool isInput)
+//{
+//    auto selectedInput = outputDropdown.getText();
+//    auto selectedOutput = outputDropdown.getText();
+//
+//    juce::String error;
+//
+//    // Set up audio device configuration
+//    juce::AudioDeviceManager::AudioDeviceSetup setup;
+//    audioDeviceManager->getAudioDeviceSetup(setup);
+//
+//    if (isInput)
+//    {
+//        setup.inputDeviceName = selectedInput;
+//    }
+//    else
+//    {
+//        setup.outputDeviceName = selectedOutput;
+//    }
+//
+//    error = audioDeviceManager->setAudioDeviceSetup(setup, true);
+//
+//    if (!error.isEmpty())
+//    {
+//        std::cerr << "Failed to switch audio device: " << error << std::endl;
+//    }
+//    else
+//    {
+//        std::cout << "Switched to Device: " << (isInput ? selectedInput : selectedOutput).toStdString() << std::endl;
+//    }
+//
+//    // Reinitialize settings
+//    initialiseAudio();
+//}
+
+
+
 void VSTPluginComponent::scanPlugins(const String& pluginFilePath)
 {
 
@@ -488,75 +587,7 @@ void VSTPluginComponent::processStereoAudio(AudioBuffer<float>& audioBuffer, con
 
 }
 
-//void VSTPluginComponent::processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames)
-//{
-//    std::cout << "================================" << std::endl;
-//    std::cout << "Processing multichannel audio..." << std::endl;
-//
-//    if (!pluginInstance)
-//
-//    {
-//        std::cerr << "No plugin instance available for processing!" << std::endl;
-//        return;
-//    }
-//
-//    int inputChannels = audioBuffer.getNumChannels();
-//    int pluginInputChannels = pluginInstance->getTotalNumInputChannels();
-//    int pluginOutputChannels = pluginInstance->getTotalNumOutputChannels();
-//    std::cout << "Input Channels: " << inputChannels << ", Plugin Inputs: " << pluginInputChannels << ", Plugin Outputs: " << pluginOutputChannels << std::endl;
-//
-//    if (pluginInputChannels < inputChannels) {
-//        std::cerr << "Plugin cannot handle all input channels. " << pluginInputChannels << " channels." << std::endl;
-//    }
-//
-//    int channelsToProcess = std::min(audioBuffer.getNumChannels(), pluginInstance->getTotalNumInputChannels());
-//
-//    // Create an output buffer
-//    juce::AudioBuffer<float> multichannelOutputBuffer(pluginOutputChannels, audioBuffer.getNumSamples());
-//    multichannelOutputBuffer.clear();
-//
-//    // Create a MidiBuffer (no MIDI in this case)
-//    MidiBuffer midiBuffer;
-//
-//    for (int pos = 0; pos < audioBuffer.getNumSamples(); pos += blockSize)
-//    {
-//        int numSamples = std::min(blockSize, audioBuffer.getNumSamples() - pos);
-//
-//        // Process each group of channels through the plugin
-//        for (int groupStart = 0; groupStart < inputChannels; groupStart += pluginInputChannels)
-//        {
-//            int channelsToProcess = std::min(pluginInputChannels, inputChannels - groupStart);
-//
-//            // Create buffers for plugin I/O
-//            juce::AudioBuffer<float> pluginInputBuffer(pluginInputChannels, numSamples);
-//            juce::AudioBuffer<float> pluginOutputBuffer(pluginOutputChannels, numSamples);
-//            pluginInputBuffer.clear();
-//            pluginOutputBuffer.clear();
-//
-//            // Copy from input to plugin input buffer
-//            for (int ch = 0; ch < channelsToProcess; ++ch)
-//            {
-//                pluginInputBuffer.copyFrom(ch, 0, audioBuffer, groupStart + ch, pos, numSamples);
-//            }
-//
-//            // Process through the plugin
-//            pluginInstance->processBlock(pluginInputBuffer, midiBuffer);
-//
-//            // Copy plugin output back to main output buffer
-//            for (int ch = 0; ch < channelsToProcess; ++ch)
-//            {
-//                multichannelOutputBuffer.copyFrom(groupStart + ch, pos, pluginInputBuffer, ch, 0, numSamples);
-//            }
-//        }
-//    }
-//
-//    std::cout << "Multichannel processing complete." << std::endl;
-//    std::cout << "================================" << std::endl;
-//
-//    // Export the output buffer
-//    //std::cout << "Audio Exporting Started." << std::endl;
-//    exporter.exportAudioToFile(multichannelOutputBuffer, sampleRate, loadedAudioFileNames);
-//}
+
 
 void VSTPluginComponent::processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames)
 {
