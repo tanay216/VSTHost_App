@@ -338,44 +338,162 @@ void MainComponent::paint(juce::Graphics& g)
 
 }
 
-void MainComponent::resized()
-{
-    // This is called when the MainContentComponent is resized.
+//void MainComponent::resized()
+//{
+//    // This is called when the MainContentComponent is resized.
+//
+//    int buttonHeight = 30; // Custom height for buttons
+//    int buttonWidth = 200; // Custom width for buttons
+//    auto area = juce::Component::getLocalBounds().reduced(10);
+//    auto treeViewArea = area.removeFromRight(300).withHeight(300).withWidth(300);
+//
+//    audioFileTree.setBounds(treeViewArea);
+//    channelConfigDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    scanPluginButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    loadAudioButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    pluginListDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    playButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    stopButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    exportAudioButton.setBounds(area.removeFromTop(60).withWidth(buttonWidth).withX(10));
+//    refreshPluginDetailsButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(area.getWidth() - 210));
+//    ShowEditorButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    unloadPluginButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(area.getWidth() - 210));
+//    inputDeviceDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    outputDeviceDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    refreshIODevicesListButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//
+//    // audioFileListBox.setBounds(area.removeFromTop(200).withWidth(200).withX(area.getWidth() - 210)); // Position the list to the top right
+//
+//
+//    if (pluginEditor != nullptr && pluginEditor->isVisible())
+//    {
+//        // Adjust height and position as needed
+//        pluginEditor->setBounds(10, area.getY() + 30, area.getWidth(), 200);
+//
+//        pluginEditor->setBounds(0, 0, pluginEditor->getWidth(), pluginEditor->getHeight()); // Adjust bounds
+//        pluginEditorViewport->setViewedComponent(pluginEditor.get(), true); // Refresh viewport
+//    }
+//
+//
+//}
 
-    int buttonHeight = 30; // Custom height for buttons
-    int buttonWidth = 200; // Custom width for buttons
-    auto area = juce::Component::getLocalBounds().reduced(10);
-    auto treeViewArea = area.removeFromRight(300).withHeight(300).withWidth(300);
+//void MainComponent::resized()
+//{
+//    // Define the area of the main component
+//   
+//    auto area = juce::Component::getLocalBounds().reduced(10);
+//    auto treeViewArea = area.removeFromRight(300).withHeight(300).withWidth(300);
+//
+//    // Create FlexBox container
+//    juce::FlexBox flexBox;
+//    flexBox.flexDirection = juce::FlexBox::Direction::column; // Layout will be in columns (vertical stacking)
+//
+//    // Define left panel (audio file tree view)
+//    juce::FlexItem leftPanel(audioFileTree); // 300px width for the tree view
+//    leftPanel.withWidth(300).withHeight(area.getHeight());
+//    flexBox.items.add(leftPanel);
+//
+//    // Define top panel (buttons)
+//    juce::FlexItem topPanel; 
+//    topPanel.withHeight(30);
+//    flexBox.items.add(topPanel);
+//
+//    juce::FlexItem middlePanel;
+//    middlePanel.withFlex(1); // Take remaining space
+//    flexBox.items.add(middlePanel);
+//
+//    // Apply the FlexBox layout to the parent component
+//    flexBox.performLayout(juce::Component::getLocalBounds());
+//
+//    // Now we set bounds for the elements (buttons, tree view, etc.) within each section
+//    audioFileTree.setBounds(treeViewArea);
+//
+//    // Set bounds for the buttons (top panel)
+//    int buttonHeight = 30;
+//    int buttonWidth = 200;
+//    auto topPanelBounds = treeViewArea; // Get bounds for the top panel
+//    channelConfigDropdown.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    scanPluginButton.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    loadAudioButton.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    pluginListDropdown.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    playButton.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    stopButton.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+//    exportAudioButton.setBounds(topPanelBounds.removeFromTop(60).withWidth(buttonWidth).withX(10));
+//    ShowEditorButton.setBounds(topPanelBounds.removeFromTop(60).withWidth(buttonWidth).withX(10));
+//    inputDeviceDropdown.setBounds(topPanelBounds.removeFromTop(60).withWidth(buttonWidth).withX(10));
+//    outputDeviceDropdown.setBounds(topPanelBounds.removeFromTop(60).withWidth(buttonWidth).withX(10));
+//    refreshIODevicesListButton.setBounds(topPanelBounds.removeFromTop(60).withWidth(buttonWidth).withX(10));
+//
+//    // Set bounds for the plugin editor (middle panel)
+//    if (pluginEditor != nullptr && pluginEditor->isVisible())
+//    {
+//        auto middlePanelBounds = treeViewArea;
+//        pluginEditor->setBounds(middlePanelBounds.reduced(10)); // Adjust bounds for the plugin editor
+//        pluginEditorViewport->setViewedComponent(pluginEditor.get(), true); // Refresh viewport
+//    }
+//}
 
-    audioFileTree.setBounds(treeViewArea);
-    channelConfigDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-    scanPluginButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-    loadAudioButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-    pluginListDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-    playButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-    stopButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-    exportAudioButton.setBounds(area.removeFromTop(60).withWidth(buttonWidth).withX(10));
-    refreshPluginDetailsButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(area.getWidth() - 210));
-    ShowEditorButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-    unloadPluginButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(area.getWidth() - 210));
-    inputDeviceDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-    outputDeviceDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-    refreshIODevicesListButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+void MainComponent::resized() {
+    // Main FlexBox
+    juce::FlexBox flexBox;
 
-    // audioFileListBox.setBounds(area.removeFromTop(200).withWidth(200).withX(area.getWidth() - 210)); // Position the list to the top right
+    // First, set up the left column for the audio file tree (vertical stacking)
+    juce::FlexBox leftColumn;
+    leftColumn.items.add(juce::FlexItem(audioFileTree).withMinWidth(200).withFlex(0));
+
+    // Add the left column to the main flexBox
+    flexBox.items.add(juce::FlexItem(leftColumn).withFlex(0));  // Use fixed size for the left column
+
+    juce::FlexBox buttonRows;
+
+    // Add buttons to the FlexBox
+    buttonRows.items.add(juce::FlexItem(scanPluginButton).withFlex(1).withHeight(10));
+    buttonRows.items.add(juce::FlexItem(loadAudioButton).withFlex(1).withHeight(10));
+    buttonRows.items.add(juce::FlexItem(pluginListDropdown).withFlex(1).withHeight(10));
+    buttonRows.items.add(juce::FlexItem(exportAudioButton).withFlex(1).withHeight(10));
+    buttonRows.items.add(juce::FlexItem(refreshPluginDetailsButton).withFlex(1).withHeight(10));
+    buttonRows.items.add(juce::FlexItem(unloadPluginButton).withFlex(1).withHeight(10));
+    buttonRows.items.add(juce::FlexItem(ShowEditorButton).withFlex(1).withHeight(10));
+    buttonRows.items.add(juce::FlexItem(inputDeviceDropdown).withFlex(1).withHeight(10));
+    buttonRows.items.add(juce::FlexItem(outputDeviceDropdown).withFlex(1).withHeight(10));
+    // buttonRows.items.add(juce::FlexItem(button2).withFlex(1));
+     //buttonRows.items.add(juce::FlexItem(button3).withFlex(1));
+
+     // Set the FlexBox layout (for example, vertical layout)
+    buttonRows.flexDirection = juce::FlexBox::Direction::column;
+    buttonRows.performLayout(juce::Component::getLocalBounds());
 
 
-    if (pluginEditor != nullptr && pluginEditor->isVisible())
-    {
-        // Adjust height and position as needed
-        pluginEditor->setBounds(10, area.getY() + 30, area.getWidth(), 200);
+    //// Set up the top row for the buttons (horizontal stacking)
+    //juce::FlexBox buttonRow;
+    //buttonRow.items.add(juce::FlexItem(scanPluginButton).withFlex(0).withHeight(40));
+    //buttonRow.items.add(juce::FlexItem(loadAudioButton).withFlex(0).withHeight(40));
+    //buttonRow.items.add(juce::FlexItem(deleteButton).withFlex(0).withHeight(40));
+    //buttonRow.items.add(juce::FlexItem(playButton).withFlex(0).withHeight(40));
+    //buttonRow.items.add(juce::FlexItem(stopButton).withFlex(0).withHeight(40));
+    //buttonRow.items.add(juce::FlexItem(exportAudioButton).withFlex(0).withHeight(40));
+    //buttonRow.items.add(juce::FlexItem(refreshPluginDetailsButton).withFlex(0).withHeight(40));
+    //buttonRow.items.add(juce::FlexItem(unloadPluginButton).withFlex(0).withHeight(40));
+    //buttonRow.items.add(juce::FlexItem(ShowEditorButton).withFlex(0).withHeight(40));
+    //buttonRow.items.add(juce::FlexItem(refreshIODevicesListButton).withFlex(0).withHeight(40));
 
-        pluginEditor->setBounds(0, 0, pluginEditor->getWidth(), pluginEditor->getHeight()); // Adjust bounds
-        pluginEditorViewport->setViewedComponent(pluginEditor.get(), true); // Refresh viewport
+    //// Add the button row to the main flexBox with fixed height
+    //flexBox.items.add(juce::FlexItem(buttonRow).withHeight(50)); // Button row with fixed height
+
+    // Plugin Editor (middle area)
+    if (pluginEditor != nullptr) {
+        flexBox.items.add(juce::FlexItem(*pluginEditor).withFlex(1));  // Middle section takes remaining space
     }
 
-
+    // Perform the layout with the bounds of the MainComponent
+    flexBox.performLayout(juce::Component::getLocalBounds());
 }
+
+
+
+
+
+
 
 void MainComponent::buttonClicked(juce::Button* button)
 {
