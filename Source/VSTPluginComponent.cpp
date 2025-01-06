@@ -21,7 +21,14 @@ void VSTPluginComponent::initialiseAudio()
     audioDeviceManager->initialise(0, 2, nullptr, true);
     audioDeviceManager->addAudioCallback(&audioSourcePlayer);
     audioSourcePlayer.setSource(&transportSource);
-    auto* device = audioDeviceManager->getCurrentAudioDevice();
+    refereshAudioIODetails();
+   
+
+}
+
+void VSTPluginComponent::refereshAudioIODetails() 
+{
+     auto* device = audioDeviceManager->getCurrentAudioDevice();
     sampleRate = device->getCurrentSampleRate();
     blockSize = device->getCurrentBufferSizeSamples();
     std::cout << "===============================" << std::endl;
@@ -33,84 +40,7 @@ void VSTPluginComponent::initialiseAudio()
     std::cout << "  Input Channels: " << device->getActiveInputChannels().toString(2) << std::endl;
     std::cout << "  Output Channels: " << device->getActiveOutputChannels().toString(2) << std::endl;
     std::cout << "===============================" << std::endl;
-
 }
-
-//void VSTPluginComponent::populateAudioDeviceDropdowns()
-//{
-//    // Get available devices
-//    const juce::OwnedArray<juce::AudioIODeviceType> availableDevices = audioDeviceManager->getAvailableDeviceTypes();
-//
-//    // Populate dropdowns using MainComponent dropdowns
-//    auto& inputDropdown = mainComponent.getInputDeviceDropdown();
-//    auto& outputDropdown = mainComponent.getOutputDeviceDropdown();
-//    
-//    // Clear dropdowns
-//    inputDropdown.clear();
-//    outputDropdown.clear();
-//
-//    int inputIndex = 1, outputIndex = 1;
-//
-//    for (auto* type : availableDevices)
-//    {
-//        type->scanForDevices(); // Scan for devices
-//        auto inputDevices = type->getDeviceNames(true);  // Input devices
-//        auto outputDevices = type->getDeviceNames(false); // Output devices
-//
-//        for (auto& name : inputDevices)
-//        {
-//            outputDropdown.addItem(name, inputIndex++);
-//        }
-//
-//        for (auto& name : outputDevices)
-//        {
-//            outputDropdown.addItem(name, outputIndex++);
-//        }
-//    }
-//
-//    // Set current selections
-//    auto* currentDevice = audioDeviceManager->getCurrentAudioDevice();
-//    if (currentDevice != nullptr)
-//    {
-//        outputDropdown.setSelectedItemIndex(0);  // Default to first input
-//        outputDropdown.setSelectedItemIndex(0); // Default to first output
-//    }
-//}
-//
-//void VSTPluginComponent::changeAudioDevice(bool isInput)
-//{
-//    auto selectedInput = outputDropdown.getText();
-//    auto selectedOutput = outputDropdown.getText();
-//
-//    juce::String error;
-//
-//    // Set up audio device configuration
-//    juce::AudioDeviceManager::AudioDeviceSetup setup;
-//    audioDeviceManager->getAudioDeviceSetup(setup);
-//
-//    if (isInput)
-//    {
-//        setup.inputDeviceName = selectedInput;
-//    }
-//    else
-//    {
-//        setup.outputDeviceName = selectedOutput;
-//    }
-//
-//    error = audioDeviceManager->setAudioDeviceSetup(setup, true);
-//
-//    if (!error.isEmpty())
-//    {
-//        std::cerr << "Failed to switch audio device: " << error << std::endl;
-//    }
-//    else
-//    {
-//        std::cout << "Switched to Device: " << (isInput ? selectedInput : selectedOutput).toStdString() << std::endl;
-//    }
-//
-//    // Reinitialize settings
-//    initialiseAudio();
-//}
 
 
 

@@ -21,13 +21,18 @@ MainComponent::MainComponent()
     juce::Component::addAndMakeVisible(unloadPluginButton);
     juce::Component::addAndMakeVisible(ShowEditorButton);
     juce::Component::addAndMakeVisible(audioFileTree);
+    juce::Component::addAndMakeVisible(refreshIODevicesListButton);
     
     juce::Component::addAndMakeVisible(inputDeviceDropdown);
-   // inputDeviceDropdown.onChange = [this]() { changeAudioDevice(true); }; // Handle input selection
+    inputDeviceDropdown.onChange = [this]() { changeAudioDevice(true); }; // Handle input selection
 
     
     juce::Component::addAndMakeVisible(outputDeviceDropdown);
-   // outputDeviceDropdown.onChange = [this]() { changeAudioDevice(false); }; // Handle output selection
+    outputDeviceDropdown.onChange = [this]() { changeAudioDevice(false); }; // Handle output selection
+
+    // Attach as a listener for audio device changes
+   
+    populateAudioDeviceDropdowns();
 
     audioFileTree.setColour(juce::TreeView::backgroundColourId, juce::Colours::antiquewhite);
     audioFileTree.setDefaultOpenness(true);
@@ -76,6 +81,7 @@ MainComponent::MainComponent()
     refreshPluginDetailsButton.addListener(this);
     unloadPluginButton.addListener(this);
     ShowEditorButton.addListener(this);
+    refreshIODevicesListButton.addListener(this);
 
 
 
@@ -102,6 +108,152 @@ MainComponent::~MainComponent()
     // This shuts down the audio device and clears the audio source.
     //shutdownAudio();
 }
+//==============================================================================
+
+//void MainComponent::populateAudioDeviceDropdowns()
+//{
+//    std::cout << "Populating audio device dropdowns..." << std::endl;
+//    // Get available device types
+//    auto* deviceManager = vstPluginComponent.getDeviceManager();
+//    const juce::OwnedArray<juce::AudioIODeviceType>& availableDevices = deviceManager->getAvailableDeviceTypes();
+//
+//    // Clear dropdowns
+//    inputDeviceDropdown.clear();
+//    outputDeviceDropdown.clear();
+//
+//    int inputIndex = 1, outputIndex = 1;
+//
+//    for (auto* type : availableDevices)
+//    {
+//        type->scanForDevices(); // Scan for devices
+//
+//        // Input Devices
+//        auto inputDevices = type->getDeviceNames(true);
+//        for (auto& name : inputDevices)
+//        {
+//            inputDeviceDropdown.addItem(name, inputIndex++);
+//        }
+//
+//        // Output Devices
+//        auto outputDevices = type->getDeviceNames(false);
+//        for (auto& name : outputDevices)
+//        {
+//            outputDeviceDropdown.addItem(name, outputIndex++);
+//        }
+//    }
+//
+//    // Set default selections based on the current device
+//    auto* currentDevice = deviceManager->getCurrentAudioDevice();
+//    if (currentDevice != nullptr)
+//    {
+//        inputDeviceDropdown.setText(currentDevice->getName(), juce::dontSendNotification);
+//        outputDeviceDropdown.setText(currentDevice->getName(), juce::dontSendNotification);
+//    }
+//    
+//    // Force dropdown UI update
+//    inputDeviceDropdown.repaint();
+//    outputDeviceDropdown.repaint();
+//}
+
+void MainComponent::populateAudioDeviceDropdowns()
+{
+    std::cout << "Populating audio device dropdowns..." << std::endl;
+
+    // Get available device types
+    auto* deviceManager = vstPluginComponent.getDeviceManager();
+    const juce::OwnedArray<juce::AudioIODeviceType>& availableDevices = deviceManager->getAvailableDeviceTypes();
+
+    // Clear dropdowns
+    inputDeviceDropdown.clear();
+    outputDeviceDropdown.clear();
+
+    int inputIndex = 1, outputIndex = 1;
+
+    // Temporary containers for unique device names
+    juce::StringArray uniqueInputDevices;
+    juce::StringArray uniqueOutputDevices;
+
+    for (auto* type : availableDevices)
+    {
+        type->scanForDevices(); // Scan for devices
+
+        // Input Devices
+        auto inputDevices = type->getDeviceNames(true);
+        for (auto& name : inputDevices)
+        {
+            if (!uniqueInputDevices.contains(name))  // Only add unique names
+            {
+                uniqueInputDevices.add(name);
+                inputDeviceDropdown.addItem(name, inputIndex++);
+            }
+        }
+
+        // Output Devices
+        auto outputDevices = type->getDeviceNames(false);
+        for (auto& name : outputDevices)
+        {
+            if (!uniqueOutputDevices.contains(name))  // Only add unique names
+            {
+                uniqueOutputDevices.add(name);
+                outputDeviceDropdown.addItem(name, outputIndex++);
+            }
+        }
+    }
+
+    // Set default selections based on the current device
+    auto* currentDevice = deviceManager->getCurrentAudioDevice();
+    if (currentDevice != nullptr)
+    {
+        inputDeviceDropdown.setText(currentDevice->getName(), juce::dontSendNotification);
+        outputDeviceDropdown.setText(currentDevice->getName(), juce::dontSendNotification);
+    }
+
+    // Force dropdown UI update
+    inputDeviceDropdown.repaint();
+    outputDeviceDropdown.repaint();
+}
+
+
+void MainComponent::changeAudioDevice(bool isInput)
+{
+    auto selectedInput = inputDeviceDropdown.getText();
+    auto selectedOutput = outputDeviceDropdown.getText();
+
+    // Access device manager
+    auto* deviceManager = vstPluginComponent.getDeviceManager();
+
+    // Setup audio configuration
+    juce::AudioDeviceManager::AudioDeviceSetup setup;
+    deviceManager->getAudioDeviceSetup(setup);
+
+    if (isInput)
+    {
+        setup.inputDeviceName = selectedInput;
+    }
+    else
+    {
+        setup.outputDeviceName = selectedOutput;
+    }
+
+    // Apply changes
+    juce::String error = deviceManager->setAudioDeviceSetup(setup, true);
+
+    if (!error.isEmpty())
+    {
+        std::cerr << "Failed to switch audio device: " << error << std::endl;
+    }
+    else
+    {
+        std::cout << "Switched to Device: " << (isInput ? selectedInput : selectedOutput).toStdString() << std::endl;
+    }
+
+    // Reinitialize audio
+   // vstPluginComponent.initialiseAudio();
+    vstPluginComponent.refereshAudioIODetails();
+}
+
+
+
 
 //==============================================================================
 void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -168,10 +320,6 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
     }
 }
 
-
-
-
-
 void MainComponent::releaseResources()
 {
     transportSource.releaseResources();
@@ -187,6 +335,7 @@ void MainComponent::paint(juce::Graphics& g)
     g.setColour(juce::Colours::white);
     g.setFont(18.0f);
     g.drawText("VST Host GUI App", juce::Component::getLocalBounds(), juce::Justification::centredTop);
+
 }
 
 void MainComponent::resized()
@@ -209,6 +358,10 @@ void MainComponent::resized()
     refreshPluginDetailsButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(area.getWidth() - 210));
     ShowEditorButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
     unloadPluginButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(area.getWidth() - 210));
+    inputDeviceDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+    outputDeviceDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+    refreshIODevicesListButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
+
     // audioFileListBox.setBounds(area.removeFromTop(200).withWidth(200).withX(area.getWidth() - 210)); // Position the list to the top right
 
 
@@ -504,6 +657,12 @@ void MainComponent::buttonClicked(juce::Button* button)
             std::cout << "No plugin loaded." << std::endl;
         }
     }
+
+    else if (button == &refreshIODevicesListButton)
+	{
+        std::cout << "Refreshing audio device list..." << std::endl;
+        populateAudioDeviceDropdowns();
+	}
 
 
 }

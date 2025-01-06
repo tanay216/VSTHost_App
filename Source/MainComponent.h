@@ -23,6 +23,15 @@ public:
     //==============================================================================
     MainComponent();
     ~MainComponent() override;
+    //==============================================================================
+
+
+    void populateAudioDeviceDropdowns();
+    void changeAudioDevice(bool isInput);
+
+   
+
+
 
     //==============================================================================
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
@@ -55,8 +64,7 @@ public:
 
     void getAudioBuffersList();
 
-    juce::ComboBox& getInputDeviceDropdown() { return inputDeviceDropdown; }
-    juce::ComboBox& getOutputDeviceDropdown() { return outputDeviceDropdown; }
+   
 
     
 
@@ -110,6 +118,8 @@ private:
     juce::TextButton refreshPluginDetailsButton{ "Refresh Plugin Details" };
     juce::TextButton unloadPluginButton{ "X Remove Plugin" };
     juce::TextButton ShowEditorButton{ "Show Plugin UI" };
+    juce::TextButton refreshIODevicesListButton{ "Refresh IO Devices list" };
+
 
 
     juce::ComboBox pluginListDropdown;

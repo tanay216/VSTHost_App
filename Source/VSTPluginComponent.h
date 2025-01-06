@@ -55,8 +55,11 @@ public:
     VSTPluginComponent();
 
     void initialiseAudio();
-    void populateAudioDeviceDropdowns();
-    void changeAudioDevice(bool isInput);
+    void refereshAudioIODetails();
+     juce::AudioDeviceManager* getDeviceManager() const
+    {
+        return audioDeviceManager.get();
+    }
 
 
     std::unique_ptr<AudioPluginInstance> pluginInstance;
