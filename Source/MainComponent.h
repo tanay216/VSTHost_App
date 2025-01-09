@@ -5,6 +5,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "AudioFileManager.h"
 #include "VSTPluginComponent.h"
+#include "Exporter.h"
 
 //==============================================================================
 /*
@@ -80,6 +81,7 @@ private:
     VSTPluginHost pluginHost;
     AudioFileManager audioFileManager;
     VSTPluginComponent vstPluginComponent;
+    
     std::unique_ptr<juce::FileChooser> fileChooser;
     
     /* Audio & Files */
@@ -272,6 +274,137 @@ private:
     };
 };
 
+
+class ExportAudioComponent : public juce::Component,
+    public juce::Button::Listener
+{
+public:
+    void handleExportAudio(juce::Array<juce::AudioBuffer<float>>& audioBuffers,
+        const juce::StringArray& audioFileNames,
+        VSTPluginComponent& vstPluginComponent,
+        std::unordered_map<std::string, bool>& bypassStates)
+    {
+        
+        
+            if (audioFileNames.size() != audioBuffers.size())
+            {
+                std::cout << "Audio buffers do not match the number of loaded files." << std::endl;
+                return;
+            }
+
+            for (int i = 0; i < audioFileNames.size(); ++i)
+            {
+                std::string currentAudioFileName = audioFileNames[i].toStdString();
+                juce::AudioBuffer<float>& currentAudioBuffer = audioBuffers[i];
+
+                auto isBypassed = bypassStates.find(currentAudioFileName) != bypassStates.end() &&
+                    bypassStates[currentAudioFileName];
+
+                if (isBypassed)
+                {
+                    std::cout << "Skipping export for bypassed file: " << currentAudioFileName << std::endl;
+                    continue;
+                }
+
+                if (currentAudioBuffer.getNumSamples() == 0)
+                {
+                    std::cout << "Audio Buffer is empty for: " << currentAudioFileName << "." << std::endl;
+                    return;
+                }
+
+                std::cout << "Exporting: " << currentAudioFileName << std::endl;
+                vstPluginComponent.processAudioWithPlugin(currentAudioBuffer, currentAudioFileName);
+            }
+            
+        
+          
+    }
+    ExportAudioComponent()
+    {
+        // Add and configure the "Browse" button
+        addAndMakeVisible(browseButton);
+        browseButton.setButtonText("Browse");
+        browseButton.addListener(this);
+
+        // Add and configure the "Export" button
+        addAndMakeVisible(exportButton);
+        exportButton.setButtonText("Export");
+        exportButton.addListener(this);
+
+        // Add the filename label
+        addAndMakeVisible(fileNameLabel);
+        fileNameLabel.setText("Output File: Not Selected", juce::dontSendNotification);
+    }
+
+    void resized() override
+    {
+        auto bounds = getLocalBounds().reduced(10);
+        fileNameLabel.setBounds(bounds.removeFromTop(30));
+        browseButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
+        exportButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
+    }
+
+    void buttonClicked(juce::Button* button) override
+    {
+        
+
+        if (button == &browseButton)
+        {
+            // Open a file chooser for selecting a directory
+            fileChooser = std::make_unique<juce::FileChooser>(
+                "Choose an output directory", juce::File(), "*");
+
+            fileChooser->launchAsync(juce::FileBrowserComponent::canSelectDirectories,
+                [this](const juce::FileChooser& chooser)
+                {
+                    auto selectedDirectory = chooser.getResult();
+                    if (selectedDirectory.exists() && selectedDirectory.isDirectory())
+                    {
+                        // Set the output directory path
+                        exporter.outputDirPath = selectedDirectory.getFullPathName().toStdString();
+                        fileNameLabel.setText("Output Directory: " + selectedDirectory.getFullPathName(),
+                            juce::dontSendNotification);
+
+                        // Output the directory path for verification
+                        std::cout << "Output directory set to: " << exporter.outputDirPath << std::endl;
+                    }
+                });
+        }
+
+        else if (button == &exportButton)
+        {
+            if (outputFile.existsAsFile() || !outputFile.getFullPathName().isEmpty())
+            {
+               // handleExportAudio();
+                // Perform export logic here
+                juce::AlertWindow::showMessageBoxAsync(
+                    juce::AlertWindow::InfoIcon, "Export", "Audio exported successfully!");
+
+            }
+            else
+            {
+                juce::AlertWindow::showMessageBoxAsync(
+                    juce::AlertWindow::WarningIcon, "Export", "Please select a valid output file.");
+            }
+            
+
+           
+        }
+    
+
+        
+    }
+
+private:
+    juce::TextButton browseButton{ "Browse" };
+    juce::TextButton exportButton{ "Export" };
+    juce::Label fileNameLabel;
+    std::unique_ptr<juce::FileChooser> fileChooser;
+    juce::File outputFile;
+    Exporter exporter;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ExportAudioComponent)
+};
 
 
 

@@ -15,11 +15,13 @@ public:
     void exportStereoAudio(const AudioBuffer<float>& buffer, double sampleRate);
     void exportMultiChannelAudio(const AudioBuffer<float>& buffer, double sampleRate);
 
+    std::string outputDirPath = "C:\\ProcessedAudio";
+
 private:
 
     std::string extension;
     std::string outputFileName;
-    std::string outputDirPath = "C:\\ProcessedAudio";
+    
     //static const std::string outputDirPath ; // Output Directory Path
     WavAudioFormat wavFormat;
     //VSTPluginComponent vstPluginComponent;

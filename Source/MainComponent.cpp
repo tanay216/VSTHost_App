@@ -338,6 +338,10 @@ void MainComponent::paint(juce::Graphics& g)
 
 }
 
+
+
+/* Original code*/
+
 //void MainComponent::resized()
 //{
 //    // This is called when the MainContentComponent is resized.
@@ -377,117 +381,62 @@ void MainComponent::paint(juce::Graphics& g)
 //
 //}
 
-//void MainComponent::resized()
-//{
-//    // Define the area of the main component
-//   
-//    auto area = juce::Component::getLocalBounds().reduced(10);
-//    auto treeViewArea = area.removeFromRight(300).withHeight(300).withWidth(300);
-//
-//    // Create FlexBox container
-//    juce::FlexBox flexBox;
-//    flexBox.flexDirection = juce::FlexBox::Direction::column; // Layout will be in columns (vertical stacking)
-//
-//    // Define left panel (audio file tree view)
-//    juce::FlexItem leftPanel(audioFileTree); // 300px width for the tree view
-//    leftPanel.withWidth(300).withHeight(area.getHeight());
-//    flexBox.items.add(leftPanel);
-//
-//    // Define top panel (buttons)
-//    juce::FlexItem topPanel; 
-//    topPanel.withHeight(30);
-//    flexBox.items.add(topPanel);
-//
-//    juce::FlexItem middlePanel;
-//    middlePanel.withFlex(1); // Take remaining space
-//    flexBox.items.add(middlePanel);
-//
-//    // Apply the FlexBox layout to the parent component
-//    flexBox.performLayout(juce::Component::getLocalBounds());
-//
-//    // Now we set bounds for the elements (buttons, tree view, etc.) within each section
-//    audioFileTree.setBounds(treeViewArea);
-//
-//    // Set bounds for the buttons (top panel)
-//    int buttonHeight = 30;
-//    int buttonWidth = 200;
-//    auto topPanelBounds = treeViewArea; // Get bounds for the top panel
-//    channelConfigDropdown.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    scanPluginButton.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    loadAudioButton.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    pluginListDropdown.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    playButton.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    stopButton.setBounds(topPanelBounds.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    exportAudioButton.setBounds(topPanelBounds.removeFromTop(60).withWidth(buttonWidth).withX(10));
-//    ShowEditorButton.setBounds(topPanelBounds.removeFromTop(60).withWidth(buttonWidth).withX(10));
-//    inputDeviceDropdown.setBounds(topPanelBounds.removeFromTop(60).withWidth(buttonWidth).withX(10));
-//    outputDeviceDropdown.setBounds(topPanelBounds.removeFromTop(60).withWidth(buttonWidth).withX(10));
-//    refreshIODevicesListButton.setBounds(topPanelBounds.removeFromTop(60).withWidth(buttonWidth).withX(10));
-//
-//    // Set bounds for the plugin editor (middle panel)
-//    if (pluginEditor != nullptr && pluginEditor->isVisible())
-//    {
-//        auto middlePanelBounds = treeViewArea;
-//        pluginEditor->setBounds(middlePanelBounds.reduced(10)); // Adjust bounds for the plugin editor
-//        pluginEditorViewport->setViewedComponent(pluginEditor.get(), true); // Refresh viewport
-//    }
-//}
+/* new code*/
 
-void MainComponent::resized() {
-    // Main FlexBox
-    juce::FlexBox flexBox;
 
-    // First, set up the left column for the audio file tree (vertical stacking)
+void MainComponent::resized()
+{
+    // Main FlexBox for the entire layout
+    juce::FlexBox mainFlexBox;
+    mainFlexBox.flexDirection = juce::FlexBox::Direction::row; // Left-to-right layout
+
+    // Left column: Audio file tree
     juce::FlexBox leftColumn;
     leftColumn.items.add(juce::FlexItem(audioFileTree).withMinWidth(200).withFlex(0));
+    mainFlexBox.items.add(juce::FlexItem(leftColumn).withMinWidth(200).withFlex(0));
 
-    // Add the left column to the main flexBox
-    flexBox.items.add(juce::FlexItem(leftColumn).withFlex(0));  // Use fixed size for the left column
+    // Middle column: Buttons and plugin UI
+    juce::FlexBox middleColumn;
+    middleColumn.flexDirection = juce::FlexBox::Direction::column; // Top-to-bottom layout
 
-    juce::FlexBox buttonRows;
+    // Button row (Top section of the middle column)
+    juce::FlexBox buttonRow;
+    buttonRow.flexDirection = juce::FlexBox::Direction::row; // Horizontal button layout
+    buttonRow.flexWrap = juce::FlexBox::Wrap::wrap;        // No wrapping
 
-    // Add buttons to the FlexBox
-    buttonRows.items.add(juce::FlexItem(scanPluginButton).withFlex(1).withHeight(10));
-    buttonRows.items.add(juce::FlexItem(loadAudioButton).withFlex(1).withHeight(10));
-    buttonRows.items.add(juce::FlexItem(pluginListDropdown).withFlex(1).withHeight(10));
-    buttonRows.items.add(juce::FlexItem(exportAudioButton).withFlex(1).withHeight(10));
-    buttonRows.items.add(juce::FlexItem(refreshPluginDetailsButton).withFlex(1).withHeight(10));
-    buttonRows.items.add(juce::FlexItem(unloadPluginButton).withFlex(1).withHeight(10));
-    buttonRows.items.add(juce::FlexItem(ShowEditorButton).withFlex(1).withHeight(10));
-    buttonRows.items.add(juce::FlexItem(inputDeviceDropdown).withFlex(1).withHeight(10));
-    buttonRows.items.add(juce::FlexItem(outputDeviceDropdown).withFlex(1).withHeight(10));
-    // buttonRows.items.add(juce::FlexItem(button2).withFlex(1));
-     //buttonRows.items.add(juce::FlexItem(button3).withFlex(1));
+    // Add buttons to the buttonRow with fixed sizes
+    buttonRow.items.add(juce::FlexItem(scanPluginButton).withFlex(1).withWidth(120).withHeight(40));
+    buttonRow.items.add(juce::FlexItem(loadAudioButton).withFlex(1).withWidth(120).withHeight(40));
+    buttonRow.items.add(juce::FlexItem(pluginListDropdown).withFlex(1).withWidth(120).withHeight(40));
+    buttonRow.items.add(juce::FlexItem(exportAudioButton).withFlex(1).withWidth(120).withHeight(40));
+    buttonRow.items.add(juce::FlexItem(refreshPluginDetailsButton).withFlex(1).withWidth(120).withHeight(40));
+    buttonRow.items.add(juce::FlexItem(unloadPluginButton).withFlex(1).withWidth(120).withHeight(40));
+    buttonRow.items.add(juce::FlexItem(ShowEditorButton).withFlex(1).withWidth(120).withHeight(40));
+    buttonRow.items.add(juce::FlexItem(inputDeviceDropdown).withFlex(1).withWidth(120).withHeight(40));
+    buttonRow.items.add(juce::FlexItem(outputDeviceDropdown).withFlex(1).withWidth(120).withHeight(40));
+    buttonRow.items.add(juce::FlexItem(refreshIODevicesListButton).withFlex(1).withWidth(120).withHeight(40));
 
-     // Set the FlexBox layout (for example, vertical layout)
-    buttonRows.flexDirection = juce::FlexBox::Direction::column;
-    buttonRows.performLayout(juce::Component::getLocalBounds());
+    // Add the buttonRow to the middleColumn
+    middleColumn.items.add(juce::FlexItem(buttonRow).withFlex(0)); // Fixed height for buttons
 
-
-    //// Set up the top row for the buttons (horizontal stacking)
-    //juce::FlexBox buttonRow;
-    //buttonRow.items.add(juce::FlexItem(scanPluginButton).withFlex(0).withHeight(40));
-    //buttonRow.items.add(juce::FlexItem(loadAudioButton).withFlex(0).withHeight(40));
-    //buttonRow.items.add(juce::FlexItem(deleteButton).withFlex(0).withHeight(40));
-    //buttonRow.items.add(juce::FlexItem(playButton).withFlex(0).withHeight(40));
-    //buttonRow.items.add(juce::FlexItem(stopButton).withFlex(0).withHeight(40));
-    //buttonRow.items.add(juce::FlexItem(exportAudioButton).withFlex(0).withHeight(40));
-    //buttonRow.items.add(juce::FlexItem(refreshPluginDetailsButton).withFlex(0).withHeight(40));
-    //buttonRow.items.add(juce::FlexItem(unloadPluginButton).withFlex(0).withHeight(40));
-    //buttonRow.items.add(juce::FlexItem(ShowEditorButton).withFlex(0).withHeight(40));
-    //buttonRow.items.add(juce::FlexItem(refreshIODevicesListButton).withFlex(0).withHeight(40));
-
-    //// Add the button row to the main flexBox with fixed height
-    //flexBox.items.add(juce::FlexItem(buttonRow).withHeight(50)); // Button row with fixed height
-
-    // Plugin Editor (middle area)
-    if (pluginEditor != nullptr) {
-        flexBox.items.add(juce::FlexItem(*pluginEditor).withFlex(1));  // Middle section takes remaining space
+    // Plugin Editor (takes up the remaining space)
+    if (pluginEditor != nullptr)
+    {
+        middleColumn.items.add(juce::FlexItem(*pluginEditor).withFlex(1)); // Plugin UI expands to fill
     }
 
-    // Perform the layout with the bounds of the MainComponent
-    flexBox.performLayout(juce::Component::getLocalBounds());
+    // Add the middleColumn to the mainFlexBox
+    mainFlexBox.items.add(juce::FlexItem(middleColumn).withFlex(1)); // Middle column takes up remaining space
+
+    // Perform the layout
+    mainFlexBox.performLayout(juce::Component::getLocalBounds());
 }
+
+
+
+
+
+
 
 
 
@@ -671,56 +620,73 @@ void MainComponent::buttonClicked(juce::Button* button)
     {
         //transportSource.stop();
     }
+    //else if (button == &exportAudioButton)
+    //{
+    //    if (readerSource != nullptr)
+    //    {
+    //        if (audioFileNames.size() != audioBuffers.size())
+    //        {
+    //            std::cout << "Audio buffers do not match the number of loaded files." << std::endl;
+    //            return;
+    //        }
+
+    //        // Iterate through all the loaded audio files
+    //        for (int i = 0; i < audioFileNames.size(); ++i)
+    //        {
+
+    //            // std::cout << "Main Audio buffer size: " << audioBuffer.getNumSamples() << std::endl;
+    //            // std::cout << "Main Audio buffer Channels: " << audioBuffer.getNumChannels() << std::endl               
+
+    //            std::cout << "Exporting audio file..." << std::endl;
+    //            std::string currentAudioFileName = audioFileNames[i].toStdString();
+    //            juce::AudioBuffer<float>& currentAudioBuffer = audioBuffers[i];
+
+    //            auto isBypassed = bypassStates.find(currentAudioFileName) != bypassStates.end() && bypassStates[currentAudioFileName];
+
+    //            if (isBypassed)
+    //            {
+    //                // Skip processing and log bypassed files
+    //                std::cout << "Skipping export for bypassed file: " << currentAudioFileName << std::endl;
+    //                continue; // Skip this file and move to the next one
+    //            }
+
+
+
+    //            if (currentAudioBuffer.getNumSamples() == 0)
+    //            {
+    //                std::cout << "Audio Buffer is empty for: " << currentAudioFileName << "." << std::endl;
+    //                return;
+    //            }
+
+    //            std::cout << "Exporting: " << currentAudioFileName << std::endl;
+
+    //            // Process each audio file
+    //            vstPluginComponent.processAudioWithPlugin(currentAudioBuffer, currentAudioFileName);
+    //        }
+
+    //    }
+    //    else
+    //    {
+    //        std::cout << "readerSource is empty." << std::endl;
+    //    }
+    //}
+
     else if (button == &exportAudioButton)
     {
-        if (readerSource != nullptr)
-        {
-            if (audioFileNames.size() != audioBuffers.size())
-            {
-                std::cout << "Audio buffers do not match the number of loaded files." << std::endl;
-                return;
-            }
+        juce::DialogWindow::LaunchOptions options;
 
-            // Iterate through all the loaded audio files
-            for (int i = 0; i < audioFileNames.size(); ++i)
-            {
-
-                // std::cout << "Main Audio buffer size: " << audioBuffer.getNumSamples() << std::endl;
-                // std::cout << "Main Audio buffer Channels: " << audioBuffer.getNumChannels() << std::endl               
-
-                std::cout << "Exporting audio file..." << std::endl;
-                std::string currentAudioFileName = audioFileNames[i].toStdString();
-                juce::AudioBuffer<float>& currentAudioBuffer = audioBuffers[i];
-
-                auto isBypassed = bypassStates.find(currentAudioFileName) != bypassStates.end() && bypassStates[currentAudioFileName];
-
-                if (isBypassed)
-                {
-                    // Skip processing and log bypassed files
-                    std::cout << "Skipping export for bypassed file: " << currentAudioFileName << std::endl;
-                    continue; // Skip this file and move to the next one
-                }
-
-
-
-                if (currentAudioBuffer.getNumSamples() == 0)
-                {
-                    std::cout << "Audio Buffer is empty for: " << currentAudioFileName << "." << std::endl;
-                    return;
-                }
-
-                std::cout << "Exporting: " << currentAudioFileName << std::endl;
-
-                // Process each audio file
-                vstPluginComponent.processAudioWithPlugin(currentAudioBuffer, currentAudioFileName);
-            }
+        // Create and show the ExportAudioComponent
+        auto exportAudioComponent = std::make_unique<ExportAudioComponent>();
+        options.content.setOwned(exportAudioComponent.release());
+        options.dialogTitle = "Export Processed Audio";
+        options.dialogBackgroundColour = juce::Colours::white;
+        options.resizable = false;
+        options.useNativeTitleBar = true;
+        options.launchAsync();
+        
+       
 
         }
-        else
-        {
-            std::cout << "readerSource is empty." << std::endl;
-        }
-    }
     else if (button == &refreshPluginDetailsButton)
     {
         int selectedIndex = pluginListDropdown.getSelectedId() - 1; // Adjust for 1-based indexing
@@ -784,6 +750,8 @@ void MainComponent::buttonClicked(juce::Button* button)
 
 
 }
+
+
 
 void MainComponent::getAudioBuffersList() {
 
