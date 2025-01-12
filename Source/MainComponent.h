@@ -81,7 +81,7 @@ private:
     VSTPluginHost pluginHost;
     AudioFileManager audioFileManager;
     VSTPluginComponent vstPluginComponent;
-    
+   
     std::unique_ptr<juce::FileChooser> fileChooser;
     
     /* Audio & Files */
@@ -279,7 +279,7 @@ class ExportAudioComponent : public juce::Component,
     public juce::Button::Listener
 {
 public:
-    void handleExportAudio(juce::Array<juce::AudioBuffer<float>>& audioBuffers,
+    /*void handleExportAudio(juce::Array<juce::AudioBuffer<float>>& audioBuffers,
         const juce::StringArray& audioFileNames,
         VSTPluginComponent& vstPluginComponent,
         std::unordered_map<std::string, bool>& bypassStates)
@@ -318,8 +318,14 @@ public:
             
         
           
-    }
-    ExportAudioComponent()
+    }*/
+    ExportAudioComponent(juce::Array<juce::AudioBuffer<float>>& audioBuffers,
+        juce::StringArray& audioFileNames,
+        VSTPluginComponent& vstPluginComponent, 
+        std::unordered_map<std::string, bool>& bypassStates) : audioBuffers(audioBuffers),
+        audioFileNames(audioFileNames),
+        bypassStates(bypassStates),
+        vstPluginComponent(vstPluginComponent)
     {
         // Add and configure the "Browse" button
         addAndMakeVisible(browseButton);
@@ -336,6 +342,42 @@ public:
         fileNameLabel.setText("Output File: Not Selected", juce::dontSendNotification);
     }
 
+    void handleExportAudio()
+    {
+        if (audioFileNames.size() != audioBuffers.size())
+        {
+            std::cout << "Audio buffers do not match the number of loaded files." << std::endl;
+            return;
+        }
+
+        for (int i = 0; i < audioFileNames.size(); ++i)
+        {
+            std::string currentAudioFileName = audioFileNames[i].toStdString();
+            juce::AudioBuffer<float>& currentAudioBuffer = audioBuffers[i];
+
+            auto isBypassed = bypassStates.find(currentAudioFileName) != bypassStates.end() &&
+                bypassStates[currentAudioFileName];
+
+            if (isBypassed)
+            {
+                std::cout << "Skipping export for bypassed file: " << currentAudioFileName << std::endl;
+                continue;
+            }
+
+            if (currentAudioBuffer.getNumSamples() == 0)
+            {
+                std::cout << "Audio Buffer is empty for: " << currentAudioFileName << "." << std::endl;
+                return;
+            }
+
+            std::cout << "Exporting: " << currentAudioFileName << std::endl;
+            vstPluginComponent.processAudioWithPlugin(currentAudioBuffer, currentAudioFileName);
+        }
+
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::AlertWindow::InfoIcon, "Export", "Audio exported successfully!");
+    }
+
     void resized() override
     {
         auto bounds = getLocalBounds().reduced(10);
@@ -347,7 +389,6 @@ public:
     void buttonClicked(juce::Button* button) override
     {
         
-
         if (button == &browseButton)
         {
             // Open a file chooser for selecting a directory
@@ -373,25 +414,23 @@ public:
 
         else if (button == &exportButton)
         {
-            if (outputFile.existsAsFile() || !outputFile.getFullPathName().isEmpty())
+            if ( !audioBuffers.isEmpty())
+
             {
-               // handleExportAudio();
+                handleExportAudio();
                 // Perform export logic here
                 juce::AlertWindow::showMessageBoxAsync(
                     juce::AlertWindow::InfoIcon, "Export", "Audio exported successfully!");
-
             }
             else
             {
                 juce::AlertWindow::showMessageBoxAsync(
                     juce::AlertWindow::WarningIcon, "Export", "Please select a valid output file.");
             }
+          
             
-
            
         }
-    
-
         
     }
 
@@ -402,6 +441,11 @@ private:
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::File outputFile;
     Exporter exporter;
+
+    juce::Array<juce::AudioBuffer<float>>& audioBuffers;
+    const juce::StringArray& audioFileNames;
+    std::unordered_map<std::string, bool>& bypassStates;
+    VSTPluginComponent& vstPluginComponent;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ExportAudioComponent)
 };
