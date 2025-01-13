@@ -678,7 +678,7 @@ void MainComponent::buttonClicked(juce::Button* button)
         // Create and show the ExportAudioComponent
        // auto exportAudioComponent = std::make_unique<ExportAudioComponent>(*this);
         auto exportAudioComponent = std::make_unique<ExportAudioComponent>(
-            audioBuffers, audioFileNames, vstPluginComponent, bypassStates);
+            audioBuffers, audioFileNames, vstPluginComponent, bypassStates, exporterComponent);
         options.content.setOwned(exportAudioComponent.release());
         options.dialogTitle = "Export Processed Audio";
         options.dialogBackgroundColour = juce::Colours::white;

@@ -9,8 +9,12 @@ using namespace juce;
 
 class Exporter {
 public:
+
+    Exporter();
+    ~Exporter();
     void exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName);
-    void exportFileName(const std::string& originalFileName);
+    void exportFileName(const std::string& originalFileName, std::string& suffix);
+    void batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, std::string& suffix);
     void exportMonoAudio(const AudioBuffer<float>& buffer, double sampleRate);
     void exportStereoAudio(const AudioBuffer<float>& buffer, double sampleRate);
     void exportMultiChannelAudio(const AudioBuffer<float>& buffer, double sampleRate);
@@ -21,6 +25,7 @@ private:
 
     std::string extension;
     std::string outputFileName;
+    std::string addSuffix;
     
     //static const std::string outputDirPath ; // Output Directory Path
     WavAudioFormat wavFormat;

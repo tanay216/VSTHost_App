@@ -2,22 +2,48 @@
 #include "Exporter.h"
 
 
-
-
-void Exporter::exportFileName(const std::string& originalFileName) {
-    
-    File audioFile(originalFileName); // Assume originalFileName is the full path or name with extension
-    extension = audioFile.getFileExtension().toStdString();
-    outputFileName = audioFile.getFileNameWithoutExtension().toStdString() + "_processed" + extension; // Add the suffix and extension
-    std::cout << "Output File Name in exportFileName function: " << outputFileName << std::endl;
+Exporter::Exporter() {
+	Exporter::addSuffix = "_";
 }
+Exporter::~Exporter() {
+	
+}
+
+
+//void Exporter::exportFileName(const std::string& originalFileName) {
+//    
+//    File audioFile(originalFileName); // Assume originalFileName is the full path or name with extension
+//    extension = audioFile.getFileExtension().toStdString();
+//    outputFileName = audioFile.getFileNameWithoutExtension().toStdString() + "_processed" + extension; // Add the suffix and extension
+//    std::cout << "Output File Name in exportFileName function: " << outputFileName << std::endl;
+//}
+
+void Exporter::exportFileName(const std::string& originalFileName, std::string& suffix)
+{
+    File audioFile(originalFileName);
+    addSuffix = suffix;
+    extension = audioFile.getFileExtension().toStdString();
+    outputFileName = audioFile.getFileNameWithoutExtension().toStdString() + suffix + extension;
+    std::cout << "Renamed: " << originalFileName << " -> " << outputFileName << std::endl;
+}
+
+void Exporter::batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, std::string& suffix)
+{
+    for (const auto& originalFileName : inputFileNames)
+    {
+        exportFileName(originalFileName.toStdString(), suffix); // Call the updated exportFileName
+        renamedFileNames.add(outputFileName); // Store the renamed file name
+    }
+}
+
+
 
 void Exporter::exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName)
 {
     std::cout << "Exporting processed audio to file..." << std::endl;
     //std::cout << "buffer channels: "<< buffer.getNumChannels() << "" << std::endl;
 
-    exportFileName(originalFileName);
+    exportFileName(originalFileName, addSuffix);
 
     // Access the mono and stereo buffers from VSTPluginHost
     //VSTPluginComponent vstPluginComponent;

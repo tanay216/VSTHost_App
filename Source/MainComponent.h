@@ -81,6 +81,7 @@ private:
     VSTPluginHost pluginHost;
     AudioFileManager audioFileManager;
     VSTPluginComponent vstPluginComponent;
+    Exporter exporterComponent;
    
     std::unique_ptr<juce::FileChooser> fileChooser;
     
@@ -322,10 +323,11 @@ public:
     ExportAudioComponent(juce::Array<juce::AudioBuffer<float>>& audioBuffers,
         juce::StringArray& audioFileNames,
         VSTPluginComponent& vstPluginComponent, 
-        std::unordered_map<std::string, bool>& bypassStates) : audioBuffers(audioBuffers),
+        std::unordered_map<std::string, bool>& bypassStates, Exporter& exporter) : audioBuffers(audioBuffers),
         audioFileNames(audioFileNames),
         bypassStates(bypassStates),
-        vstPluginComponent(vstPluginComponent)
+        vstPluginComponent(vstPluginComponent), 
+        exporter(exporter)
     {
         // Add and configure the "Browse" button
         addAndMakeVisible(browseButton);
@@ -336,6 +338,19 @@ public:
         addAndMakeVisible(exportButton);
         exportButton.setButtonText("Export");
         exportButton.addListener(this);
+        
+        // Add and configure the "Rename" button
+        addAndMakeVisible(renameButton);
+        renameButton.setButtonText("Rename");
+        renameButton.addListener(this);
+        
+        // Add label for renaming input
+        addAndMakeVisible(renamePatternLabel);
+        renamePatternLabel.setText("Rename Pattern:", juce::dontSendNotification);
+
+        // Add text editor for renaming input
+        addAndMakeVisible(renamePatternInput);
+        renamePatternInput.setText("_processed");
 
         // Add the filename label
         addAndMakeVisible(fileNameLabel);
@@ -382,6 +397,9 @@ public:
     {
         auto bounds = getLocalBounds().reduced(10);
         fileNameLabel.setBounds(bounds.removeFromTop(30));
+       // renamePatternLabel.setBounds(bounds.removeFromTop(30));
+        renamePatternInput.setBounds(bounds.removeFromTop(30));
+        renameButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
         browseButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
         exportButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
     }
@@ -431,19 +449,38 @@ public:
             
            
         }
+
+        else if (button == &renameButton)
+        {
+          //  performBatchRename(renamePatternInput.getText());
+        }
         
     }
+
+    void performBatchRename(const juce::String& pattern)
+    {
+        juce::StringArray renamedFileNames; // To hold the renamed file names
+        exporter.batchRename(audioFileNames, renamedFileNames, pattern.toStdString());
+
+        // Replace the original file names with renamed ones
+        audioFileNames = renamedFileNames;
+    }
+
+
 
 private:
     juce::TextButton browseButton{ "Browse" };
     juce::TextButton exportButton{ "Export" };
     juce::Label fileNameLabel;
+    juce::TextButton renameButton{ "Rename" };
+    juce::Label renamePatternLabel;
+    juce::TextEditor renamePatternInput;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::File outputFile;
-    Exporter exporter;
+    Exporter& exporter;
 
     juce::Array<juce::AudioBuffer<float>>& audioBuffers;
-    const juce::StringArray& audioFileNames;
+    juce::StringArray& audioFileNames;
     std::unordered_map<std::string, bool>& bypassStates;
     VSTPluginComponent& vstPluginComponent;
 
