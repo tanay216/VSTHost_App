@@ -452,7 +452,7 @@ public:
 
         else if (button == &renameButton)
         {
-          //  performBatchRename(renamePatternInput.getText());
+          performBatchRename(renamePatternInput.getText());
         }
         
     }

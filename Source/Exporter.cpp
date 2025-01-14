@@ -3,7 +3,7 @@
 
 
 Exporter::Exporter() {
-	Exporter::addSuffix = "_";
+	Exporter::addSuffix = "";
 }
 Exporter::~Exporter() {
 	
