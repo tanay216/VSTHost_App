@@ -359,7 +359,7 @@ void VSTPluginComponent::debugBusAndChannelInfo(AudioProcessor* pluginInstance)
     std::cout << "=====================" << std::endl;
 }
 
-void VSTPluginComponent::processAudioWithPlugin(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames) {
+void VSTPluginComponent::processAudioWithPlugin(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex) {
     std::cout << "Processing:" << std::endl;
     if (!selectedPlugin || !pluginInstance)
     {
@@ -385,20 +385,20 @@ void VSTPluginComponent::processAudioWithPlugin(AudioBuffer<float>& audioBuffer,
     if (audioBuffer.getNumChannels() == 1)
     {
         isMono = true;
-        processMonoAudio(audioBuffer, loadedAudioFileNames); // Function to handle mono audio processing
+        processMonoAudio(audioBuffer, loadedAudioFileNames, insert, insertIndex); // Function to handle mono audio processing
     }
     else if (audioBuffer.getNumChannels() == 2)
     {
         isMono = false;
-        processStereoAudio(audioBuffer, loadedAudioFileNames); // Function to handle stereo audio processing
+        processStereoAudio(audioBuffer, loadedAudioFileNames, insert, insertIndex); // Function to handle stereo audio processing
     }
     else if (audioBuffer.getNumChannels() > 2)
     {
-        processMultiChannelAudio(audioBuffer, loadedAudioFileNames);
+        processMultiChannelAudio(audioBuffer, loadedAudioFileNames, insert, insertIndex);
     }
 }
 
-void VSTPluginComponent::processMonoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames)
+void VSTPluginComponent::processMonoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert,int insertIndex)
 {
     std::cout << "Processing mono audio..." << std::endl;
     AudioFileManager audioFileManager;
@@ -462,11 +462,11 @@ void VSTPluginComponent::processMonoAudio(AudioBuffer<float>& audioBuffer, const
     std::cout << "Mono processing complete." << std::endl;
     // Export the output buffer
     std::cout << "Audio Exporting Started." << std::endl;
-    exporter.exportAudioToFile(monoOutputBuffer, sampleRate, loadedAudioFileNames);
+    exporter.exportAudioToFile(monoOutputBuffer, sampleRate, loadedAudioFileNames, insert, insertIndex);
    
 }
 
-void VSTPluginComponent::processStereoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames)
+void VSTPluginComponent::processStereoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert,int insertIndex)
 {
     std::cout << "Processing stereo audio..." << std::endl;
     AudioFileManager audioFileManager;
@@ -513,13 +513,13 @@ void VSTPluginComponent::processStereoAudio(AudioBuffer<float>& audioBuffer, con
     std::cout << "Stereo processing complete." << std::endl;
     // Export the output buffer
     std::cout << "Audio Exporting Started." << std::endl;
-    exporter.exportAudioToFile(stereoOutputBuffer, sampleRate, loadedAudioFileNames);
+    exporter.exportAudioToFile(stereoOutputBuffer, sampleRate, loadedAudioFileNames, insert, insertIndex);
 
 }
 
 
 
-void VSTPluginComponent::processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames)
+void VSTPluginComponent::processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex)
 {
     std::cerr << "================================" << std::endl;
     if (!pluginInstance)
@@ -615,7 +615,7 @@ void VSTPluginComponent::processMultiChannelAudio(AudioBuffer<float>& audioBuffe
     }
 
     // Export the processed audio
-    exporter.exportAudioToFile(multioutputBuffer, sampleRate, loadedAudioFileNames);
+    exporter.exportAudioToFile(multioutputBuffer, sampleRate, loadedAudioFileNames, insert, insertIndex);
 }
 
 

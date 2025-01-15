@@ -12,9 +12,9 @@ public:
 
     Exporter();
     ~Exporter();
-    void exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName);
-    void exportFileName(const std::string& originalFileName, const std::string& prefix, const std::string& suffix);
-    void batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& suffix);
+    void exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName, const std::string& insert, int insertIndex);
+    void exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix);
+    void batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix);
     void resetOriginalNames(const juce::StringArray& inputFileNames); // Resets the mapping to the original names
     void updateRenamedFileNames(const juce::StringArray& renamedFileNames);
 
@@ -28,7 +28,7 @@ public:
 private:
 
     std::string extension;
-    std::string outputFileName;
+    juce::String outputFileName;
     std::string addSuffix;
     std::string addPrefix;
     juce::StringArray newRenamedFileNames;

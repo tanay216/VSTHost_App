@@ -9,18 +9,57 @@ Exporter::Exporter() {
 Exporter::~Exporter() {}
 
 
-//void Exporter::exportFileName(const std::string& originalFileName, std::string& suffix)
+//void Exporter::exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& suffix)
 //{
-//    File audioFile(originalFileName);
-//    addSuffix = suffix;
+//    // Retrieve the original name
+//    std::string baseName = currentFileName;
+//
+//    auto it = originalFileNameMap.find(currentFileName);
+//    if (it != originalFileNameMap.end())
+//    {
+//        baseName = it->second; // Start from the original name
+//    }
+//
+//    // Perform renaming
+//    File audioFile(baseName);
 //    extension = audioFile.getFileExtension().toStdString();
-//    outputFileName = audioFile.getFileNameWithoutExtension().toStdString() + suffix + extension;
-//    std::cout << "Renamed: " << originalFileName << " -> " << outputFileName << std::endl;
+//    outputFileName = prefix + audioFile.getFileNameWithoutExtension().toStdString() + suffix + extension;
+//
+//    std::cout << "Renamed: " << baseName << " -> " << outputFileName << std::endl;
 //}
 
-void Exporter::exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& suffix)
+//void Exporter::exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix)
+//{
+//    // Retrieve the original name
+//    std::string baseName = currentFileName;
+//    
+//    std::cout << "Final export file name: " << baseName << std::endl;
+//
+//    auto it = originalFileNameMap.find(currentFileName);
+//    if (it != originalFileNameMap.end())
+//    {
+//        baseName = it->second; // Start from the original name
+//    }
+//
+//    // Perform renaming
+//    File audioFile(baseName);
+//    std::string nameWithoutExtension = audioFile.getFileNameWithoutExtension().toStdString();
+//    extension = audioFile.getFileExtension().toStdString();
+//
+//    // Insert at the specified index
+//    if (insertIndex >= 0 && insertIndex <= static_cast<int>(nameWithoutExtension.size()))
+//    {
+//        nameWithoutExtension.insert(insertIndex, insert);
+//    }
+//
+//    // Combine prefix, modified name, and suffix
+//    outputFileName = prefix + nameWithoutExtension + suffix + extension;
+//
+//    std::cout << "Renamed: " << baseName << " -> " << outputFileName << std::endl;
+//}
+
+void Exporter::exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix)
 {
-    // Retrieve the original name
     std::string baseName = currentFileName;
 
     auto it = originalFileNameMap.find(currentFileName);
@@ -29,25 +68,48 @@ void Exporter::exportFileName(const std::string& currentFileName, const std::str
         baseName = it->second; // Start from the original name
     }
 
-    // Perform renaming
     File audioFile(baseName);
+    std::string nameWithoutExtension = audioFile.getFileNameWithoutExtension().toStdString();
     extension = audioFile.getFileExtension().toStdString();
-    outputFileName = prefix + audioFile.getFileNameWithoutExtension().toStdString() + suffix + extension;
+
+    // Check if the insert is already part of the filename, to avoid double insertion
+    if (nameWithoutExtension.find(insert) == std::string::npos)
+    {
+        // Insert at the specified index only if it's not already inserted
+        if (insertIndex >= 0 && insertIndex <= static_cast<int>(nameWithoutExtension.size()))
+        {
+            nameWithoutExtension.insert(insertIndex, insert);
+        }
+    }
+
+    outputFileName = prefix + nameWithoutExtension + suffix + extension;
 
     std::cout << "Renamed: " << baseName << " -> " << outputFileName << std::endl;
 }
 
 
-void Exporter::batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& suffix)
-{
-   // resetOriginalNames(inputFileNames); // Ensure mappings are reset before renaming
 
+
+//void Exporter::batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& suffix)
+//{
+//   // resetOriginalNames(inputFileNames); // Ensure mappings are reset before renaming
+//
+//    for (const auto& currentFileName : inputFileNames)
+//    {
+//        exportFileName(currentFileName.toStdString(), prefix, insert, insertIndex, suffix); // Call the updated exportFileName
+//        renamedFileNames.add(outputFileName); // Store the renamed file name
+//    }
+//}
+
+void Exporter::batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix)
+{
     for (const auto& currentFileName : inputFileNames)
     {
-        exportFileName(currentFileName.toStdString(), prefix, suffix); // Call the updated exportFileName
-        renamedFileNames.add(outputFileName); // Store the renamed file name
+        exportFileName(currentFileName.toStdString(), prefix, insert, insertIndex, suffix); // Use updated function
+        renamedFileNames.add(outputFileName); // Store renamed file name
     }
 }
+
 
 
 
@@ -66,12 +128,12 @@ void Exporter::updateRenamedFileNames(const juce::StringArray& renamedFileNames)
    // this->renamedFileNames = renamedFileNames; // Store renamed file names
 }
 
-void Exporter::exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName)
+void Exporter::exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName, const std::string& insert, int insertIndex)
 {
     std::cout << "Exporting processed audio to file..." << std::endl;
     //std::cout << "buffer channels: "<< buffer.getNumChannels() << "" << std::endl;
 
-    exportFileName(originalFileName, addPrefix,addSuffix);
+    exportFileName(originalFileName, addPrefix, insert, insertIndex ,addSuffix);
 
     // Access the mono and stereo buffers from VSTPluginHost
     //VSTPluginComponent vstPluginComponent;

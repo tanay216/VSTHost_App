@@ -35,6 +35,7 @@ private:
     juce::AudioProcessor* pluginProcessor;
     AudioSourcePlayer audioSourcePlayer;
     AudioTransportSource transportSource;
+
  
     
    // AudioBuffer<float> audioBuffer;
@@ -70,10 +71,12 @@ public:
    // void handleBusChange(AudioProcessor* pluginInstance, AudioBuffer<float> audioBuffer);
     void refreshPlugin(int pluginIndex, AudioProcessor* pluginInstance);
     void debugBusAndChannelInfo(AudioProcessor* pluginInstance);
-    void processAudioWithPlugin(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames);
-    void processMonoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames);
-    void processStereoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames);
-    void processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames);
+    void processAudioWithPlugin(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex);
+    
+   // void insertAtIndex(std::string modifiedFileName);
+    void processMonoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex);
+    void processStereoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex);
+    void processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex);
     const AudioBuffer<float>& getMonoOutputBuffer() const;  // Getter for monoOutputBuffer
     const AudioBuffer<float>& getStereoOutputBuffer() const; // Getter for stereoOutputBuffer
     void VSTPluginComponent::handleMultichannelConfiguration(int configId);

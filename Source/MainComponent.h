@@ -304,63 +304,57 @@ public:
         addAndMakeVisible(renameButton);
         renameButton.setButtonText("Rename");
         renameButton.addListener(this);
+
+        addAndMakeVisible(prefixToggle);
+        prefixToggle.setButtonText("Prefix");
+        prefixToggle.onClick = [this] { prefixPatternInput.setEnabled(prefixToggle.getToggleState()); };
+
+        addAndMakeVisible(insertToggle);
+        insertToggle.setButtonText("Insert");
+        insertToggle.onClick = [this] {
+            insertPatternInput.setEnabled(insertToggle.getToggleState());
+            indexEditor.setEnabled(insertToggle.getToggleState());
+            };
+
+        addAndMakeVisible(suffixToggle);
+        suffixToggle.setButtonText("Suffix");
+        suffixToggle.onClick = [this] { suffixPatternInput.setEnabled(suffixToggle.getToggleState()); };
+
         
         // Add label for renaming input
         addAndMakeVisible(prefixPatternLabel);
         prefixPatternLabel.setText("suffix Pattern:", juce::dontSendNotification);
+        
+
+        addAndMakeVisible(insertPatternInput);
+        insertPatternInput.setTextToShowWhenEmpty("Insert", juce::Colours::grey);
+        insertPatternInput.setEnabled(false);
+
+        addAndMakeVisible(indexEditor);
+        indexEditor.setTextToShowWhenEmpty("At Index", juce::Colours::grey);
+        indexEditor.setEnabled(false);
 
         // Add text editor for renaming input
         addAndMakeVisible(prefixPatternInput);
         prefixPatternInput.setTextToShowWhenEmpty("Prefix", juce::Colours::grey);
+        prefixPatternInput.setEnabled(false);
         
         // Add label for renaming input
         addAndMakeVisible(suffixPatternLabel);
         suffixPatternLabel.setText("suffix Pattern:", juce::dontSendNotification);
 
+
         // Add text editor for renaming input
         addAndMakeVisible(suffixPatternInput);
         suffixPatternInput.setTextToShowWhenEmpty("Suffix", juce::Colours::grey);
+        suffixPatternInput.setEnabled(false);
 
         // Add the filename label
         addAndMakeVisible(fileNameLabel);
         fileNameLabel.setText("Output File: Not Selected", juce::dontSendNotification);
     }
 
-  /*  void handleExportAudio()
-    {
-        if (audioFileNames.size() != audioBuffers.size())
-        {
-            std::cout << "Audio buffers do not match the number of loaded files." << std::endl;
-            return;
-        }
-
-        for (int i = 0; i < audioFileNames.size(); ++i)
-        {
-            std::string currentAudioFileName = audioFileNames[i].toStdString();
-            juce::AudioBuffer<float>& currentAudioBuffer = audioBuffers[i];
-
-            auto isBypassed = bypassStates.find(currentAudioFileName) != bypassStates.end() &&
-                bypassStates[currentAudioFileName];
-
-            if (isBypassed)
-            {
-                std::cout << "Skipping export for bypassed file: " << currentAudioFileName << std::endl;
-                continue;
-            }
-
-            if (currentAudioBuffer.getNumSamples() == 0)
-            {
-                std::cout << "Audio Buffer is empty for: " << currentAudioFileName << "." << std::endl;
-                return;
-            }
-
-            std::cout << "Exporting: " << currentAudioFileName << std::endl;
-            vstPluginComponent.processAudioWithPlugin(currentAudioBuffer, currentAudioFileName);
-        }
-
-        juce::AlertWindow::showMessageBoxAsync(
-            juce::AlertWindow::InfoIcon, "Export", "Audio exported successfully!");
-    }*/
+  
 
     void handleExportAudio()
     {
@@ -390,28 +384,54 @@ public:
             }
 
             std::cout << "Exporting: " << renamedFileName << std::endl;
-            vstPluginComponent.processAudioWithPlugin(buffer, renamedFileName);
+            // Get the dynamic insert values
+            const std::string insert = insertPatternInput.getText().toStdString();
+            const int insertIndex = indexEditor.getText().getIntValue();
+
+            // Validate insertIndex
+            if (insertIndex < 0)
+            {
+                std::cerr << "Invalid insert index: " << insertIndex << std::endl;
+                return;
+            }
+            vstPluginComponent.processAudioWithPlugin(buffer, renamedFileName, insert, insertIndex);
         }
 
         juce::AlertWindow::showMessageBoxAsync(
             juce::AlertWindow::InfoIcon, "Export", "Audio exported successfully!");
     }
 
+   
+
 
     void resized() override
     {
         auto bounds = getLocalBounds().reduced(10);
+        auto topRow = bounds.removeFromTop(30);
+        auto secondRow = bounds.removeFromTop(30);
+        auto thirdRow = bounds.removeFromTop(30);
         fileNameLabel.setBounds(bounds.removeFromTop(30));
 
-        prefixPatternLabel.setBounds(bounds.removeFromTop(30));
-        prefixPatternInput.setBounds(bounds.removeFromTop(30).withWidth(200));
+        prefixToggle.setBounds(topRow.removeFromLeft(100));
+       // prefixPatternLabel.setBounds(topRow.removeFromLeft(120));
+        prefixPatternInput.setBounds(topRow.removeFromLeft(120).withWidth(200));
 
-        suffixPatternLabel.setBounds(bounds.removeFromTop(30));
-        suffixPatternInput.setBounds(bounds.removeFromTop(30).withWidth(200));
+        insertToggle.setBounds(secondRow.removeFromLeft(100));
+        insertPatternInput.setBounds(secondRow.removeFromLeft(120));
+        indexEditor.setBounds(secondRow.removeFromLeft(140));
+
+        suffixToggle.setBounds(thirdRow.removeFromLeft(100));
+        //suffixPatternLabel.setBounds(thirdRow.removeFromLeft(120));
+        suffixPatternInput.setBounds(thirdRow.removeFromLeft(120).withWidth(200));
         
         renameButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
         browseButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
         exportButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(juce::Colours::black); // Set the background color to black
     }
 
     void buttonClicked(juce::Button* button) override
@@ -469,17 +489,42 @@ public:
     }
 
 
-    void performBatchRename(const juce::String& prefix, const juce::String& suffix)
-    {
-        juce::StringArray renamedFileNames; // To hold the renamed file names
-        exporter.resetOriginalNames(audioFileNames);
-        exporter.batchRename(audioFileNames, renamedFileNames, prefix.toStdString(), suffix.toStdString());
+    //void performBatchRename(const juce::String& prefix, const juce::String& suffix)
+    //{
+    //    juce::StringArray renamedFileNames; // To hold the renamed file names
+    //    exporter.resetOriginalNames(audioFileNames);
+    //    exporter.batchRename(audioFileNames, renamedFileNames, prefix.toStdString(), insert.toStdString(), insertIndex, suffix.toStdString());
+    //    // Replace the original file names with renamed ones
+    //  // audioFileNames = renamedFileNames;
+    //    // Update the exporter with the renamed file names
+    //    exporter.updateRenamedFileNames(renamedFileNames);
+    //}
 
-        // Replace the original file names with renamed ones
-      // audioFileNames = renamedFileNames;
-        // Update the exporter with the renamed file names
+    void ExportAudioComponent::performBatchRename(const juce::String& prefix, const juce::String& suffix)
+    {
+        juce::StringArray renamedFileNames;
+        exporter.resetOriginalNames(audioFileNames);
+
+        // Get the dynamic values
+        const juce::String insert = insertPatternInput.getText();
+        const int insertIndex = indexEditor.getText().getIntValue();
+
+        // Validation
+        if (insertIndex < 0)
+        {
+            juce::AlertWindow::showMessageBoxAsync(
+                juce::AlertWindow::WarningIcon, "Invalid Index", "Please enter a non-negative index.");
+            return;
+        }
+
+        // Perform batch renaming
+        exporter.batchRename(audioFileNames, renamedFileNames, prefix.toStdString(), insert.toStdString(), insertIndex, suffix.toStdString());
+
+        // Update exporter with renamed file names
         exporter.updateRenamedFileNames(renamedFileNames);
     }
+
+
 
 
 
@@ -489,6 +534,12 @@ private:
     juce::TextButton exportButton{ "Export" };
     juce::Label fileNameLabel;
     juce::TextButton renameButton{ "Rename" };
+
+    juce::ToggleButton prefixToggle, insertToggle, suffixToggle;
+
+    juce::Label insertPatternLabel{"Insert Label", "Insert"};
+    juce::TextEditor insertPatternInput, indexEditor;
+    
     juce::Label suffixPatternLabel{"Suffix Label", "Suffix"};
     juce::TextEditor suffixPatternInput;
     
