@@ -280,46 +280,7 @@ class ExportAudioComponent : public juce::Component,
     public juce::Button::Listener
 {
 public:
-    /*void handleExportAudio(juce::Array<juce::AudioBuffer<float>>& audioBuffers,
-        const juce::StringArray& audioFileNames,
-        VSTPluginComponent& vstPluginComponent,
-        std::unordered_map<std::string, bool>& bypassStates)
-    {
-        
-        
-            if (audioFileNames.size() != audioBuffers.size())
-            {
-                std::cout << "Audio buffers do not match the number of loaded files." << std::endl;
-                return;
-            }
-
-            for (int i = 0; i < audioFileNames.size(); ++i)
-            {
-                std::string currentAudioFileName = audioFileNames[i].toStdString();
-                juce::AudioBuffer<float>& currentAudioBuffer = audioBuffers[i];
-
-                auto isBypassed = bypassStates.find(currentAudioFileName) != bypassStates.end() &&
-                    bypassStates[currentAudioFileName];
-
-                if (isBypassed)
-                {
-                    std::cout << "Skipping export for bypassed file: " << currentAudioFileName << std::endl;
-                    continue;
-                }
-
-                if (currentAudioBuffer.getNumSamples() == 0)
-                {
-                    std::cout << "Audio Buffer is empty for: " << currentAudioFileName << "." << std::endl;
-                    return;
-                }
-
-                std::cout << "Exporting: " << currentAudioFileName << std::endl;
-                vstPluginComponent.processAudioWithPlugin(currentAudioBuffer, currentAudioFileName);
-            }
-            
-        
-          
-    }*/
+    
     ExportAudioComponent(juce::Array<juce::AudioBuffer<float>>& audioBuffers,
         juce::StringArray& audioFileNames,
         VSTPluginComponent& vstPluginComponent, 
@@ -345,19 +306,27 @@ public:
         renameButton.addListener(this);
         
         // Add label for renaming input
-        addAndMakeVisible(renamePatternLabel);
-        renamePatternLabel.setText("Rename Pattern:", juce::dontSendNotification);
+        addAndMakeVisible(prefixPatternLabel);
+        prefixPatternLabel.setText("suffix Pattern:", juce::dontSendNotification);
 
         // Add text editor for renaming input
-        addAndMakeVisible(renamePatternInput);
-        renamePatternInput.setText("_processed");
+        addAndMakeVisible(prefixPatternInput);
+        prefixPatternInput.setTextToShowWhenEmpty("Prefix", juce::Colours::grey);
+        
+        // Add label for renaming input
+        addAndMakeVisible(suffixPatternLabel);
+        suffixPatternLabel.setText("suffix Pattern:", juce::dontSendNotification);
+
+        // Add text editor for renaming input
+        addAndMakeVisible(suffixPatternInput);
+        suffixPatternInput.setTextToShowWhenEmpty("Suffix", juce::Colours::grey);
 
         // Add the filename label
         addAndMakeVisible(fileNameLabel);
         fileNameLabel.setText("Output File: Not Selected", juce::dontSendNotification);
     }
 
-    void handleExportAudio()
+  /*  void handleExportAudio()
     {
         if (audioFileNames.size() != audioBuffers.size())
         {
@@ -391,14 +360,55 @@ public:
 
         juce::AlertWindow::showMessageBoxAsync(
             juce::AlertWindow::InfoIcon, "Export", "Audio exported successfully!");
+    }*/
+
+    void handleExportAudio()
+    {
+        if (audioBuffers.size() != exporter.getRenamedFileNames().size())
+        {
+            std::cout << "Mismatch between buffers and renamed file names." << std::endl;
+            return;
+        }
+
+        auto renamedFileNames = exporter.getRenamedFileNames();
+
+        for (int i = 0; i < audioBuffers.size(); ++i)
+        {
+            const auto& renamedFileName = renamedFileNames[i].toStdString();
+            juce::AudioBuffer<float>& buffer = audioBuffers[i];
+
+            if (bypassStates.find(renamedFileName) != bypassStates.end() && bypassStates[renamedFileName])
+            {
+                std::cout << "Skipping export for bypassed file: " << renamedFileName << std::endl;
+                continue;
+            }
+
+            if (buffer.getNumSamples() == 0)
+            {
+                std::cout << "Audio Buffer is empty for: " << renamedFileName << "." << std::endl;
+                return;
+            }
+
+            std::cout << "Exporting: " << renamedFileName << std::endl;
+            vstPluginComponent.processAudioWithPlugin(buffer, renamedFileName);
+        }
+
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::AlertWindow::InfoIcon, "Export", "Audio exported successfully!");
     }
+
 
     void resized() override
     {
         auto bounds = getLocalBounds().reduced(10);
         fileNameLabel.setBounds(bounds.removeFromTop(30));
-       // renamePatternLabel.setBounds(bounds.removeFromTop(30));
-        renamePatternInput.setBounds(bounds.removeFromTop(30));
+
+        prefixPatternLabel.setBounds(bounds.removeFromTop(30));
+        prefixPatternInput.setBounds(bounds.removeFromTop(30).withWidth(200));
+
+        suffixPatternLabel.setBounds(bounds.removeFromTop(30));
+        suffixPatternInput.setBounds(bounds.removeFromTop(30).withWidth(200));
+        
         renameButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
         browseButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
         exportButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
@@ -452,19 +462,25 @@ public:
 
         else if (button == &renameButton)
         {
-          performBatchRename(renamePatternInput.getText());
+          //exporter.resetOriginalNames(audioFileNames);
+          performBatchRename(prefixPatternInput.getText(), suffixPatternInput.getText());
         }
         
     }
 
-    void performBatchRename(const juce::String& pattern)
+
+    void performBatchRename(const juce::String& prefix, const juce::String& suffix)
     {
         juce::StringArray renamedFileNames; // To hold the renamed file names
-        exporter.batchRename(audioFileNames, renamedFileNames, pattern.toStdString());
+        exporter.resetOriginalNames(audioFileNames);
+        exporter.batchRename(audioFileNames, renamedFileNames, prefix.toStdString(), suffix.toStdString());
 
         // Replace the original file names with renamed ones
-        audioFileNames = renamedFileNames;
+      // audioFileNames = renamedFileNames;
+        // Update the exporter with the renamed file names
+        exporter.updateRenamedFileNames(renamedFileNames);
     }
+
 
 
 
@@ -473,8 +489,11 @@ private:
     juce::TextButton exportButton{ "Export" };
     juce::Label fileNameLabel;
     juce::TextButton renameButton{ "Rename" };
-    juce::Label renamePatternLabel;
-    juce::TextEditor renamePatternInput;
+    juce::Label suffixPatternLabel{"Suffix Label", "Suffix"};
+    juce::TextEditor suffixPatternInput;
+    
+    juce::Label prefixPatternLabel{"Prefix Label", "Prefix"};
+    juce::TextEditor prefixPatternInput;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::File outputFile;
     Exporter& exporter;

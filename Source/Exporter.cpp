@@ -4,46 +4,74 @@
 
 Exporter::Exporter() {
 	Exporter::addSuffix = "";
+	Exporter::addPrefix = "";
 }
-Exporter::~Exporter() {
-	
-}
+Exporter::~Exporter() {}
 
 
-//void Exporter::exportFileName(const std::string& originalFileName) {
-//    
-//    File audioFile(originalFileName); // Assume originalFileName is the full path or name with extension
+//void Exporter::exportFileName(const std::string& originalFileName, std::string& suffix)
+//{
+//    File audioFile(originalFileName);
+//    addSuffix = suffix;
 //    extension = audioFile.getFileExtension().toStdString();
-//    outputFileName = audioFile.getFileNameWithoutExtension().toStdString() + "_processed" + extension; // Add the suffix and extension
-//    std::cout << "Output File Name in exportFileName function: " << outputFileName << std::endl;
+//    outputFileName = audioFile.getFileNameWithoutExtension().toStdString() + suffix + extension;
+//    std::cout << "Renamed: " << originalFileName << " -> " << outputFileName << std::endl;
 //}
 
-void Exporter::exportFileName(const std::string& originalFileName, std::string& suffix)
+void Exporter::exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& suffix)
 {
-    File audioFile(originalFileName);
-    addSuffix = suffix;
+    // Retrieve the original name
+    std::string baseName = currentFileName;
+
+    auto it = originalFileNameMap.find(currentFileName);
+    if (it != originalFileNameMap.end())
+    {
+        baseName = it->second; // Start from the original name
+    }
+
+    // Perform renaming
+    File audioFile(baseName);
     extension = audioFile.getFileExtension().toStdString();
-    outputFileName = audioFile.getFileNameWithoutExtension().toStdString() + suffix + extension;
-    std::cout << "Renamed: " << originalFileName << " -> " << outputFileName << std::endl;
+    outputFileName = prefix + audioFile.getFileNameWithoutExtension().toStdString() + suffix + extension;
+
+    std::cout << "Renamed: " << baseName << " -> " << outputFileName << std::endl;
 }
 
-void Exporter::batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, std::string& suffix)
+
+void Exporter::batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& suffix)
 {
-    for (const auto& originalFileName : inputFileNames)
+   // resetOriginalNames(inputFileNames); // Ensure mappings are reset before renaming
+
+    for (const auto& currentFileName : inputFileNames)
     {
-        exportFileName(originalFileName.toStdString(), suffix); // Call the updated exportFileName
+        exportFileName(currentFileName.toStdString(), prefix, suffix); // Call the updated exportFileName
         renamedFileNames.add(outputFileName); // Store the renamed file name
     }
 }
 
 
 
+void Exporter::resetOriginalNames(const juce::StringArray& inputFileNames)
+{
+    originalFileNameMap.clear(); // Reset all mappings
+    for (const auto& fileName : inputFileNames)
+    {
+        originalFileNameMap[fileName.toStdString()] = fileName.toStdString(); // Map each file to its original name
+    }
+}
+
+void Exporter::updateRenamedFileNames(const juce::StringArray& renamedFileNames)
+{
+     newRenamedFileNames = renamedFileNames;
+   // this->renamedFileNames = renamedFileNames; // Store renamed file names
+}
+
 void Exporter::exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName)
 {
     std::cout << "Exporting processed audio to file..." << std::endl;
     //std::cout << "buffer channels: "<< buffer.getNumChannels() << "" << std::endl;
 
-    exportFileName(originalFileName, addSuffix);
+    exportFileName(originalFileName, addPrefix,addSuffix);
 
     // Access the mono and stereo buffers from VSTPluginHost
     //VSTPluginComponent vstPluginComponent;
