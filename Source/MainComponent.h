@@ -305,10 +305,31 @@ public:
         renameButton.setButtonText("Rename");
         renameButton.addListener(this);
 
+        // Add the filename label
+        addAndMakeVisible(fileNameLabel);
+        fileNameLabel.setText("Output Folder: Not Selected", juce::dontSendNotification);
+
+        //==================== Prefix ========================
+
+        // Prefix Toggle
         addAndMakeVisible(prefixToggle);
         prefixToggle.setButtonText("Prefix");
         prefixToggle.onClick = [this] { prefixPatternInput.setEnabled(prefixToggle.getToggleState()); };
+        
+        // Add label for renaming input
+        addAndMakeVisible(prefixPatternLabel);
+        prefixPatternLabel.setText("suffix Pattern:", juce::dontSendNotification);
 
+        // Add text editor for renaming input
+        addAndMakeVisible(prefixPatternInput);
+        prefixPatternInput.setTextToShowWhenEmpty("Prefix", juce::Colours::grey);
+        prefixPatternInput.setEnabled(false);
+
+        
+
+        //==================== Insert At Index ========================
+
+        // Insert Toggle
         addAndMakeVisible(insertToggle);
         insertToggle.setButtonText("Insert");
         insertToggle.onClick = [this] {
@@ -316,16 +337,7 @@ public:
             indexEditor.setEnabled(insertToggle.getToggleState());
             };
 
-        addAndMakeVisible(suffixToggle);
-        suffixToggle.setButtonText("Suffix");
-        suffixToggle.onClick = [this] { suffixPatternInput.setEnabled(suffixToggle.getToggleState()); };
-
         
-        // Add label for renaming input
-        addAndMakeVisible(prefixPatternLabel);
-        prefixPatternLabel.setText("suffix Pattern:", juce::dontSendNotification);
-        
-
         addAndMakeVisible(insertPatternInput);
         insertPatternInput.setTextToShowWhenEmpty("Insert", juce::Colours::grey);
         insertPatternInput.setEnabled(false);
@@ -334,24 +346,49 @@ public:
         indexEditor.setTextToShowWhenEmpty("At Index", juce::Colours::grey);
         indexEditor.setEnabled(false);
 
-        // Add text editor for renaming input
-        addAndMakeVisible(prefixPatternInput);
-        prefixPatternInput.setTextToShowWhenEmpty("Prefix", juce::Colours::grey);
-        prefixPatternInput.setEnabled(false);
+        //==================== Suffix ========================
+
+        // Suffix Toggle
+        addAndMakeVisible(suffixToggle);
+        suffixToggle.setButtonText("Suffix");
+        suffixToggle.onClick = [this] { suffixPatternInput.setEnabled(suffixToggle.getToggleState()); };
         
-        // Add label for renaming input
+        // Add label for suffix renaming input
         addAndMakeVisible(suffixPatternLabel);
         suffixPatternLabel.setText("suffix Pattern:", juce::dontSendNotification);
 
 
-        // Add text editor for renaming input
+        // Add text editor for suffix renaming input
         addAndMakeVisible(suffixPatternInput);
         suffixPatternInput.setTextToShowWhenEmpty("Suffix", juce::Colours::grey);
         suffixPatternInput.setEnabled(false);
 
-        // Add the filename label
-        addAndMakeVisible(fileNameLabel);
-        fileNameLabel.setText("Output File: Not Selected", juce::dontSendNotification);
+        //==================== Find & Replace ========================
+
+        // FindReplace Toggle
+        addAndMakeVisible(findReplaceToggle);
+		findReplaceToggle.setButtonText("Find & Replace");
+		findReplaceToggle.onClick = [this] { findPatternInput.setEnabled(findReplaceToggle.getToggleState()), replacePatternInput.setEnabled(findReplaceToggle.getToggleState()); };
+
+        // Add Label for Find
+        addAndMakeVisible(findPatternLabel);
+		findPatternLabel.setText("Find:", juce::dontSendNotification);
+
+        // Add input for Find
+        addAndMakeVisible(findPatternInput);
+		findPatternInput.setTextToShowWhenEmpty("Find", juce::Colours::grey);
+		findPatternInput.setEnabled(false);
+        
+        // Add Label for Replace
+        addAndMakeVisible(replacePatternLabel);
+		replacePatternLabel.setText("Replace:", juce::dontSendNotification);
+
+        // Add input for Replace
+        addAndMakeVisible(replacePatternInput);
+		replacePatternInput.setTextToShowWhenEmpty("Replace", juce::Colours::grey);
+		replacePatternInput.setEnabled(false);
+
+        
     }
 
   
@@ -410,10 +447,12 @@ public:
         auto topRow = bounds.removeFromTop(30);
         auto secondRow = bounds.removeFromTop(30);
         auto thirdRow = bounds.removeFromTop(30);
+        auto fourthRow = bounds.removeFromTop(30);
+        auto fifthRow = bounds.removeFromTop(30);
+        
         fileNameLabel.setBounds(bounds.removeFromTop(30));
 
         prefixToggle.setBounds(topRow.removeFromLeft(100));
-       // prefixPatternLabel.setBounds(topRow.removeFromLeft(120));
         prefixPatternInput.setBounds(topRow.removeFromLeft(120).withWidth(200));
 
         insertToggle.setBounds(secondRow.removeFromLeft(100));
@@ -421,8 +460,14 @@ public:
         indexEditor.setBounds(secondRow.removeFromLeft(140));
 
         suffixToggle.setBounds(thirdRow.removeFromLeft(100));
-        //suffixPatternLabel.setBounds(thirdRow.removeFromLeft(120));
         suffixPatternInput.setBounds(thirdRow.removeFromLeft(120).withWidth(200));
+
+		findReplaceToggle.setBounds(fourthRow.removeFromLeft(100));
+       // findPatternLabel.setBounds(fifthRow.removeFromTop(30).removeFromLeft(120));
+		findPatternInput.setBounds(fifthRow.removeFromLeft(120));
+       // replacePatternLabel.setBounds(sixthRow.removeFromTop(30).removeFromLeft(120));
+		replacePatternInput.setBounds(fifthRow.removeFromLeft(140));
+		
         
         renameButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
         browseButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
@@ -489,17 +534,6 @@ public:
     }
 
 
-    //void performBatchRename(const juce::String& prefix, const juce::String& suffix)
-    //{
-    //    juce::StringArray renamedFileNames; // To hold the renamed file names
-    //    exporter.resetOriginalNames(audioFileNames);
-    //    exporter.batchRename(audioFileNames, renamedFileNames, prefix.toStdString(), insert.toStdString(), insertIndex, suffix.toStdString());
-    //    // Replace the original file names with renamed ones
-    //  // audioFileNames = renamedFileNames;
-    //    // Update the exporter with the renamed file names
-    //    exporter.updateRenamedFileNames(renamedFileNames);
-    //}
-
     void ExportAudioComponent::performBatchRename(const juce::String& prefix, const juce::String& suffix)
     {
         juce::StringArray renamedFileNames;
@@ -535,7 +569,10 @@ private:
     juce::Label fileNameLabel;
     juce::TextButton renameButton{ "Rename" };
 
-    juce::ToggleButton prefixToggle, insertToggle, suffixToggle;
+    juce::ToggleButton prefixToggle, insertToggle, suffixToggle, findReplaceToggle;
+
+    juce::Label prefixPatternLabel{ "Prefix Label", "Prefix" };
+    juce::TextEditor prefixPatternInput;
 
     juce::Label insertPatternLabel{"Insert Label", "Insert"};
     juce::TextEditor insertPatternInput, indexEditor;
@@ -543,8 +580,13 @@ private:
     juce::Label suffixPatternLabel{"Suffix Label", "Suffix"};
     juce::TextEditor suffixPatternInput;
     
-    juce::Label prefixPatternLabel{"Prefix Label", "Prefix"};
-    juce::TextEditor prefixPatternInput;
+    juce::Label findPatternLabel{"Find Label", "Find"};
+    juce::TextEditor findPatternInput;
+
+    juce::Label replacePatternLabel{"Replace Label", "Replace"};
+    juce::TextEditor replacePatternInput;
+    
+    
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::File outputFile;
     Exporter& exporter;
