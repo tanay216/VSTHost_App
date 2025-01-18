@@ -8,32 +8,9 @@ Exporter::Exporter() {
 }
 Exporter::~Exporter() {}
 
-
-//void Exporter::exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& suffix)
-//{
-//    // Retrieve the original name
-//    std::string baseName = currentFileName;
-//
-//    auto it = originalFileNameMap.find(currentFileName);
-//    if (it != originalFileNameMap.end())
-//    {
-//        baseName = it->second; // Start from the original name
-//    }
-//
-//    // Perform renaming
-//    File audioFile(baseName);
-//    extension = audioFile.getFileExtension().toStdString();
-//    outputFileName = prefix + audioFile.getFileNameWithoutExtension().toStdString() + suffix + extension;
-//
-//    std::cout << "Renamed: " << baseName << " -> " << outputFileName << std::endl;
-//}
-
 //void Exporter::exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix)
 //{
-//    // Retrieve the original name
 //    std::string baseName = currentFileName;
-//    
-//    std::cout << "Final export file name: " << baseName << std::endl;
 //
 //    auto it = originalFileNameMap.find(currentFileName);
 //    if (it != originalFileNameMap.end())
@@ -41,41 +18,130 @@ Exporter::~Exporter() {}
 //        baseName = it->second; // Start from the original name
 //    }
 //
-//    // Perform renaming
 //    File audioFile(baseName);
 //    std::string nameWithoutExtension = audioFile.getFileNameWithoutExtension().toStdString();
 //    extension = audioFile.getFileExtension().toStdString();
 //
-//    // Insert at the specified index
-//    if (insertIndex >= 0 && insertIndex <= static_cast<int>(nameWithoutExtension.size()))
+//    // Check if the insert is already part of the filename, to avoid double insertion
+//    if (nameWithoutExtension.find(insert) == std::string::npos)
 //    {
-//        nameWithoutExtension.insert(insertIndex, insert);
+//        // Insert at the specified index only if it's not already inserted
+//        if (insertIndex >= 0 && insertIndex <= static_cast<int>(nameWithoutExtension.size()))
+//        {
+//            nameWithoutExtension.insert(insertIndex, insert);
+//        }
 //    }
 //
-//    // Combine prefix, modified name, and suffix
 //    outputFileName = prefix + nameWithoutExtension + suffix + extension;
 //
 //    std::cout << "Renamed: " << baseName << " -> " << outputFileName << std::endl;
 //}
 
-void Exporter::exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix)
+//void Exporter::exportFileName(const std::string& currentFileName, 
+//                              const std::string& prefix,
+//                              const std::string& insert, 
+//                                int insertIndex, 
+//                              const std::string& suffix, 
+//                              const std::string& find, 
+//                              const std::string& replace,
+//                                int trimFromBeginningIndex,
+//                                int trimFromEndIndex,
+//                                int rangeFromIndex,
+//                                int rangeToIndex)
+//{
+//    std::string baseName = currentFileName;
+//
+//    auto it = originalFileNameMap.find(currentFileName);
+//    if (it != originalFileNameMap.end())
+//    {
+//        baseName = it->second; // Get original name
+//    }
+//
+//    File audioFile(baseName);
+//    std::string nameWithoutExtension = audioFile.getFileNameWithoutExtension().toStdString();
+//    extension = audioFile.getFileExtension().toStdString();
+//
+//    // Perform Find & Replace
+//    if (!find.empty())
+//    {
+//        size_t pos = 0;
+//        while ((pos = nameWithoutExtension.find(find, pos)) != std::string::npos)
+//        {
+//            nameWithoutExtension.replace(pos, find.length(), replace);
+//            pos += replace.length();
+//        }
+//    }
+//
+//    // Insert at index (only if not already inserted)
+//    if (!insert.empty() && nameWithoutExtension.find(insert) == std::string::npos)
+//    {
+//        if (insertIndex >= 0 && insertIndex <= static_cast<int>(nameWithoutExtension.size()))
+//        {
+//            nameWithoutExtension.insert(insertIndex, insert);
+//        }
+//    }
+//
+//    outputFileName = prefix + nameWithoutExtension + suffix + extension;
+//
+//    std::cout << "Renamed: " << baseName << " -> " << outputFileName << std::endl;
+//}
+
+void Exporter::exportFileName(const std::string& currentFileName,
+    const std::string& prefix,
+    const std::string& insert,
+    int insertIndex,
+    const std::string& suffix,
+    const std::string& find,
+    const std::string& replace,
+    int trimFromBeginningIndex,
+    int trimFromEndIndex,
+    int rangeFromIndex,
+    int rangeToIndex)
 {
     std::string baseName = currentFileName;
 
     auto it = originalFileNameMap.find(currentFileName);
     if (it != originalFileNameMap.end())
     {
-        baseName = it->second; // Start from the original name
+        baseName = it->second; // Get original name
     }
 
     File audioFile(baseName);
     std::string nameWithoutExtension = audioFile.getFileNameWithoutExtension().toStdString();
     extension = audioFile.getFileExtension().toStdString();
 
-    // Check if the insert is already part of the filename, to avoid double insertion
-    if (nameWithoutExtension.find(insert) == std::string::npos)
+    // Perform Find & Replace
+    if (!find.empty())
     {
-        // Insert at the specified index only if it's not already inserted
+        size_t pos = 0;
+        while ((pos = nameWithoutExtension.find(find, pos)) != std::string::npos)
+        {
+            nameWithoutExtension.replace(pos, find.length(), replace);
+            pos += replace.length();
+        }
+    }
+
+    // Trim from Beginning
+    if (trimFromBeginningIndex > 0 && trimFromBeginningIndex <= static_cast<int>(nameWithoutExtension.size()))
+    {
+        nameWithoutExtension = nameWithoutExtension.substr(trimFromBeginningIndex);
+    }
+
+    // Trim from End
+    if (trimFromEndIndex > 0 && trimFromEndIndex <= static_cast<int>(nameWithoutExtension.size()))
+    {
+        nameWithoutExtension = nameWithoutExtension.substr(0, nameWithoutExtension.size() - trimFromEndIndex);
+    }
+
+    // Trim by Range
+    if (rangeFromIndex >= 0 && rangeToIndex > rangeFromIndex && rangeToIndex <= static_cast<int>(nameWithoutExtension.size()))
+    {
+        nameWithoutExtension.erase(rangeFromIndex, rangeToIndex - rangeFromIndex);
+    }
+
+    // Insert at index (only if not already inserted)
+    if (!insert.empty() && nameWithoutExtension.find(insert) == std::string::npos)
+    {
         if (insertIndex >= 0 && insertIndex <= static_cast<int>(nameWithoutExtension.size()))
         {
             nameWithoutExtension.insert(insertIndex, insert);
@@ -88,29 +154,17 @@ void Exporter::exportFileName(const std::string& currentFileName, const std::str
 }
 
 
-
-
-//void Exporter::batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& suffix)
-//{
-//   // resetOriginalNames(inputFileNames); // Ensure mappings are reset before renaming
-//
-//    for (const auto& currentFileName : inputFileNames)
-//    {
-//        exportFileName(currentFileName.toStdString(), prefix, insert, insertIndex, suffix); // Call the updated exportFileName
-//        renamedFileNames.add(outputFileName); // Store the renamed file name
-//    }
-//}
-
-void Exporter::batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix)
+void Exporter::batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+    int trimFromEndIndex,
+    int rangeFromIndex,
+    int rangeToIndex)
 {
     for (const auto& currentFileName : inputFileNames)
     {
-        exportFileName(currentFileName.toStdString(), prefix, insert, insertIndex, suffix); // Use updated function
-        renamedFileNames.add(outputFileName); // Store renamed file name
+        exportFileName(currentFileName.toStdString(), prefix, insert, insertIndex, suffix, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex);
+        renamedFileNames.add(outputFileName);
     }
 }
-
-
 
 
 void Exporter::resetOriginalNames(const juce::StringArray& inputFileNames)
@@ -128,12 +182,15 @@ void Exporter::updateRenamedFileNames(const juce::StringArray& renamedFileNames)
    // this->renamedFileNames = renamedFileNames; // Store renamed file names
 }
 
-void Exporter::exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName, const std::string& insert, int insertIndex)
+void Exporter::exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+    int trimFromEndIndex,
+    int rangeFromIndex,
+    int rangeToIndex)
 {
     std::cout << "Exporting processed audio to file..." << std::endl;
     //std::cout << "buffer channels: "<< buffer.getNumChannels() << "" << std::endl;
 
-    exportFileName(originalFileName, addPrefix, insert, insertIndex ,addSuffix);
+    exportFileName(originalFileName, addPrefix, insert, insertIndex ,addSuffix, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex);
 
     // Access the mono and stereo buffers from VSTPluginHost
     //VSTPluginComponent vstPluginComponent;

@@ -12,9 +12,18 @@ public:
 
     Exporter();
     ~Exporter();
-    void exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName, const std::string& insert, int insertIndex);
-    void exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix);
-    void batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix);
+    void exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+        int trimFromEndIndex,
+        int rangeFromIndex,
+        int rangeToIndex);
+    void exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+        int trimFromEndIndex,
+        int rangeFromIndex,
+        int rangeToIndex);
+    void batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+        int trimFromEndIndex,
+        int rangeFromIndex,
+        int rangeToIndex);
     void resetOriginalNames(const juce::StringArray& inputFileNames); // Resets the mapping to the original names
     void updateRenamedFileNames(const juce::StringArray& renamedFileNames);
 

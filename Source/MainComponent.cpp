@@ -12,6 +12,7 @@ MainComponent::MainComponent()
     viewport.setViewedComponent(&contentComponent, false);
 
     juce::Component::addAndMakeVisible(scanPluginButton);
+    scanPluginButton.triggerClick();
     juce::Component::addAndMakeVisible(loadAudioButton);
     juce::Component::addAndMakeVisible(playButton);
     juce::Component::addAndMakeVisible(stopButton);

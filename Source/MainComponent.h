@@ -290,6 +290,7 @@ public:
         vstPluginComponent(vstPluginComponent), 
         exporter(exporter)
     {
+
         // Add and configure the "Browse" button
         addAndMakeVisible(browseButton);
         browseButton.setButtonText("Browse");
@@ -388,6 +389,39 @@ public:
 		replacePatternInput.setTextToShowWhenEmpty("Replace", juce::Colours::grey);
 		replacePatternInput.setEnabled(false);
 
+
+
+        //==================== Find & Replace ========================
+
+        // Trim from Beginning
+        addAndMakeVisible(trimFromBeginningToggle);
+        trimFromBeginningToggle.setButtonText("Trim From Beginning");
+        trimFromBeginningToggle.onClick = [this] { trimFromBeginningInput.setEnabled(trimFromBeginningToggle.getToggleState()); };
+        addAndMakeVisible(trimFromBeginningInput);
+        trimFromBeginningInput.setTextToShowWhenEmpty("Characters", juce::Colours::grey);
+        trimFromBeginningInput.setEnabled(false);
+
+        // Trim from End
+        addAndMakeVisible(trimFromEndToggle);
+        trimFromEndToggle.setButtonText("Trim From End");
+        trimFromEndToggle.onClick = [this] { trimFromEndInput.setEnabled(trimFromEndToggle.getToggleState()); };
+        addAndMakeVisible(trimFromEndInput);
+        trimFromEndInput.setTextToShowWhenEmpty("Characters", juce::Colours::grey);
+        trimFromEndInput.setEnabled(false);
+
+        // Range Trim
+        addAndMakeVisible(rangeToggle);
+        rangeToggle.setButtonText("Trim Range");
+        rangeToggle.onClick = [this] {
+            rangeFromInput.setEnabled(rangeToggle.getToggleState());
+            rangeToInput.setEnabled(rangeToggle.getToggleState());
+            };
+        addAndMakeVisible(rangeFromInput);
+        rangeFromInput.setTextToShowWhenEmpty("From", juce::Colours::grey);
+        rangeFromInput.setEnabled(false);
+        addAndMakeVisible(rangeToInput);
+        rangeToInput.setTextToShowWhenEmpty("To", juce::Colours::grey);
+        rangeToInput.setEnabled(false);
         
     }
 
@@ -424,6 +458,12 @@ public:
             // Get the dynamic insert values
             const std::string insert = insertPatternInput.getText().toStdString();
             const int insertIndex = indexEditor.getText().getIntValue();
+            const std::string find = findPatternInput.getText().toStdString();
+			const std::string replace = replacePatternInput.getText().toStdString();
+            int trimFromBeginningIndex = trimFromBeginningInput.getText().getIntValue();
+			int trimFromEndIndex = trimFromEndInput.getText().getIntValue();
+			int rangeFromIndex = rangeFromInput.getText().getIntValue();
+			int rangeToIndex = rangeToInput.getText().getIntValue();
 
             // Validate insertIndex
             if (insertIndex < 0)
@@ -431,7 +471,7 @@ public:
                 std::cerr << "Invalid insert index: " << insertIndex << std::endl;
                 return;
             }
-            vstPluginComponent.processAudioWithPlugin(buffer, renamedFileName, insert, insertIndex);
+            vstPluginComponent.processAudioWithPlugin(buffer, renamedFileName, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex);
         }
 
         juce::AlertWindow::showMessageBoxAsync(
@@ -467,6 +507,23 @@ public:
 		findPatternInput.setBounds(fifthRow.removeFromLeft(120));
        // replacePatternLabel.setBounds(sixthRow.removeFromTop(30).removeFromLeft(120));
 		replacePatternInput.setBounds(fifthRow.removeFromLeft(140));
+
+       
+        auto row = bounds.removeFromTop(30);
+
+        trimFromBeginningToggle.setBounds(row.removeFromLeft(150));
+        trimFromBeginningInput.setBounds(row);
+        row = bounds.removeFromTop(30);
+
+        trimFromEndToggle.setBounds(row.removeFromLeft(150));
+        trimFromEndInput.setBounds(row);
+        row = bounds.removeFromTop(30);
+
+        rangeToggle.setBounds(row.removeFromLeft(150));
+        rangeFromInput.setBounds(row.removeFromLeft(70));
+        rangeToInput.setBounds(row);
+        row = bounds.removeFromTop(30);
+
 		
         
         renameButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
@@ -542,6 +599,13 @@ public:
         // Get the dynamic values
         const juce::String insert = insertPatternInput.getText();
         const int insertIndex = indexEditor.getText().getIntValue();
+        const juce::String find = findPatternInput.getText();
+        const juce::String replace = replacePatternInput.getText();
+        int trimFromBeginningIndex = trimFromBeginningInput.getText().getIntValue();
+		int trimFromEndIndex = trimFromEndInput.getText().getIntValue();
+		int rangeFromIndex = rangeFromInput.getText().getIntValue();
+		int rangeToIndex = rangeToInput.getText().getIntValue();
+           
 
         // Validation
         if (insertIndex < 0)
@@ -552,7 +616,7 @@ public:
         }
 
         // Perform batch renaming
-        exporter.batchRename(audioFileNames, renamedFileNames, prefix.toStdString(), insert.toStdString(), insertIndex, suffix.toStdString());
+        exporter.batchRename(audioFileNames, renamedFileNames, prefix.toStdString(), insert.toStdString(), insertIndex, suffix.toStdString(), find.toStdString(), replace.toStdString(), trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex);
 
         // Update exporter with renamed file names
         exporter.updateRenamedFileNames(renamedFileNames);
@@ -569,7 +633,7 @@ private:
     juce::Label fileNameLabel;
     juce::TextButton renameButton{ "Rename" };
 
-    juce::ToggleButton prefixToggle, insertToggle, suffixToggle, findReplaceToggle;
+    juce::ToggleButton prefixToggle, insertToggle, suffixToggle, findReplaceToggle, trimFromBeginningToggle, trimFromEndToggle, rangeToggle;
 
     juce::Label prefixPatternLabel{ "Prefix Label", "Prefix" };
     juce::TextEditor prefixPatternInput;
@@ -584,7 +648,7 @@ private:
     juce::TextEditor findPatternInput;
 
     juce::Label replacePatternLabel{"Replace Label", "Replace"};
-    juce::TextEditor replacePatternInput;
+    juce::TextEditor replacePatternInput, trimFromBeginningInput, trimFromEndInput, rangeFromInput, rangeToInput;
     
     
     std::unique_ptr<juce::FileChooser> fileChooser;

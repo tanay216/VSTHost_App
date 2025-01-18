@@ -71,12 +71,24 @@ public:
    // void handleBusChange(AudioProcessor* pluginInstance, AudioBuffer<float> audioBuffer);
     void refreshPlugin(int pluginIndex, AudioProcessor* pluginInstance);
     void debugBusAndChannelInfo(AudioProcessor* pluginInstance);
-    void processAudioWithPlugin(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex);
+    void processAudioWithPlugin(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+        int trimFromEndIndex,
+        int rangeFromIndex,
+        int rangeToIndex);
     
    // void insertAtIndex(std::string modifiedFileName);
-    void processMonoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex);
-    void processStereoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex);
-    void processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex);
+    void processMonoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+        int trimFromEndIndex,
+        int rangeFromIndex,
+        int rangeToIndex);
+    void processStereoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+        int trimFromEndIndex,
+        int rangeFromIndex,
+        int rangeToIndex);
+    void processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+        int trimFromEndIndex,
+        int rangeFromIndex,
+        int rangeToIndex);
     const AudioBuffer<float>& getMonoOutputBuffer() const;  // Getter for monoOutputBuffer
     const AudioBuffer<float>& getStereoOutputBuffer() const; // Getter for stereoOutputBuffer
     void VSTPluginComponent::handleMultichannelConfiguration(int configId);
