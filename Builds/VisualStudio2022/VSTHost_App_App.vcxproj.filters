@@ -3540,6 +3540,9 @@
     <ClInclude Include="..\..\Source\MainComponent.h">
       <Filter>VSTHost_App\Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\SettingsManager.h">
+      <Filter>VSTHost_App</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h">
       <Filter>JUCE Modules\juce_audio_basics\audio_play_head</Filter>
     </ClInclude>

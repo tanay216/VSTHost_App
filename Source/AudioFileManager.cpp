@@ -118,3 +118,14 @@ AudioBuffer<float> AudioFileManager::loadAudioFile(const File& audioFile)
 //    return audioBuffer;  // Return the audio buffer
 //}
 
+void AudioFileManager::saveLastAudioLoadPath(const juce::String& path)
+{
+    SettingsManager::getInstance().saveSetting("lastAudioLoadPath", path);
+}
+
+juce::String AudioFileManager::getLastAudioLoadPath() const
+{
+    return SettingsManager::getInstance().getSetting("lastAudioLoadPath", "");
+}
+
+

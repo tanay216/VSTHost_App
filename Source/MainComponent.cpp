@@ -436,15 +436,6 @@ void MainComponent::resized()
 
 
 
-
-
-
-
-
-
-
-
-
 void MainComponent::buttonClicked(juce::Button* button)
 {
     if (button == &scanPluginButton)
@@ -466,7 +457,12 @@ void MainComponent::buttonClicked(juce::Button* button)
     {
         std::cout << "Loading audio" << std::endl;
         std::cout << "====================" << std::endl;
-        fileChooser = std::make_unique<juce::FileChooser>("Select an audio file", juce::File(), "*.wav");
+        // Print the current last saved path every time button is clicked
+        std::cout << "Current path: " << audioFileManager.getLastAudioLoadPath() << std::endl;
+
+        juce::String lastPath = audioFileManager.getLastAudioLoadPath();
+        juce::File initialFolder = lastPath.isNotEmpty() ? juce::File(lastPath) : juce::File();
+        fileChooser = std::make_unique<juce::FileChooser>("Select an audio file", initialFolder, "*.wav");
         // Launch the file chooser asynchronously
         fileChooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::canSelectMultipleItems,
             [this](const juce::FileChooser& chooser)
@@ -480,6 +476,8 @@ void MainComponent::buttonClicked(juce::Button* button)
                     
                     for (const auto& file : selectedFiles)
                     {
+                        audioFileManager.saveLastAudioLoadPath(file.getParentDirectory().getFullPathName());
+                        std::cout << "Output directory saved to: " << audioFileManager.getLastAudioLoadPath().toStdString() << std::endl;
                         // const auto& file = selectedFiles[i];
                         
                         if (!audioFileNames.contains(file.getFileName()))
@@ -621,56 +619,7 @@ void MainComponent::buttonClicked(juce::Button* button)
     {
         //transportSource.stop();
     }
-    //else if (button == &exportAudioButton)
-    //{
-    //    if (readerSource != nullptr)
-    //    {
-    //        if (audioFileNames.size() != audioBuffers.size())
-    //        {
-    //            std::cout << "Audio buffers do not match the number of loaded files." << std::endl;
-    //            return;
-    //        }
-
-    //        // Iterate through all the loaded audio files
-    //        for (int i = 0; i < audioFileNames.size(); ++i)
-    //        {
-
-    //            // std::cout << "Main Audio buffer size: " << audioBuffer.getNumSamples() << std::endl;
-    //            // std::cout << "Main Audio buffer Channels: " << audioBuffer.getNumChannels() << std::endl               
-
-    //            std::cout << "Exporting audio file..." << std::endl;
-    //            std::string currentAudioFileName = audioFileNames[i].toStdString();
-    //            juce::AudioBuffer<float>& currentAudioBuffer = audioBuffers[i];
-
-    //            auto isBypassed = bypassStates.find(currentAudioFileName) != bypassStates.end() && bypassStates[currentAudioFileName];
-
-    //            if (isBypassed)
-    //            {
-    //                // Skip processing and log bypassed files
-    //                std::cout << "Skipping export for bypassed file: " << currentAudioFileName << std::endl;
-    //                continue; // Skip this file and move to the next one
-    //            }
-
-
-
-    //            if (currentAudioBuffer.getNumSamples() == 0)
-    //            {
-    //                std::cout << "Audio Buffer is empty for: " << currentAudioFileName << "." << std::endl;
-    //                return;
-    //            }
-
-    //            std::cout << "Exporting: " << currentAudioFileName << std::endl;
-
-    //            // Process each audio file
-    //            vstPluginComponent.processAudioWithPlugin(currentAudioBuffer, currentAudioFileName);
-    //        }
-
-    //    }
-    //    else
-    //    {
-    //        std::cout << "readerSource is empty." << std::endl;
-    //    }
-    //}
+    
 
     else if (button == &exportAudioButton)
     {

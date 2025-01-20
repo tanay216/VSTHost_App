@@ -290,6 +290,15 @@ public:
         vstPluginComponent(vstPluginComponent), 
         exporter(exporter)
     {
+        // Load last export path from settings
+        juce::String lastExportPath = exporter.getLastExportFolder();
+        if (!lastExportPath.isEmpty())
+        {
+            fileNameLabel.setText("Output Folder: " + lastExportPath, juce::dontSendNotification);
+            exporter.outputDirPath = lastExportPath.toStdString();
+        }
+
+        std::cout << "Last Export Folder Loaded: " << lastExportPath << std::endl;
 
         // Add and configure the "Browse" button
         addAndMakeVisible(browseButton);
@@ -308,7 +317,7 @@ public:
 
         // Add the filename label
         addAndMakeVisible(fileNameLabel);
-        fileNameLabel.setText("Output Folder: Not Selected", juce::dontSendNotification);
+        fileNameLabel.setText("Output Folder: " + lastExportPath, juce::dontSendNotification);
 
         //==================== Prefix ========================
 
@@ -423,6 +432,18 @@ public:
         rangeToInput.setTextToShowWhenEmpty("To", juce::Colours::grey);
         rangeToInput.setEnabled(false);
         
+        //==================== Regular Expression ========================
+
+        // Regular Expression Rename
+        addAndMakeVisible(regexToggle);
+        regexToggle.setButtonText("Regex Rename");
+        regexToggle.onClick = [this] { regexPatternInput.setEnabled(regexToggle.getToggleState()); regexReplacementInput.setEnabled(regexToggle.getToggleState()); };
+        addAndMakeVisible(regexPatternInput);
+        regexPatternInput.setTextToShowWhenEmpty("Regex Pattern", juce::Colours::grey);
+        regexPatternInput.setEnabled(false);
+        addAndMakeVisible(regexReplacementInput);
+        regexReplacementInput.setTextToShowWhenEmpty("Replacement", juce::Colours::grey);
+        regexReplacementInput.setEnabled(false);
     }
 
   
@@ -464,6 +485,8 @@ public:
 			int trimFromEndIndex = trimFromEndInput.getText().getIntValue();
 			int rangeFromIndex = rangeFromInput.getText().getIntValue();
 			int rangeToIndex = rangeToInput.getText().getIntValue();
+            const std::string& regexPattern = regexPatternInput.getText().toStdString();
+            const std::string& regexReplacement = regexReplacementInput.getText().toStdString();
 
             // Validate insertIndex
             if (insertIndex < 0)
@@ -471,7 +494,7 @@ public:
                 std::cerr << "Invalid insert index: " << insertIndex << std::endl;
                 return;
             }
-            vstPluginComponent.processAudioWithPlugin(buffer, renamedFileName, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex);
+            vstPluginComponent.processAudioWithPlugin(buffer, renamedFileName, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexPattern);
         }
 
         juce::AlertWindow::showMessageBoxAsync(
@@ -524,6 +547,10 @@ public:
         rangeToInput.setBounds(row);
         row = bounds.removeFromTop(30);
 
+        regexToggle.setBounds(row.removeFromLeft(150));
+        regexPatternInput.setBounds(row.removeFromLeft(150));
+        regexReplacementInput.setBounds(row);
+
 		
         
         renameButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
@@ -541,13 +568,17 @@ public:
         
         if (button == &browseButton)
         {
+            std::cout << "Current Export Folder: " << exporter.getLastExportFolder() << std::endl;
+            juce::String lastExportPath = exporter.getLastExportFolder();
+            juce::File initialDirectory = juce::File(lastExportPath.isEmpty() ? juce::File::getSpecialLocation(juce::File::userDocumentsDirectory) : lastExportPath);
             // Open a file chooser for selecting a directory
             fileChooser = std::make_unique<juce::FileChooser>(
-                "Choose an output directory", juce::File(), "*");
+                "Choose an output directory", initialDirectory, "*");
 
             fileChooser->launchAsync(juce::FileBrowserComponent::canSelectDirectories,
                 [this](const juce::FileChooser& chooser)
                 {
+                    
                     auto selectedDirectory = chooser.getResult();
                     if (selectedDirectory.exists() && selectedDirectory.isDirectory())
                     {
@@ -558,6 +589,7 @@ public:
 
                         // Output the directory path for verification
                         std::cout << "Output directory set to: " << exporter.outputDirPath << std::endl;
+                        exporter.saveLastExportFolder(exporter.outputDirPath);
                     }
                 });
         }
@@ -605,6 +637,8 @@ public:
 		int trimFromEndIndex = trimFromEndInput.getText().getIntValue();
 		int rangeFromIndex = rangeFromInput.getText().getIntValue();
 		int rangeToIndex = rangeToInput.getText().getIntValue();
+        const std::string& regexPattern = regexPatternInput.getText().toStdString();
+        const std::string& regexReplacement = regexReplacementInput.getText().toStdString();
            
 
         // Validation
@@ -616,7 +650,7 @@ public:
         }
 
         // Perform batch renaming
-        exporter.batchRename(audioFileNames, renamedFileNames, prefix.toStdString(), insert.toStdString(), insertIndex, suffix.toStdString(), find.toStdString(), replace.toStdString(), trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex);
+        exporter.batchRename(audioFileNames, renamedFileNames, prefix.toStdString(), insert.toStdString(), insertIndex, suffix.toStdString(), find.toStdString(), replace.toStdString(), trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexReplacement); 
 
         // Update exporter with renamed file names
         exporter.updateRenamedFileNames(renamedFileNames);
@@ -649,6 +683,9 @@ private:
 
     juce::Label replacePatternLabel{"Replace Label", "Replace"};
     juce::TextEditor replacePatternInput, trimFromBeginningInput, trimFromEndInput, rangeFromInput, rangeToInput;
+
+    juce::ToggleButton regexToggle;
+    juce::TextEditor regexPatternInput, regexReplacementInput;
     
     
     std::unique_ptr<juce::FileChooser> fileChooser;

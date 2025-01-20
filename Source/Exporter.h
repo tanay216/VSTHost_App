@@ -4,6 +4,8 @@
 #include <juce_audio_formats/juce_audio_formats.h>
 #include <string>
 #include "VSTPluginComponent.h"
+#include <regex>
+#include "SettingsManager.h"
 
 using namespace juce;
 
@@ -15,15 +17,21 @@ public:
     void exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
         int trimFromEndIndex,
         int rangeFromIndex,
-        int rangeToIndex);
+        int rangeToIndex,
+        const std::string& regexPattern,
+        const std::string& regexReplacement);
     void exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
         int trimFromEndIndex,
         int rangeFromIndex,
-        int rangeToIndex);
+        int rangeToIndex,
+        const std::string& regexPattern,
+        const std::string& regexReplacement);
     void batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
         int trimFromEndIndex,
         int rangeFromIndex,
-        int rangeToIndex);
+        int rangeToIndex,
+        const std::string& regexPattern,
+        const std::string& regexReplacement);
     void resetOriginalNames(const juce::StringArray& inputFileNames); // Resets the mapping to the original names
     void updateRenamedFileNames(const juce::StringArray& renamedFileNames);
 
@@ -31,6 +39,11 @@ public:
     void exportMonoAudio(const AudioBuffer<float>& buffer, double sampleRate);
     void exportStereoAudio(const AudioBuffer<float>& buffer, double sampleRate);
     void exportMultiChannelAudio(const AudioBuffer<float>& buffer, double sampleRate);
+
+    void saveLastExportFolder(const juce::String& path);
+    juce::String getLastExportFolder() const;
+    void saveRenameSettings(const juce::String& settings);
+    juce::String getLastRenameSettings() const;
 
     std::string outputDirPath = "C:\\ProcessedAudio";
 

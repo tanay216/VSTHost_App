@@ -26,6 +26,8 @@
       <FILE id="DuWFzl" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
     </GROUP>
+    <FILE id="ahv3DJ" name="SettingsManager.h" compile="0" resource="0"
+          file="Source/SettingsManager.h"/>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>

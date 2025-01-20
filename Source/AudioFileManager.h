@@ -16,6 +16,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <vector>
 #include <iostream>  
+#include "SettingsManager.h"
 
 
 using namespace juce;
@@ -25,6 +26,7 @@ class AudioFileManager
 public:
     AudioFileManager();
     ~AudioFileManager();
+
 
     // Scans a directory for audio files and allows user selection
     std::vector<juce::File> scanAudioFiles(const juce::String& directoryPath);
@@ -36,6 +38,9 @@ public:
     const std::string& AudioFileManager::getLoadedAudioFileNames() const {
         return loadedAudioFileNames;
     }
+
+    void saveLastAudioLoadPath(const juce::String& path);
+    juce::String getLastAudioLoadPath() const;
     
     AudioBuffer<float> audioBuffer;
     std::vector<juce::AudioBuffer<float>> loadedBuffers;
@@ -48,6 +53,7 @@ private:
    // std::unique_ptr<AudioFormatReader> reader;
     std::string loadedAudioFileNames;
     double fileSampleRate = 0.0;
+    
     
 };
 

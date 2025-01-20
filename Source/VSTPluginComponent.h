@@ -74,21 +74,29 @@ public:
     void processAudioWithPlugin(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
         int trimFromEndIndex,
         int rangeFromIndex,
-        int rangeToIndex);
+        int rangeToIndex,
+        const std::string& regexPattern,
+        const std::string& regexReplacement);
     
    // void insertAtIndex(std::string modifiedFileName);
     void processMonoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
         int trimFromEndIndex,
         int rangeFromIndex,
-        int rangeToIndex);
+        int rangeToIndex,
+        const std::string& regexPattern,
+        const std::string& regexReplacement);
     void processStereoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
         int trimFromEndIndex,
         int rangeFromIndex,
-        int rangeToIndex);
+        int rangeToIndex,
+        const std::string& regexPattern,
+        const std::string& regexReplacement);
     void processMultiChannelAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
         int trimFromEndIndex,
         int rangeFromIndex,
-        int rangeToIndex);
+        int rangeToIndex,
+        const std::string& regexPattern,
+        const std::string& regexReplacement);
     const AudioBuffer<float>& getMonoOutputBuffer() const;  // Getter for monoOutputBuffer
     const AudioBuffer<float>& getStereoOutputBuffer() const; // Getter for stereoOutputBuffer
     void VSTPluginComponent::handleMultichannelConfiguration(int configId);

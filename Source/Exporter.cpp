@@ -8,46 +8,20 @@ Exporter::Exporter() {
 }
 Exporter::~Exporter() {}
 
-//void Exporter::exportFileName(const std::string& currentFileName, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix)
-//{
-//    std::string baseName = currentFileName;
-//
-//    auto it = originalFileNameMap.find(currentFileName);
-//    if (it != originalFileNameMap.end())
-//    {
-//        baseName = it->second; // Start from the original name
-//    }
-//
-//    File audioFile(baseName);
-//    std::string nameWithoutExtension = audioFile.getFileNameWithoutExtension().toStdString();
-//    extension = audioFile.getFileExtension().toStdString();
-//
-//    // Check if the insert is already part of the filename, to avoid double insertion
-//    if (nameWithoutExtension.find(insert) == std::string::npos)
-//    {
-//        // Insert at the specified index only if it's not already inserted
-//        if (insertIndex >= 0 && insertIndex <= static_cast<int>(nameWithoutExtension.size()))
-//        {
-//            nameWithoutExtension.insert(insertIndex, insert);
-//        }
-//    }
-//
-//    outputFileName = prefix + nameWithoutExtension + suffix + extension;
-//
-//    std::cout << "Renamed: " << baseName << " -> " << outputFileName << std::endl;
-//}
 
-//void Exporter::exportFileName(const std::string& currentFileName, 
-//                              const std::string& prefix,
-//                              const std::string& insert, 
-//                                int insertIndex, 
-//                              const std::string& suffix, 
-//                              const std::string& find, 
-//                              const std::string& replace,
-//                                int trimFromBeginningIndex,
-//                                int trimFromEndIndex,
-//                                int rangeFromIndex,
-//                                int rangeToIndex)
+//void Exporter::exportFileName(const std::string& currentFileName,
+//    const std::string& prefix,
+//    const std::string& insert,
+//    int insertIndex,
+//    const std::string& suffix,
+//    const std::string& find,
+//    const std::string& replace,
+//    int trimFromBeginningIndex,
+//    int trimFromEndIndex,
+//    int rangeFromIndex,
+//    int rangeToIndex,
+//    const std::string& regexPattern,
+//    const std::string& regexReplacement)
 //{
 //    std::string baseName = currentFileName;
 //
@@ -72,6 +46,24 @@ Exporter::~Exporter() {}
 //        }
 //    }
 //
+//    // Trim from Beginning
+//    if (trimFromBeginningIndex > 0 && trimFromBeginningIndex <= static_cast<int>(nameWithoutExtension.size()))
+//    {
+//        nameWithoutExtension = nameWithoutExtension.substr(trimFromBeginningIndex);
+//    }
+//
+//    // Trim from End
+//    if (trimFromEndIndex > 0 && trimFromEndIndex <= static_cast<int>(nameWithoutExtension.size()))
+//    {
+//        nameWithoutExtension = nameWithoutExtension.substr(0, nameWithoutExtension.size() - trimFromEndIndex);
+//    }
+//
+//    // Trim by Range
+//    if (rangeFromIndex >= 0 && rangeToIndex > rangeFromIndex && rangeToIndex <= static_cast<int>(nameWithoutExtension.size()))
+//    {
+//        nameWithoutExtension.erase(rangeFromIndex, rangeToIndex - rangeFromIndex);
+//    }
+//
 //    // Insert at index (only if not already inserted)
 //    if (!insert.empty() && nameWithoutExtension.find(insert) == std::string::npos)
 //    {
@@ -86,6 +78,7 @@ Exporter::~Exporter() {}
 //    std::cout << "Renamed: " << baseName << " -> " << outputFileName << std::endl;
 //}
 
+
 void Exporter::exportFileName(const std::string& currentFileName,
     const std::string& prefix,
     const std::string& insert,
@@ -96,7 +89,9 @@ void Exporter::exportFileName(const std::string& currentFileName,
     int trimFromBeginningIndex,
     int trimFromEndIndex,
     int rangeFromIndex,
-    int rangeToIndex)
+    int rangeToIndex,
+    const std::string& regexPattern,
+    const std::string& regexReplacement)
 {
     std::string baseName = currentFileName;
 
@@ -109,6 +104,20 @@ void Exporter::exportFileName(const std::string& currentFileName,
     File audioFile(baseName);
     std::string nameWithoutExtension = audioFile.getFileNameWithoutExtension().toStdString();
     extension = audioFile.getFileExtension().toStdString();
+
+    // Apply Regular Expression Replacement
+    if (!regexPattern.empty())
+    {
+        try
+        {
+            std::regex re(regexPattern);
+            nameWithoutExtension = std::regex_replace(nameWithoutExtension, re, regexReplacement);
+        }
+        catch (const std::regex_error& e)
+        {
+            std::cerr << "Regex Error: " << e.what() << std::endl;
+        }
+    }
 
     // Perform Find & Replace
     if (!find.empty())
@@ -154,14 +163,17 @@ void Exporter::exportFileName(const std::string& currentFileName,
 }
 
 
+
 void Exporter::batchRename(const juce::StringArray& inputFileNames, juce::StringArray& renamedFileNames, const std::string& prefix, const std::string& insert, int insertIndex, const std::string& suffix, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
     int trimFromEndIndex,
     int rangeFromIndex,
-    int rangeToIndex)
+    int rangeToIndex,
+    const std::string& regexPattern,
+    const std::string& regexReplacement)
 {
     for (const auto& currentFileName : inputFileNames)
     {
-        exportFileName(currentFileName.toStdString(), prefix, insert, insertIndex, suffix, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex);
+        exportFileName(currentFileName.toStdString(), prefix, insert, insertIndex, suffix, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexReplacement);
         renamedFileNames.add(outputFileName);
     }
 }
@@ -185,18 +197,16 @@ void Exporter::updateRenamedFileNames(const juce::StringArray& renamedFileNames)
 void Exporter::exportAudioToFile(const AudioBuffer<float>& buffer, double sampleRate, const std::string& originalFileName, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
     int trimFromEndIndex,
     int rangeFromIndex,
-    int rangeToIndex)
+    int rangeToIndex,
+    const std::string& regexPattern,
+    const std::string& regexReplacement)
 {
     std::cout << "Exporting processed audio to file..." << std::endl;
     //std::cout << "buffer channels: "<< buffer.getNumChannels() << "" << std::endl;
 
-    exportFileName(originalFileName, addPrefix, insert, insertIndex ,addSuffix, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex);
+    exportFileName(originalFileName, addPrefix, insert, insertIndex ,addSuffix, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexReplacement);
 
-    // Access the mono and stereo buffers from VSTPluginHost
-    //VSTPluginComponent vstPluginComponent;
-   // auto& monoOutputBuffer = vstPluginComponent.getMonoOutputBuffer();
-    //auto& stereoOutputBuffer = VSTPluginComponent::getInstance().getStereoOutputBuffer();
-
+    
     if (buffer.getNumChannels() == 1) {
         std::cout << "ExportMonoAudio function called" << std::endl;
         exportMonoAudio(buffer, sampleRate);
@@ -224,6 +234,7 @@ void Exporter::exportMonoAudio(const AudioBuffer<float>& buffer, double sampleRa
 
     File outputDir(outputDirPath);; // Specify the output file path
     File outputFile(outputDir.getChildFile(outputFileName));  // Use the new filename
+    
 
     // Ensure the output directory exists
     if (!outputDir.exists())
@@ -386,5 +397,27 @@ void Exporter::exportMultiChannelAudio(const AudioBuffer<float>& buffer, double 
         std::cout << "Successfully exported audio to " << outputFileName << std::endl;
     }
 }
+
+void Exporter::saveLastExportFolder(const juce::String& path)
+{
+    SettingsManager::getInstance().saveSetting("lastExportFolder", path);
+}
+
+juce::String Exporter::getLastExportFolder() const
+{
+    return SettingsManager::getInstance().getSetting("lastExportFolder", "");
+}
+
+void Exporter::saveRenameSettings(const juce::String& settings)
+{
+    SettingsManager::getInstance().saveSetting("lastRenameSettings", settings);
+}
+
+juce::String Exporter::getLastRenameSettings() const
+{
+    return SettingsManager::getInstance().getSetting("lastRenameSettings", "");
+}
+
+
 
 
