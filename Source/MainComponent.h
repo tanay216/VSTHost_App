@@ -300,6 +300,52 @@ public:
 
         std::cout << "Last Export Folder Loaded: " << lastExportPath << std::endl;
 
+        // Load rename settings
+        auto renameSettings = exporter.loadRenameSettings();
+
+        // Apply settings to UI fields
+        prefixPatternInput.setText(renameSettings["prefix"]);
+        insertPatternInput.setText(renameSettings["insert"]);
+        indexEditor.setText(renameSettings["insertIndex"]);
+        suffixPatternInput.setText(renameSettings["suffix"]);
+        findPatternInput.setText(renameSettings["find"]);
+        replacePatternInput.setText(renameSettings["replace"]);
+        trimFromBeginningInput.setText(renameSettings["trimStart"]);
+        trimFromEndInput.setText(renameSettings["trimEnd"]);
+        rangeFromInput.setText(renameSettings["rangeStart"]);
+        rangeToInput.setText(renameSettings["rangeEnd"]);
+        regexPatternInput.setText(renameSettings["regexPattern"]);
+        regexReplacementInput.setText(renameSettings["regexReplacement"]);
+
+        // Automatically set toggles based on whether text exists in inputs
+        prefixToggle.setToggleState(!renameSettings["prefix"].isEmpty(), juce::dontSendNotification);
+        insertToggle.setToggleState(!renameSettings["insert"].isEmpty(), juce::dontSendNotification);
+        suffixToggle.setToggleState(!renameSettings["suffix"].isEmpty(), juce::dontSendNotification);
+        findReplaceToggle.setToggleState(!renameSettings["find"].isEmpty() || !renameSettings["replace"].isEmpty(), juce::dontSendNotification);
+        trimFromBeginningToggle.setToggleState(renameSettings["trimStart"] != "0", juce::dontSendNotification);
+        trimFromEndToggle.setToggleState(renameSettings["trimEnd"] != "0", juce::dontSendNotification);
+        rangeToggle.setToggleState(renameSettings["rangeStart"] != "0" || renameSettings["rangeEnd"] != "0", juce::dontSendNotification);
+        regexToggle.setToggleState(!renameSettings["regexPattern"].isEmpty(), juce::dontSendNotification);
+
+        // Enable text fields based on toggle states
+        prefixPatternInput.setEnabled(prefixToggle.getToggleState());
+        insertPatternInput.setEnabled(insertToggle.getToggleState());
+        indexEditor.setEnabled(insertToggle.getToggleState());
+        suffixPatternInput.setEnabled(suffixToggle.getToggleState());
+        findPatternInput.setEnabled(findReplaceToggle.getToggleState());
+        replacePatternInput.setEnabled(findReplaceToggle.getToggleState());
+        trimFromBeginningInput.setEnabled(trimFromBeginningToggle.getToggleState());
+        trimFromEndInput.setEnabled(trimFromEndToggle.getToggleState());
+        rangeFromInput.setEnabled(rangeToggle.getToggleState());
+        rangeToInput.setEnabled(rangeToggle.getToggleState());
+        regexPatternInput.setEnabled(regexToggle.getToggleState());
+        regexReplacementInput.setEnabled(regexToggle.getToggleState());
+
+        // Add reset button
+        addAndMakeVisible(resetRenameButton);
+        resetRenameButton.setButtonText("Reset Rename Settings");
+        resetRenameButton.addListener(this);
+
         // Add and configure the "Browse" button
         addAndMakeVisible(browseButton);
         browseButton.setButtonText("Browse");
@@ -507,6 +553,8 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds().reduced(10);
+        resetRenameButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
+
         auto topRow = bounds.removeFromTop(30);
         auto secondRow = bounds.removeFromTop(30);
         auto thirdRow = bounds.removeFromTop(30);
@@ -514,6 +562,7 @@ public:
         auto fifthRow = bounds.removeFromTop(30);
         
         fileNameLabel.setBounds(bounds.removeFromTop(30));
+       
 
         prefixToggle.setBounds(topRow.removeFromLeft(100));
         prefixPatternInput.setBounds(topRow.removeFromLeft(120).withWidth(200));
@@ -553,6 +602,7 @@ public:
 
 		
         
+       
         renameButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
         browseButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
         exportButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
@@ -592,6 +642,26 @@ public:
                         exporter.saveLastExportFolder(exporter.outputDirPath);
                     }
                 });
+        }
+
+        else if (button == &resetRenameButton)
+        {
+            exporter.resetRenameSettings();
+
+            prefixPatternInput.setText("");
+            suffixPatternInput.setText("");
+            insertPatternInput.setText("");
+            indexEditor.setText("0");
+            findPatternInput.setText("");
+            replacePatternInput.setText("");
+            trimFromBeginningInput.setText("0");
+            trimFromEndInput.setText("0");
+            rangeFromInput.setText("0");
+            rangeToInput.setText("0");
+            regexPatternInput.setText("");
+            regexReplacementInput.setText("");
+
+            std::cout << "Rename settings reset to default." << std::endl;
         }
 
         else if (button == &exportButton)
@@ -640,6 +710,10 @@ public:
         const std::string& regexPattern = regexPatternInput.getText().toStdString();
         const std::string& regexReplacement = regexReplacementInput.getText().toStdString();
            
+        exporter.saveRenameSettings(prefix.toStdString(), insert.toStdString(), insertIndex, suffix.toStdString(),
+            find.toStdString(), replace.toStdString(), trimFromBeginningIndex, trimFromEndIndex,
+            rangeFromIndex, rangeToIndex, regexPattern, regexReplacement);
+        std::cout<<"Saved Rename Settings"<<std::endl;
 
         // Validation
         if (insertIndex < 0)
@@ -662,6 +736,7 @@ public:
 
 
 private:
+    juce::TextButton resetRenameButton{ "Reset Rename" };
     juce::TextButton browseButton{ "Browse" };
     juce::TextButton exportButton{ "Export" };
     juce::Label fileNameLabel;

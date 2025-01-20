@@ -407,17 +407,55 @@ juce::String Exporter::getLastExportFolder() const
 {
     return SettingsManager::getInstance().getSetting("lastExportFolder", "");
 }
-
-void Exporter::saveRenameSettings(const juce::String& settings)
+void Exporter::saveRenameSettings(const std::string& prefix,
+    const std::string& insert,
+    int insertIndex,
+    const std::string& suffix,
+    const std::string& find,
+    const std::string& replace,
+    int trimFromBeginningIndex,
+    int trimFromEndIndex,
+    int rangeFromIndex,
+    int rangeToIndex,
+    const std::string& regexPattern,
+    const std::string& regexReplacement)
 {
-    SettingsManager::getInstance().saveSetting("lastRenameSettings", settings);
+    SettingsManager::getInstance().saveSetting("rename_prefix", prefix);
+    SettingsManager::getInstance().saveSetting("rename_insert", insert);
+    SettingsManager::getInstance().saveSetting("rename_insertIndex", juce::String(insertIndex));
+    SettingsManager::getInstance().saveSetting("rename_suffix", suffix);
+    SettingsManager::getInstance().saveSetting("rename_find", find);
+    SettingsManager::getInstance().saveSetting("rename_replace", replace);
+    SettingsManager::getInstance().saveSetting("rename_trimStart", juce::String(trimFromBeginningIndex));
+    SettingsManager::getInstance().saveSetting("rename_trimEnd", juce::String(trimFromEndIndex));
+    SettingsManager::getInstance().saveSetting("rename_rangeStart", juce::String(rangeFromIndex));
+    SettingsManager::getInstance().saveSetting("rename_rangeEnd", juce::String(rangeToIndex));
+    SettingsManager::getInstance().saveSetting("rename_regexPattern", regexPattern);
+    SettingsManager::getInstance().saveSetting("rename_regexReplacement", regexReplacement);
 }
 
-juce::String Exporter::getLastRenameSettings() const
+std::unordered_map<std::string, juce::String> Exporter::loadRenameSettings() const
 {
-    return SettingsManager::getInstance().getSetting("lastRenameSettings", "");
+    return {
+        {"prefix", SettingsManager::getInstance().getSetting("rename_prefix", "")},
+        {"insert", SettingsManager::getInstance().getSetting("rename_insert", "")},
+        {"insertIndex", SettingsManager::getInstance().getSetting("rename_insertIndex", "0")},
+        {"suffix", SettingsManager::getInstance().getSetting("rename_suffix", "")},
+        {"find", SettingsManager::getInstance().getSetting("rename_find", "")},
+        {"replace", SettingsManager::getInstance().getSetting("rename_replace", "")},
+        {"trimStart", SettingsManager::getInstance().getSetting("rename_trimStart", "0")},
+        {"trimEnd", SettingsManager::getInstance().getSetting("rename_trimEnd", "0")},
+        {"rangeStart", SettingsManager::getInstance().getSetting("rename_rangeStart", "0")},
+        {"rangeEnd", SettingsManager::getInstance().getSetting("rename_rangeEnd", "0")},
+        {"regexPattern", SettingsManager::getInstance().getSetting("rename_regexPattern", "")},
+        {"regexReplacement", SettingsManager::getInstance().getSetting("rename_regexReplacement", "")}
+    };
 }
 
+void Exporter::resetRenameSettings()
+{
+    saveRenameSettings("", "", 0, "", "", "", 0, 0, 0, 0, "", "");
+}
 
 
 

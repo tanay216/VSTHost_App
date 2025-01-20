@@ -42,8 +42,22 @@ public:
 
     void saveLastExportFolder(const juce::String& path);
     juce::String getLastExportFolder() const;
-    void saveRenameSettings(const juce::String& settings);
-    juce::String getLastRenameSettings() const;
+    
+    void saveRenameSettings(const std::string& prefix,
+        const std::string& insert,
+        int insertIndex,
+        const std::string& suffix,
+        const std::string& find,
+        const std::string& replace,
+        int trimFromBeginningIndex,
+        int trimFromEndIndex,
+        int rangeFromIndex,
+        int rangeToIndex,
+        const std::string& regexPattern,
+        const std::string& regexReplacement);
+    std::unordered_map<std::string, juce::String> loadRenameSettings() const;
+    void resetRenameSettings();
+
 
     std::string outputDirPath = "C:\\ProcessedAudio";
 
