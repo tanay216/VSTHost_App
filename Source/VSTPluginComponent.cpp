@@ -403,7 +403,80 @@ void VSTPluginComponent::processAudioWithPlugin(AudioBuffer<float>& audioBuffer,
     }
 }
 
-void VSTPluginComponent::processMonoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert,int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+//void VSTPluginComponent::processMonoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert,int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+//    int trimFromEndIndex,
+//    int rangeFromIndex,
+//    int rangeToIndex,
+//    const std::string& regexPattern,
+//    const std::string& regexReplacement)
+//{
+//    std::cout << "Processing mono audio..." << std::endl;
+//    AudioFileManager audioFileManager;
+//
+//    if (!pluginInstance)
+//    {
+//        std::cerr << "No plugin instance available for processing!" << std::endl;
+//        return;
+//    }
+//
+//    // Ensure mono buffer
+//    if (audioBuffer.getNumChannels() != 1)
+//    {
+//        std::cerr << "Input is not mono!" << std::endl;
+//        return;
+//    }
+//
+//    int pluginInputChannels = pluginInstance->getTotalNumInputChannels();
+//    int pluginOutputChannels = pluginInstance->getTotalNumOutputChannels();
+//
+//    if (pluginInputChannels > 1)
+//    {
+//        AudioBuffer<float> stereoBuffer(pluginInputChannels, audioBuffer.getNumSamples());
+//        stereoBuffer.clear();
+//
+//        // Duplicate the mono channel into the stereo channels
+//        stereoBuffer.copyFrom(0, 0, audioBuffer, 0, 0, audioBuffer.getNumSamples());
+//        stereoBuffer.copyFrom(1, 0, audioBuffer, 0, 0, audioBuffer.getNumSamples());
+//        audioBuffer = std::move(stereoBuffer);
+//    }
+//
+//    // Create an output buffer
+//    AudioBuffer<float> monoBuffer(pluginOutputChannels, audioBuffer.getNumSamples());
+//    //monoOutputBuffer.setSize(pluginOutputChannels, audioBuffer.getNumSamples());
+//    monoBuffer.clear();
+//
+//    // Create a MidiBuffer (no MIDI in this case)
+//    MidiBuffer midiBuffer;
+//
+//    // Process the audio buffer in blocks
+//
+//    for (int pos = 0; pos < audioBuffer.getNumSamples(); pos += blockSize)
+//    {
+//        int numSamples = std::min(blockSize, audioBuffer.getNumSamples() - pos);
+//        AudioBuffer<float> blockBuffer(audioBuffer.getArrayOfWritePointers(), audioBuffer.getNumChannels(), pos, numSamples);
+//        pluginInstance->processBlock(blockBuffer, midiBuffer);
+//
+//        // Add processed samples to the output buffer
+//        for (int channel = 0; channel < std::min(pluginOutputChannels, audioBuffer.getNumChannels()); ++channel)
+//        {
+//            monoBuffer.copyFrom(0, pos, blockBuffer, 0, 0, numSamples);
+//            
+//        }
+//        
+//    }
+//   // duration = static_cast<double>(monoBuffer.getNumSamples()) / sampleRate;
+//    std::cout << "monoBuffer Channels: " << monoBuffer.getNumChannels() << std::endl;
+//    monoOutputBuffer.setSize(1, monoBuffer.getNumSamples());
+//    monoOutputBuffer.copyFrom(0, 0, monoBuffer, 0, 0, monoBuffer.getNumSamples()); // Copy from the left channel
+//    std::cout << "monoOutputBuffer Channels: " << monoOutputBuffer.getNumChannels() << std::endl;
+//    std::cout << "Mono processing complete." << std::endl;
+//    // Export the output buffer
+//    std::cout << "Audio Exporting Started." << std::endl;
+//    exporter.exportAudioToFile(monoOutputBuffer, sampleRate, loadedAudioFileNames, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexReplacement );
+//   
+//}
+
+void VSTPluginComponent::processMonoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
     int trimFromEndIndex,
     int rangeFromIndex,
     int rangeToIndex,
@@ -413,70 +486,69 @@ void VSTPluginComponent::processMonoAudio(AudioBuffer<float>& audioBuffer, const
     std::cout << "Processing mono audio..." << std::endl;
     AudioFileManager audioFileManager;
 
-    if (!pluginInstance)
-    {
-        std::cerr << "No plugin instance available for processing!" << std::endl;
-        return;
-    }
+    
+    exporter.exportAudioToFile(audioBuffer, sampleRate, loadedAudioFileNames, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexReplacement);
 
-    // Ensure mono buffer
-    if (audioBuffer.getNumChannels() != 1)
-    {
-        std::cerr << "Input is not mono!" << std::endl;
-        return;
-    }
-
-    int pluginInputChannels = pluginInstance->getTotalNumInputChannels();
-    int pluginOutputChannels = pluginInstance->getTotalNumOutputChannels();
-
-    if (pluginInputChannels > 1)
-    {
-        AudioBuffer<float> stereoBuffer(pluginInputChannels, audioBuffer.getNumSamples());
-        stereoBuffer.clear();
-
-        // Duplicate the mono channel into the stereo channels
-        stereoBuffer.copyFrom(0, 0, audioBuffer, 0, 0, audioBuffer.getNumSamples());
-        stereoBuffer.copyFrom(1, 0, audioBuffer, 0, 0, audioBuffer.getNumSamples());
-        audioBuffer = std::move(stereoBuffer);
-    }
-
-    // Create an output buffer
-    AudioBuffer<float> monoBuffer(pluginOutputChannels, audioBuffer.getNumSamples());
-    //monoOutputBuffer.setSize(pluginOutputChannels, audioBuffer.getNumSamples());
-    monoBuffer.clear();
-
-    // Create a MidiBuffer (no MIDI in this case)
-    MidiBuffer midiBuffer;
-
-    // Process the audio buffer in blocks
-
-    for (int pos = 0; pos < audioBuffer.getNumSamples(); pos += blockSize)
-    {
-        int numSamples = std::min(blockSize, audioBuffer.getNumSamples() - pos);
-        AudioBuffer<float> blockBuffer(audioBuffer.getArrayOfWritePointers(), audioBuffer.getNumChannels(), pos, numSamples);
-        pluginInstance->processBlock(blockBuffer, midiBuffer);
-
-        // Add processed samples to the output buffer
-        for (int channel = 0; channel < std::min(pluginOutputChannels, audioBuffer.getNumChannels()); ++channel)
-        {
-            monoBuffer.copyFrom(0, pos, blockBuffer, 0, 0, numSamples);
-            
-        }
-        
-    }
-   // duration = static_cast<double>(monoBuffer.getNumSamples()) / sampleRate;
-    std::cout << "monoBuffer Channels: " << monoBuffer.getNumChannels() << std::endl;
-    monoOutputBuffer.setSize(1, monoBuffer.getNumSamples());
-    monoOutputBuffer.copyFrom(0, 0, monoBuffer, 0, 0, monoBuffer.getNumSamples()); // Copy from the left channel
-    std::cout << "monoOutputBuffer Channels: " << monoOutputBuffer.getNumChannels() << std::endl;
-    std::cout << "Mono processing complete." << std::endl;
-    // Export the output buffer
-    std::cout << "Audio Exporting Started." << std::endl;
-    exporter.exportAudioToFile(monoOutputBuffer, sampleRate, loadedAudioFileNames, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexReplacement );
-   
 }
 
-void VSTPluginComponent::processStereoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert,int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+//void VSTPluginComponent::processStereoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert,int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
+//    int trimFromEndIndex,
+//    int rangeFromIndex,
+//    int rangeToIndex,
+//    const std::string& regexPattern,
+//    const std::string& regexReplacement)
+//{
+//    std::cout << "Processing stereo audio..." << std::endl;
+//    AudioFileManager audioFileManager;
+//
+//    if (!pluginInstance)
+//    {
+//        std::cerr << "No plugin instance available for processing!" << std::endl;
+//        return;
+//    }
+//
+//    // Ensure stereo buffer
+//    if (audioBuffer.getNumChannels() != 2)
+//    {
+//        std::cerr << "Input is not stereo!" << std::endl;
+//        std::cout << "current number of channels: " << audioBuffer.getNumChannels() << std::endl;
+//        return;
+//    }
+//
+//    int pluginInputChannels = pluginInstance->getTotalNumInputChannels();
+//    int pluginOutputChannels = pluginInstance->getTotalNumOutputChannels();
+//
+//    // Create an output buffer
+//    stereoOutputBuffer.setSize(pluginOutputChannels, audioBuffer.getNumSamples());
+//    stereoOutputBuffer.clear();
+//
+//    // Create a MidiBuffer (no MIDI in this case)
+//    MidiBuffer midiBuffer;
+//
+//    // Process the audio buffer in blocks
+//
+//    for (int pos = 0; pos < audioBuffer.getNumSamples(); pos += blockSize)
+//    {
+//        int numSamples = std::min(blockSize, audioBuffer.getNumSamples() - pos);
+//        AudioBuffer<float> blockBuffer(audioBuffer.getArrayOfWritePointers(), audioBuffer.getNumChannels(), pos, numSamples);
+//        pluginInstance->processBlock(blockBuffer, midiBuffer);
+//
+//        // Add processed samples to the output buffer
+//        for (int channel = 0; channel < std::min(pluginOutputChannels, audioBuffer.getNumChannels()); ++channel)
+//        {
+//            stereoOutputBuffer.copyFrom(channel, pos, blockBuffer, channel, 0, numSamples);
+//        }
+//    }
+//
+//    std::cout << "Stereo processing complete." << std::endl;
+//    // Export the output buffer
+//    std::cout << "Audio Exporting Started." << std::endl;
+//    exporter.exportAudioToFile(stereoOutputBuffer, sampleRate, loadedAudioFileNames, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexReplacement);
+//
+//}
+
+
+void VSTPluginComponent::processStereoAudio(AudioBuffer<float>& audioBuffer, const std::string& loadedAudioFileNames, const std::string& insert, int insertIndex, const std::string& find, const std::string& replace, int trimFromBeginningIndex,
     int trimFromEndIndex,
     int rangeFromIndex,
     int rangeToIndex,
@@ -486,49 +558,7 @@ void VSTPluginComponent::processStereoAudio(AudioBuffer<float>& audioBuffer, con
     std::cout << "Processing stereo audio..." << std::endl;
     AudioFileManager audioFileManager;
 
-    if (!pluginInstance)
-    {
-        std::cerr << "No plugin instance available for processing!" << std::endl;
-        return;
-    }
-
-    // Ensure stereo buffer
-    if (audioBuffer.getNumChannels() != 2)
-    {
-        std::cerr << "Input is not stereo!" << std::endl;
-        std::cout << "current number of channels: " << audioBuffer.getNumChannels() << std::endl;
-        return;
-    }
-
-    int pluginInputChannels = pluginInstance->getTotalNumInputChannels();
-    int pluginOutputChannels = pluginInstance->getTotalNumOutputChannels();
-
-    // Create an output buffer
-    stereoOutputBuffer.setSize(pluginOutputChannels, audioBuffer.getNumSamples());
-    stereoOutputBuffer.clear();
-
-    // Create a MidiBuffer (no MIDI in this case)
-    MidiBuffer midiBuffer;
-
-    // Process the audio buffer in blocks
-
-    for (int pos = 0; pos < audioBuffer.getNumSamples(); pos += blockSize)
-    {
-        int numSamples = std::min(blockSize, audioBuffer.getNumSamples() - pos);
-        AudioBuffer<float> blockBuffer(audioBuffer.getArrayOfWritePointers(), audioBuffer.getNumChannels(), pos, numSamples);
-        pluginInstance->processBlock(blockBuffer, midiBuffer);
-
-        // Add processed samples to the output buffer
-        for (int channel = 0; channel < std::min(pluginOutputChannels, audioBuffer.getNumChannels()); ++channel)
-        {
-            stereoOutputBuffer.copyFrom(channel, pos, blockBuffer, channel, 0, numSamples);
-        }
-    }
-
-    std::cout << "Stereo processing complete." << std::endl;
-    // Export the output buffer
-    std::cout << "Audio Exporting Started." << std::endl;
-    exporter.exportAudioToFile(stereoOutputBuffer, sampleRate, loadedAudioFileNames, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexReplacement);
+    exporter.exportAudioToFile(audioBuffer, sampleRate, loadedAudioFileNames, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexReplacement);
 
 }
 

@@ -37,6 +37,8 @@ public:
     //==============================================================================
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
+
+    juce::Array<juce::AudioBuffer<float>> MainComponent::getPlaybackBuffer();
     void releaseResources() override;
 
     //==============================================================================
@@ -88,10 +90,12 @@ private:
     /* Audio & Files */
     std::unordered_map<std::string, bool> bypassStates; // Tracks bypass state for each file
     juce::AudioBuffer<float> audioBuffer;
+    juce::AudioBuffer<float> playbackBuffer;
     std::string loadedAudioFileNames;
     juce::StringArray audioFileNames; // Array to store loaded audio files names
     std::unique_ptr<juce::AudioProcessorEditor> pluginEditor; // Plugin editor
     juce::Array<juce::AudioBuffer<float>> audioBuffers;
+    juce::Array<juce::AudioBuffer<float>> playbackBuffers;
     std::vector<std::unique_ptr<juce::AudioFormatReaderSource>> readerSources;
     int selectedFileIndex = -1;
 
@@ -281,10 +285,11 @@ class ExportAudioComponent : public juce::Component,
 {
 public:
     
-    ExportAudioComponent(juce::Array<juce::AudioBuffer<float>>& audioBuffers,
+    ExportAudioComponent(juce::Array<juce::AudioBuffer<float>>& audioBuffers, 
+        juce::Array<juce::AudioBuffer<float>>& playbackBuffers,
         juce::StringArray& audioFileNames,
         VSTPluginComponent& vstPluginComponent, 
-        std::unordered_map<std::string, bool>& bypassStates, Exporter& exporter) : audioBuffers(audioBuffers),
+        std::unordered_map<std::string, bool>& bypassStates, Exporter& exporter) : audioBuffers(audioBuffers), playbackBuffers(playbackBuffers),
         audioFileNames(audioFileNames),
         bypassStates(bypassStates),
         vstPluginComponent(vstPluginComponent), 
@@ -502,12 +507,14 @@ public:
             return;
         }
 
+        
         auto renamedFileNames = exporter.getRenamedFileNames();
 
         for (int i = 0; i < audioBuffers.size(); ++i)
         {
             const auto& renamedFileName = renamedFileNames[i].toStdString();
             juce::AudioBuffer<float>& buffer = audioBuffers[i];
+            juce::AudioBuffer<float>& playbackBuffer = playbackBuffers[i];
 
             if (bypassStates.find(renamedFileName) != bypassStates.end() && bypassStates[renamedFileName])
             {
@@ -540,7 +547,8 @@ public:
                 std::cerr << "Invalid insert index: " << insertIndex << std::endl;
                 return;
             }
-            vstPluginComponent.processAudioWithPlugin(buffer, renamedFileName, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexPattern);
+           vstPluginComponent.processAudioWithPlugin(playbackBuffer, renamedFileName, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexPattern);
+           
         }
 
         juce::AlertWindow::showMessageBoxAsync(
@@ -669,6 +677,7 @@ public:
             if ( !audioBuffers.isEmpty())
 
             {
+                std::cout << "Exporting audio..." << std::endl;
                 handleExportAudio();
                 // Perform export logic here
                 juce::AlertWindow::showMessageBoxAsync(
@@ -768,6 +777,7 @@ private:
     Exporter& exporter;
 
     juce::Array<juce::AudioBuffer<float>>& audioBuffers;
+    juce::Array<juce::AudioBuffer<float>>& playbackBuffers;
     juce::StringArray& audioFileNames;
     std::unordered_map<std::string, bool>& bypassStates;
     VSTPluginComponent& vstPluginComponent;

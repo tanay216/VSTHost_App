@@ -321,6 +321,41 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
     }
 }
 
+juce::Array<juce::AudioBuffer<float>> MainComponent::getPlaybackBuffer()
+{
+   /* playbackBuffer.setSize(audioBuffer.getNumChannels(), transportSource.getTotalLength());
+    juce::AudioSourceChannelInfo bufferToFill(playbackBuffer);
+    transportSource.getNextAudioBlock(bufferToFill);
+    return playbackBuffer;*/
+
+    juce::Array<juce::AudioBuffer<float>> playbackBuffers;
+
+    for (int i = 0; i < audioBuffers.size(); ++i)
+    {
+        const auto& sourceBuffer = audioBuffers[i];
+        juce::AudioBuffer<float> playbackBuffer;
+
+        // Ensure the playback buffer matches the source buffer size and channels
+        playbackBuffer.setSize(sourceBuffer.getNumChannels(), sourceBuffer.getNumSamples());
+
+        // Copy the source buffer to playback buffer for processing
+        playbackBuffer.makeCopyOf(sourceBuffer);
+
+        // Process playback buffer with the plugin
+        juce::MidiBuffer midiBuffer;
+        if (vstPluginComponent.pluginInstance != nullptr)
+        {
+            vstPluginComponent.pluginInstance->processBlock(playbackBuffer, midiBuffer);
+        }
+
+        playbackBuffers.add(playbackBuffer); // Add to the array
+    }
+
+    return playbackBuffers;
+}
+
+
+
 void MainComponent::releaseResources()
 {
     transportSource.releaseResources();
@@ -627,8 +662,9 @@ void MainComponent::buttonClicked(juce::Button* button)
 
         // Create and show the ExportAudioComponent
        // auto exportAudioComponent = std::make_unique<ExportAudioComponent>(*this);
+       
         auto exportAudioComponent = std::make_unique<ExportAudioComponent>(
-            audioBuffers, audioFileNames, vstPluginComponent, bypassStates, exporterComponent);
+            audioBuffers, playbackBuffers,  audioFileNames, vstPluginComponent, bypassStates, exporterComponent);
         exportAudioComponent->setSize(500, 500); // Width: 400, Height: 300
         options.content.setOwned(exportAudioComponent.release());
         options.dialogTitle = "Export Processed Audio";
