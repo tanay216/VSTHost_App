@@ -30,15 +30,13 @@ public:
     void populateAudioDeviceDropdowns();
     void changeAudioDevice(bool isInput);
 
-   
+
 
 
 
     //==============================================================================
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
-
-    juce::Array<juce::AudioBuffer<float>> MainComponent::getPlaybackBuffer();
     void releaseResources() override;
 
     //==============================================================================
@@ -67,9 +65,9 @@ public:
 
     void getAudioBuffersList();
 
-   
 
-    
+
+
 
 private:
     //==============================================================================
@@ -84,18 +82,16 @@ private:
     AudioFileManager audioFileManager;
     VSTPluginComponent vstPluginComponent;
     Exporter exporterComponent;
-   
+
     std::unique_ptr<juce::FileChooser> fileChooser;
-    
+
     /* Audio & Files */
     std::unordered_map<std::string, bool> bypassStates; // Tracks bypass state for each file
     juce::AudioBuffer<float> audioBuffer;
-    juce::AudioBuffer<float> playbackBuffer;
     std::string loadedAudioFileNames;
     juce::StringArray audioFileNames; // Array to store loaded audio files names
     std::unique_ptr<juce::AudioProcessorEditor> pluginEditor; // Plugin editor
     juce::Array<juce::AudioBuffer<float>> audioBuffers;
-    juce::Array<juce::AudioBuffer<float>> playbackBuffers;
     std::vector<std::unique_ptr<juce::AudioFormatReaderSource>> readerSources;
     int selectedFileIndex = -1;
 
@@ -112,7 +108,7 @@ private:
 
     /* Buttons and UI elements*/
 
-    juce::Viewport viewport;                     
+    juce::Viewport viewport;
     juce::Component contentComponent;            // Holds all buttons and UI elements
     juce::TextButton scanPluginButton{ "Scan Plugins" };
     juce::TextButton loadAudioButton{ "Load Audio File" };
@@ -192,12 +188,12 @@ private:
             MainComponent* mainComponent)
             : fileName(name), onPlayCallback(std::move(onPlay)),
             onRemoveCallback(std::move(onRemove)),
-			mainComponent(mainComponent)
+            mainComponent(mainComponent)
         {
             addNewButtons(removeButton, "X");
-          //  addNewButtons(bypassButton, "Bypass");
+            //  addNewButtons(bypassButton, "Bypass");
             addNewToggle(bypassToggleButton, "Bypass");
-           
+
         }
 
         void addNewButtons(juce::TextButton& button, const juce::String& ButtonText)
@@ -217,11 +213,11 @@ private:
         {
             auto bounds = getLocalBounds();
             fileLabel.setBounds(bounds.removeFromLeft(bounds.getWidth() - 130)); // File label
-          //  bypassButton.setBounds(bounds.removeFromRight(50));
+            //  bypassButton.setBounds(bounds.removeFromRight(50));
             bypassToggleButton.setBounds(bounds.removeFromRight(30));
             removeButton.setBounds(bounds.removeFromRight(30));
-            
-           
+
+
         }
 
         void buttonClicked(juce::Button* button) override
@@ -238,21 +234,21 @@ private:
 
             else if (button == &bypassToggleButton)
             {
-               // std::cout << "Bypass Toggle clicked" << std::endl;
+                // std::cout << "Bypass Toggle clicked" << std::endl;
 
                 bool isBypassed = bypassToggleButton.getToggleState();
-              //  std::cout << "Bypass Toggle clicked for " << fileName << " : " << isBypassed << std::endl;
+                //  std::cout << "Bypass Toggle clicked for " << fileName << " : " << isBypassed << std::endl;
 
-                
+
                 if (mainComponent)
                 {
                     mainComponent->setBypassState(fileName, isBypassed);
                 }
 
             }
-            
 
-           
+
+
         }
 
         void mouseDown(const juce::MouseEvent& e) override
@@ -272,7 +268,7 @@ private:
         juce::TextButton removeButton;
         juce::TextButton bypassButton;
         juce::ToggleButton bypassToggleButton;
-       
+
 
         std::function<void()> onPlayCallback;
         std::function<void()> onRemoveCallback;
@@ -284,15 +280,14 @@ class ExportAudioComponent : public juce::Component,
     public juce::Button::Listener
 {
 public:
-    
-    ExportAudioComponent(juce::Array<juce::AudioBuffer<float>>& audioBuffers, 
-        juce::Array<juce::AudioBuffer<float>>& playbackBuffers,
+
+    ExportAudioComponent(juce::Array<juce::AudioBuffer<float>>& audioBuffers,
         juce::StringArray& audioFileNames,
-        VSTPluginComponent& vstPluginComponent, 
-        std::unordered_map<std::string, bool>& bypassStates, Exporter& exporter) : audioBuffers(audioBuffers), playbackBuffers(playbackBuffers),
+        VSTPluginComponent& vstPluginComponent,
+        std::unordered_map<std::string, bool>& bypassStates, Exporter& exporter) : audioBuffers(audioBuffers),
         audioFileNames(audioFileNames),
         bypassStates(bypassStates),
-        vstPluginComponent(vstPluginComponent), 
+        vstPluginComponent(vstPluginComponent),
         exporter(exporter)
     {
         // Load last export path from settings
@@ -360,7 +355,7 @@ public:
         addAndMakeVisible(exportButton);
         exportButton.setButtonText("Export");
         exportButton.addListener(this);
-        
+
         // Add and configure the "Rename" button
         addAndMakeVisible(renameButton);
         renameButton.setButtonText("Rename");
@@ -376,7 +371,7 @@ public:
         addAndMakeVisible(prefixToggle);
         prefixToggle.setButtonText("Prefix");
         prefixToggle.onClick = [this] { prefixPatternInput.setEnabled(prefixToggle.getToggleState()); };
-        
+
         // Add label for renaming input
         addAndMakeVisible(prefixPatternLabel);
         prefixPatternLabel.setText("suffix Pattern:", juce::dontSendNotification);
@@ -386,7 +381,7 @@ public:
         prefixPatternInput.setTextToShowWhenEmpty("Prefix", juce::Colours::grey);
         prefixPatternInput.setEnabled(false);
 
-        
+
 
         //==================== Insert At Index ========================
 
@@ -398,7 +393,7 @@ public:
             indexEditor.setEnabled(insertToggle.getToggleState());
             };
 
-        
+
         addAndMakeVisible(insertPatternInput);
         insertPatternInput.setTextToShowWhenEmpty("Insert", juce::Colours::grey);
         insertPatternInput.setEnabled(false);
@@ -413,7 +408,7 @@ public:
         addAndMakeVisible(suffixToggle);
         suffixToggle.setButtonText("Suffix");
         suffixToggle.onClick = [this] { suffixPatternInput.setEnabled(suffixToggle.getToggleState()); };
-        
+
         // Add label for suffix renaming input
         addAndMakeVisible(suffixPatternLabel);
         suffixPatternLabel.setText("suffix Pattern:", juce::dontSendNotification);
@@ -428,26 +423,26 @@ public:
 
         // FindReplace Toggle
         addAndMakeVisible(findReplaceToggle);
-		findReplaceToggle.setButtonText("Find & Replace");
-		findReplaceToggle.onClick = [this] { findPatternInput.setEnabled(findReplaceToggle.getToggleState()), replacePatternInput.setEnabled(findReplaceToggle.getToggleState()); };
+        findReplaceToggle.setButtonText("Find & Replace");
+        findReplaceToggle.onClick = [this] { findPatternInput.setEnabled(findReplaceToggle.getToggleState()), replacePatternInput.setEnabled(findReplaceToggle.getToggleState()); };
 
         // Add Label for Find
         addAndMakeVisible(findPatternLabel);
-		findPatternLabel.setText("Find:", juce::dontSendNotification);
+        findPatternLabel.setText("Find:", juce::dontSendNotification);
 
         // Add input for Find
         addAndMakeVisible(findPatternInput);
-		findPatternInput.setTextToShowWhenEmpty("Find", juce::Colours::grey);
-		findPatternInput.setEnabled(false);
-        
+        findPatternInput.setTextToShowWhenEmpty("Find", juce::Colours::grey);
+        findPatternInput.setEnabled(false);
+
         // Add Label for Replace
         addAndMakeVisible(replacePatternLabel);
-		replacePatternLabel.setText("Replace:", juce::dontSendNotification);
+        replacePatternLabel.setText("Replace:", juce::dontSendNotification);
 
         // Add input for Replace
         addAndMakeVisible(replacePatternInput);
-		replacePatternInput.setTextToShowWhenEmpty("Replace", juce::Colours::grey);
-		replacePatternInput.setEnabled(false);
+        replacePatternInput.setTextToShowWhenEmpty("Replace", juce::Colours::grey);
+        replacePatternInput.setEnabled(false);
 
 
 
@@ -482,7 +477,7 @@ public:
         addAndMakeVisible(rangeToInput);
         rangeToInput.setTextToShowWhenEmpty("To", juce::Colours::grey);
         rangeToInput.setEnabled(false);
-        
+
         //==================== Regular Expression ========================
 
         // Regular Expression Rename
@@ -497,7 +492,7 @@ public:
         regexReplacementInput.setEnabled(false);
     }
 
-  
+
 
     void handleExportAudio()
     {
@@ -507,14 +502,12 @@ public:
             return;
         }
 
-        
         auto renamedFileNames = exporter.getRenamedFileNames();
 
         for (int i = 0; i < audioBuffers.size(); ++i)
         {
             const auto& renamedFileName = renamedFileNames[i].toStdString();
             juce::AudioBuffer<float>& buffer = audioBuffers[i];
-            juce::AudioBuffer<float>& playbackBuffer = playbackBuffers[i];
 
             if (bypassStates.find(renamedFileName) != bypassStates.end() && bypassStates[renamedFileName])
             {
@@ -533,11 +526,11 @@ public:
             const std::string insert = insertPatternInput.getText().toStdString();
             const int insertIndex = indexEditor.getText().getIntValue();
             const std::string find = findPatternInput.getText().toStdString();
-			const std::string replace = replacePatternInput.getText().toStdString();
+            const std::string replace = replacePatternInput.getText().toStdString();
             int trimFromBeginningIndex = trimFromBeginningInput.getText().getIntValue();
-			int trimFromEndIndex = trimFromEndInput.getText().getIntValue();
-			int rangeFromIndex = rangeFromInput.getText().getIntValue();
-			int rangeToIndex = rangeToInput.getText().getIntValue();
+            int trimFromEndIndex = trimFromEndInput.getText().getIntValue();
+            int rangeFromIndex = rangeFromInput.getText().getIntValue();
+            int rangeToIndex = rangeToInput.getText().getIntValue();
             const std::string& regexPattern = regexPatternInput.getText().toStdString();
             const std::string& regexReplacement = regexReplacementInput.getText().toStdString();
 
@@ -547,15 +540,14 @@ public:
                 std::cerr << "Invalid insert index: " << insertIndex << std::endl;
                 return;
             }
-           vstPluginComponent.processAudioWithPlugin(playbackBuffer, renamedFileName, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexPattern);
-           
+            vstPluginComponent.processAudioWithPlugin(buffer, renamedFileName, insert, insertIndex, find, replace, trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexPattern);
         }
 
         juce::AlertWindow::showMessageBoxAsync(
             juce::AlertWindow::InfoIcon, "Export", "Audio exported successfully!");
     }
 
-   
+
 
 
     void resized() override
@@ -568,9 +560,9 @@ public:
         auto thirdRow = bounds.removeFromTop(30);
         auto fourthRow = bounds.removeFromTop(30);
         auto fifthRow = bounds.removeFromTop(30);
-        
+
         fileNameLabel.setBounds(bounds.removeFromTop(30));
-       
+
 
         prefixToggle.setBounds(topRow.removeFromLeft(100));
         prefixPatternInput.setBounds(topRow.removeFromLeft(120).withWidth(200));
@@ -582,13 +574,13 @@ public:
         suffixToggle.setBounds(thirdRow.removeFromLeft(100));
         suffixPatternInput.setBounds(thirdRow.removeFromLeft(120).withWidth(200));
 
-		findReplaceToggle.setBounds(fourthRow.removeFromLeft(100));
-       // findPatternLabel.setBounds(fifthRow.removeFromTop(30).removeFromLeft(120));
-		findPatternInput.setBounds(fifthRow.removeFromLeft(120));
-       // replacePatternLabel.setBounds(sixthRow.removeFromTop(30).removeFromLeft(120));
-		replacePatternInput.setBounds(fifthRow.removeFromLeft(140));
+        findReplaceToggle.setBounds(fourthRow.removeFromLeft(100));
+        // findPatternLabel.setBounds(fifthRow.removeFromTop(30).removeFromLeft(120));
+        findPatternInput.setBounds(fifthRow.removeFromLeft(120));
+        // replacePatternLabel.setBounds(sixthRow.removeFromTop(30).removeFromLeft(120));
+        replacePatternInput.setBounds(fifthRow.removeFromLeft(140));
 
-       
+
         auto row = bounds.removeFromTop(30);
 
         trimFromBeginningToggle.setBounds(row.removeFromLeft(150));
@@ -608,9 +600,9 @@ public:
         regexPatternInput.setBounds(row.removeFromLeft(150));
         regexReplacementInput.setBounds(row);
 
-		
-        
-       
+
+
+
         renameButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
         browseButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
         exportButton.setBounds(bounds.removeFromTop(30).removeFromLeft(100));
@@ -623,7 +615,7 @@ public:
 
     void buttonClicked(juce::Button* button) override
     {
-        
+
         if (button == &browseButton)
         {
             std::cout << "Current Export Folder: " << exporter.getLastExportFolder() << std::endl;
@@ -636,7 +628,7 @@ public:
             fileChooser->launchAsync(juce::FileBrowserComponent::canSelectDirectories,
                 [this](const juce::FileChooser& chooser)
                 {
-                    
+
                     auto selectedDirectory = chooser.getResult();
                     if (selectedDirectory.exists() && selectedDirectory.isDirectory())
                     {
@@ -674,10 +666,9 @@ public:
 
         else if (button == &exportButton)
         {
-            if ( !audioBuffers.isEmpty())
+            if (!audioBuffers.isEmpty())
 
             {
-                std::cout << "Exporting audio..." << std::endl;
                 handleExportAudio();
                 // Perform export logic here
                 juce::AlertWindow::showMessageBoxAsync(
@@ -688,17 +679,17 @@ public:
                 juce::AlertWindow::showMessageBoxAsync(
                     juce::AlertWindow::WarningIcon, "Export", "Please select a valid output file.");
             }
-          
-            
-           
+
+
+
         }
 
         else if (button == &renameButton)
         {
-          //exporter.resetOriginalNames(audioFileNames);
-          performBatchRename(prefixPatternInput.getText(), suffixPatternInput.getText());
+            //exporter.resetOriginalNames(audioFileNames);
+            performBatchRename(prefixPatternInput.getText(), suffixPatternInput.getText());
         }
-        
+
     }
 
 
@@ -713,16 +704,16 @@ public:
         const juce::String find = findPatternInput.getText();
         const juce::String replace = replacePatternInput.getText();
         int trimFromBeginningIndex = trimFromBeginningInput.getText().getIntValue();
-		int trimFromEndIndex = trimFromEndInput.getText().getIntValue();
-		int rangeFromIndex = rangeFromInput.getText().getIntValue();
-		int rangeToIndex = rangeToInput.getText().getIntValue();
+        int trimFromEndIndex = trimFromEndInput.getText().getIntValue();
+        int rangeFromIndex = rangeFromInput.getText().getIntValue();
+        int rangeToIndex = rangeToInput.getText().getIntValue();
         const std::string& regexPattern = regexPatternInput.getText().toStdString();
         const std::string& regexReplacement = regexReplacementInput.getText().toStdString();
-           
+
         exporter.saveRenameSettings(prefix.toStdString(), insert.toStdString(), insertIndex, suffix.toStdString(),
             find.toStdString(), replace.toStdString(), trimFromBeginningIndex, trimFromEndIndex,
             rangeFromIndex, rangeToIndex, regexPattern, regexReplacement);
-        std::cout<<"Saved Rename Settings"<<std::endl;
+        std::cout << "Saved Rename Settings" << std::endl;
 
         // Validation
         if (insertIndex < 0)
@@ -733,7 +724,7 @@ public:
         }
 
         // Perform batch renaming
-        exporter.batchRename(audioFileNames, renamedFileNames, prefix.toStdString(), insert.toStdString(), insertIndex, suffix.toStdString(), find.toStdString(), replace.toStdString(), trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexReplacement); 
+        exporter.batchRename(audioFileNames, renamedFileNames, prefix.toStdString(), insert.toStdString(), insertIndex, suffix.toStdString(), find.toStdString(), replace.toStdString(), trimFromBeginningIndex, trimFromEndIndex, rangeFromIndex, rangeToIndex, regexPattern, regexReplacement);
 
         // Update exporter with renamed file names
         exporter.updateRenamedFileNames(renamedFileNames);
@@ -756,35 +747,33 @@ private:
     juce::Label prefixPatternLabel{ "Prefix Label", "Prefix" };
     juce::TextEditor prefixPatternInput;
 
-    juce::Label insertPatternLabel{"Insert Label", "Insert"};
+    juce::Label insertPatternLabel{ "Insert Label", "Insert" };
     juce::TextEditor insertPatternInput, indexEditor;
-    
-    juce::Label suffixPatternLabel{"Suffix Label", "Suffix"};
+
+    juce::Label suffixPatternLabel{ "Suffix Label", "Suffix" };
     juce::TextEditor suffixPatternInput;
-    
-    juce::Label findPatternLabel{"Find Label", "Find"};
+
+    juce::Label findPatternLabel{ "Find Label", "Find" };
     juce::TextEditor findPatternInput;
 
-    juce::Label replacePatternLabel{"Replace Label", "Replace"};
+    juce::Label replacePatternLabel{ "Replace Label", "Replace" };
     juce::TextEditor replacePatternInput, trimFromBeginningInput, trimFromEndInput, rangeFromInput, rangeToInput;
 
     juce::ToggleButton regexToggle;
     juce::TextEditor regexPatternInput, regexReplacementInput;
-    
-    
+
+
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::File outputFile;
     Exporter& exporter;
 
     juce::Array<juce::AudioBuffer<float>>& audioBuffers;
-    juce::Array<juce::AudioBuffer<float>>& playbackBuffers;
     juce::StringArray& audioFileNames;
     std::unordered_map<std::string, bool>& bypassStates;
     VSTPluginComponent& vstPluginComponent;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ExportAudioComponent)
 };
-
 
 
 
