@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="cPEt5Y" name="VSTHost_App" projectType="guiapp" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1" headerPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\include">
   <MAINGROUP id="l9CN2X" name="VSTHost_App">
     <GROUP id="{11C4BD75-CF17-0105-2F86-B6C295FABAAA}" name="Source">
+      <FILE id="kk5evR" name="WAAPIManager.cpp" compile="1" resource="0"
+            file="Source/WAAPIManager.cpp"/>
+      <FILE id="LnPekS" name="WAAPIManager.h" compile="0" resource="0" file="Source/WAAPIManager.h"/>
       <FILE id="MGeJmQ" name="MultiChannelComponent.cpp" compile="1" resource="0"
             file="Source/MultiChannelComponent.cpp"/>
       <FILE id="PhZ8Sc" name="MultiChannelComponent.h" compile="0" resource="0"
@@ -25,15 +28,15 @@
       <FILE id="wSC5Lz" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="DuWFzl" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
+      <FILE id="ahv3DJ" name="SettingsManager.h" compile="0" resource="0"
+            file="Source/SettingsManager.h"/>
     </GROUP>
-    <FILE id="ahv3DJ" name="SettingsManager.h" compile="0" resource="0"
-          file="Source/SettingsManager.h"/>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
-    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
     <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
@@ -44,10 +47,15 @@
   </MODULES>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_PLUGINHOST_VST3="1"/>
   <EXPORTFORMATS>
-    <VS2022 targetFolder="Builds/VisualStudio2022">
+    <VS2022 targetFolder="Builds/VisualStudio2022" extraLinkerFlags="ws2_32.lib&#10;user32.lib&#10;advapi32.lib&#10;AkAutobahn.lib&#10;CommunicationCentral.lib"
+            externalLibraries="ws2_32.lib&#10;user32.lib&#10;advapi32.lib&#10;AkAutobahn.lib&#10;CommunicationCentral.lib">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="VSTHost_App"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="VSTHost_App"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="VSTHost_App" libraryPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc160\Debug\lib"
+                       headerPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\include"
+                       extraLinkerFlags="AkAutobahn.lib&#10;CommunicationCentral.lib&#10;"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="VSTHost_App" headerPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\include"
+                       libraryPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc160\Release\lib"
+                       extraLinkerFlags="AkAutobahn.lib&#10;CommunicationCentral.lib"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="C:/Programs/JUCE/modules"/>

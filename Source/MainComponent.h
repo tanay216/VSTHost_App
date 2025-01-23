@@ -6,6 +6,7 @@
 #include "AudioFileManager.h"
 #include "VSTPluginComponent.h"
 #include "Exporter.h"
+#include "WAAPIManager.h"
 
 //==============================================================================
 /*
@@ -82,6 +83,8 @@ private:
     AudioFileManager audioFileManager;
     VSTPluginComponent vstPluginComponent;
     Exporter exporterComponent;
+    WAAPIManager waapiManager;
+    
 
     std::unique_ptr<juce::FileChooser> fileChooser;
 

@@ -664,6 +664,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\WAAPIManager.cpp">
+      <Filter>VSTHost_App\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\MultiChannelComponent.cpp">
       <Filter>VSTHost_App\Source</Filter>
     </ClCompile>
@@ -3522,6 +3525,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\WAAPIManager.h">
+      <Filter>VSTHost_App\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\MultiChannelComponent.h">
       <Filter>VSTHost_App\Source</Filter>
     </ClInclude>
@@ -3541,7 +3547,7 @@
       <Filter>VSTHost_App\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\SettingsManager.h">
-      <Filter>VSTHost_App</Filter>
+      <Filter>VSTHost_App\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h">
       <Filter>JUCE Modules\juce_audio_basics\audio_play_head</Filter>
