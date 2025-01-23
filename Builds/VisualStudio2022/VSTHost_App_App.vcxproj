@@ -47,12 +47,12 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\App\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VSTHost_App</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(LibraryPath);C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc160\Debug\lib</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(LibraryPath);C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc170\Debug\lib</LibraryPath>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Platform)\$(Configuration)\App\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\App\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VSTHost_App</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(LibraryPath);C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc160\Release\lib</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(LibraryPath);C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc170\Release\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -89,7 +89,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)\VSTHost_App.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc160\Debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc170\Debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalDependencies>ws2_32.lib;user32.lib;advapi32.lib;AkAutobahn.lib;CommunicationCentral.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>ws2_32.lib user32.lib advapi32.lib AkAutobahn.lib CommunicationCentral.lib  AkAutobahn.lib CommunicationCentral.lib %(AdditionalOptions)</AdditionalOptions>
@@ -100,7 +100,7 @@
     </Bscmake>
     <Lib>
       <AdditionalDependencies>ws2_32.lib;user32.lib;advapi32.lib;AkAutobahn.lib;CommunicationCentral.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc160\Debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc170\Debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -139,7 +139,7 @@
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc160\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc170\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ws2_32.lib;user32.lib;advapi32.lib;AkAutobahn.lib;CommunicationCentral.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -151,7 +151,7 @@
     </Bscmake>
     <Lib>
       <AdditionalDependencies>ws2_32.lib;user32.lib;advapi32.lib;AkAutobahn.lib;CommunicationCentral.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc160\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc170\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -24,6 +24,7 @@ MainComponent::MainComponent()
     juce::Component::addAndMakeVisible(ShowEditorButton);
     juce::Component::addAndMakeVisible(audioFileTree);
     juce::Component::addAndMakeVisible(refreshIODevicesListButton);
+    juce::Component::addAndMakeVisible(refreshFileTreeButton);
 
     juce::Component::addAndMakeVisible(inputDeviceDropdown);
     inputDeviceDropdown.onChange = [this]() { changeAudioDevice(true); }; // Handle input selection
@@ -36,10 +37,24 @@ MainComponent::MainComponent()
 
     populateAudioDeviceDropdowns();
 
+    // Wwise Status Label
+    juce::Component::addAndMakeVisible(wwiseStatusLabel);
+    wwiseStatusLabel.setFont(juce::Font(16.0f, juce::Font::bold));
+    wwiseStatusLabel.setJustificationType(juce::Justification::centred);
+    wwiseStatusLabel.setBounds(10, 10, 300, 30); // Adjust size/position
+    updateWwiseStatus();
+   
+    updateWwiseTree();
+
+    //// Wwise Tree View
+    //juce::Component::addAndMakeVisible(wwiseTree);
+    //updateWwiseTree();
+
     audioFileTree.setColour(juce::TreeView::backgroundColourId, juce::Colours::antiquewhite);
     audioFileTree.setDefaultOpenness(true);
     std::string rootName = "Root";
     auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr, nullptr, this);
+    auto wwiseRootItem = std::make_unique<WwiseTreeItem>(WwiseEventNode{ "Wwise Events", "", {} });
     audioFileTree.setRootItem(rootItem.release());
     audioFileTree.setInterceptsMouseClicks(true, true); // Enable clicks globally
     audioFileTree.setWantsKeyboardFocus(true);
@@ -84,6 +99,7 @@ MainComponent::MainComponent()
     unloadPluginButton.addListener(this);
     ShowEditorButton.addListener(this);
     refreshIODevicesListButton.addListener(this);
+    refreshFileTreeButton.addListener(this);
 
 
 
@@ -112,51 +128,98 @@ MainComponent::~MainComponent()
 }
 //==============================================================================
 
-//void MainComponent::populateAudioDeviceDropdowns()
+
+void MainComponent::updateWwiseStatus()
+{
+    std::string statusText = "Wwise Connected: " + waapiManager.getWwiseProjectName() +
+        " (" + waapiManager.getWwiseVersion() + " - " + waapiManager.getWwisePlatform() + ")";
+    wwiseStatusLabel.setText(statusText, juce::dontSendNotification);
+}
+
+//void MainComponent::updateWwiseTree()
 //{
-//    std::cout << "Populating audio device dropdowns..." << std::endl;
-//    // Get available device types
-//    auto* deviceManager = vstPluginComponent.getDeviceManager();
-//    const juce::OwnedArray<juce::AudioIODeviceType>& availableDevices = deviceManager->getAvailableDeviceTypes();
+//    std::cout << "Updating Wwise Tree..." << std::endl;
+//   // waapiManager.connectToWAAPI();
+//   // wwiseTree.removeAllChildren();
 //
-//    // Clear dropdowns
-//    inputDeviceDropdown.clear();
-//    outputDeviceDropdown.clear();
-//
-//    int inputIndex = 1, outputIndex = 1;
-//
-//    for (auto* type : availableDevices)
+//    // Delete the old root item before creating a new one
+//    if (wwiseTree.getRootItem() != nullptr)
 //    {
-//        type->scanForDevices(); // Scan for devices
-//
-//        // Input Devices
-//        auto inputDevices = type->getDeviceNames(true);
-//        for (auto& name : inputDevices)
-//        {
-//            inputDeviceDropdown.addItem(name, inputIndex++);
-//        }
-//
-//        // Output Devices
-//        auto outputDevices = type->getDeviceNames(false);
-//        for (auto& name : outputDevices)
-//        {
-//            outputDeviceDropdown.addItem(name, outputIndex++);
-//        }
+//        std::cout << "Removing old root item..." << std::endl;
+//        wwiseTree.setRootItem(nullptr); // Remove existing root
 //    }
-//
-//    // Set default selections based on the current device
-//    auto* currentDevice = deviceManager->getCurrentAudioDevice();
-//    if (currentDevice != nullptr)
-//    {
-//        inputDeviceDropdown.setText(currentDevice->getName(), juce::dontSendNotification);
-//        outputDeviceDropdown.setText(currentDevice->getName(), juce::dontSendNotification);
-//    }
+//    // Create a new root item (must be a raw pointer)
+//  //  auto* rootItem = new WwiseTreeItem(WwiseEventNode{ "Wwise Events", "", {} });
+//    auto* wwiseRootItem = audioFileTree.getRootItem();
 //    
-//    // Force dropdown UI update
-//    inputDeviceDropdown.repaint();
-//    outputDeviceDropdown.repaint();
+//
+//    auto eventTree = waapiManager.getWwiseEventsTree();
+//    for (const auto& [folderPath, folderNode] : eventTree)
+//    {
+//        std::cout<<"Adding folder: "<<folderPath<<std::endl;
+//        wwiseRootItem->addSubItem(new WwiseTreeItem(folderNode));
+//    }
+//    wwiseTree.setRootItem(wwiseRootItem);
+//   
 //}
 
+void MainComponent::updateWwiseTree()
+{
+    std::cout << "Updating Wwise Tree..." << std::endl;
+
+    if (audioFileTree.getRootItem() == nullptr)
+    {
+        std::cout << "Initializing audioFileTree root..." << std::endl;
+        std::string rootName = "Root";
+        auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr, nullptr, this);
+        audioFileTree.setRootItem(rootItem.release());
+    }
+
+    auto* rootItem = audioFileTree.getRootItem();
+
+    // Check if "Wwise Events" already exists
+    WwiseTreeItem* wwiseRootItem = nullptr;
+    for (int i = 0; i < rootItem->getNumSubItems(); ++i)
+    {
+        auto* subItem = dynamic_cast<WwiseTreeItem*>(rootItem->getSubItem(i));
+        if (subItem && subItem->getUniqueName() == "Wwise Events")
+        {
+            wwiseRootItem = subItem;
+            break;
+        }
+    }
+
+    if (wwiseRootItem == nullptr)
+    {
+        std::cout << "Adding Wwise Events Root Node..." << std::endl;
+        wwiseRootItem = new WwiseTreeItem(WwiseEventNode{ "Wwise Events", "", {} });
+        rootItem->addSubItem(wwiseRootItem);
+        
+       /* auto item = std::make_unique<AudioFileTreeItem>(fileName, playCallback, removeCallback, this);
+        rootItem->addSubItem(item.release());*/
+    }
+    else
+    {
+        std::cout << "Clearing existing Wwise Events nodes..." << std::endl;
+        wwiseRootItem->clearSubItems();
+        wwiseRootItem->itemOpennessChanged(true);
+    }
+
+    auto eventTree = waapiManager.getWwiseEventsTree();
+    for (const auto& [folderPath, folderNode] : eventTree)
+    {
+        std::cout << "Adding folder: " << folderPath << std::endl;
+        wwiseRootItem->addSubItem(new WwiseTreeItem(folderNode));
+    }
+
+    audioFileTree.getRootItem()->treeHasChanged();
+    audioFileTree.repaint();
+
+}
+
+
+
+//==============================================================================
 void MainComponent::populateAudioDeviceDropdowns()
 {
     std::cout << "Populating audio device dropdowns..." << std::endl;
@@ -338,52 +401,9 @@ void MainComponent::paint(juce::Graphics& g)
     g.setFont(18.0f);
     g.drawText("VST Host GUI App", juce::Component::getLocalBounds(), juce::Justification::centredTop);
 
+
 }
 
-
-
-/* Original code*/
-
-//void MainComponent::resized()
-//{
-//    // This is called when the MainContentComponent is resized.
-//
-//    int buttonHeight = 30; // Custom height for buttons
-//    int buttonWidth = 200; // Custom width for buttons
-//    auto area = juce::Component::getLocalBounds().reduced(10);
-//    auto treeViewArea = area.removeFromRight(300).withHeight(300).withWidth(300);
-//
-//    audioFileTree.setBounds(treeViewArea);
-//    channelConfigDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    scanPluginButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    loadAudioButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    pluginListDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    playButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    stopButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    exportAudioButton.setBounds(area.removeFromTop(60).withWidth(buttonWidth).withX(10));
-//    refreshPluginDetailsButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(area.getWidth() - 210));
-//    ShowEditorButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    unloadPluginButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(area.getWidth() - 210));
-//    inputDeviceDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    outputDeviceDropdown.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//    refreshIODevicesListButton.setBounds(area.removeFromTop(buttonHeight).withWidth(buttonWidth).withX(10));
-//
-//    // audioFileListBox.setBounds(area.removeFromTop(200).withWidth(200).withX(area.getWidth() - 210)); // Position the list to the top right
-//
-//
-//    if (pluginEditor != nullptr && pluginEditor->isVisible())
-//    {
-//        // Adjust height and position as needed
-//        pluginEditor->setBounds(10, area.getY() + 30, area.getWidth(), 200);
-//
-//        pluginEditor->setBounds(0, 0, pluginEditor->getWidth(), pluginEditor->getHeight()); // Adjust bounds
-//        pluginEditorViewport->setViewedComponent(pluginEditor.get(), true); // Refresh viewport
-//    }
-//
-//
-//}
-
-/* new code*/
 
 
 void MainComponent::resized()
@@ -395,11 +415,16 @@ void MainComponent::resized()
     // Left column: Audio file tree
     juce::FlexBox leftColumn;
     leftColumn.items.add(juce::FlexItem(audioFileTree).withMinWidth(200).withFlex(0));
+    leftColumn.items.add(juce::FlexItem(wwiseTree).withMinWidth(200).withFlex(0));
+   // wwiseTree.setBounds(10, 50, 300, getHeight() - 60);
     mainFlexBox.items.add(juce::FlexItem(leftColumn).withMinWidth(200).withFlex(0));
+
 
     // Middle column: Buttons and plugin UI
     juce::FlexBox middleColumn;
     middleColumn.flexDirection = juce::FlexBox::Direction::column; // Top-to-bottom layout
+    // Wwise Status Label (added at the top)
+    middleColumn.items.add(juce::FlexItem(wwiseStatusLabel).withFlex(0).withHeight(30).withMargin(juce::FlexItem::Margin(15, 0, 5, 0)));
 
     // Button row (Top section of the middle column)
     juce::FlexBox buttonRow;
@@ -417,6 +442,7 @@ void MainComponent::resized()
     buttonRow.items.add(juce::FlexItem(inputDeviceDropdown).withFlex(1).withWidth(120).withHeight(40));
     buttonRow.items.add(juce::FlexItem(outputDeviceDropdown).withFlex(1).withWidth(120).withHeight(40));
     buttonRow.items.add(juce::FlexItem(refreshIODevicesListButton).withFlex(1).withWidth(120).withHeight(40));
+    buttonRow.items.add(juce::FlexItem(refreshFileTreeButton).withFlex(1).withWidth(120).withHeight(40));
 
     // Add the buttonRow to the middleColumn
     middleColumn.items.add(juce::FlexItem(buttonRow).withFlex(0)); // Fixed height for buttons
@@ -701,6 +727,13 @@ void MainComponent::buttonClicked(juce::Button* button)
     {
         std::cout << "Refreshing audio device list..." << std::endl;
         populateAudioDeviceDropdowns();
+    }
+
+    else if (button == &refreshFileTreeButton) {
+
+        updateWwiseTree();
+        audioFileTree.getRootItem()->treeHasChanged();
+        audioFileTree.repaint();
     }
 
 

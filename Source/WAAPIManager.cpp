@@ -43,9 +43,10 @@ void WAAPIManager::connectToWAAPI()
 
         
         getSessionInfo();
-        GetDefaultWorkUnits();
+        GetAllEvents();
+      //  GetDefaultWorkUnits();
         // Disconnect when done
-        waapiClient.Disconnect();
+      //  waapiClient.Disconnect();
     }
     catch (const std::exception& e)
     {
@@ -69,17 +70,29 @@ void WAAPIManager::getSessionInfo()
         AkJson queryResult;
         AkJson args(AkJson::Map{});
 
+        // Get Wwise Version & Platform
         if (waapiClient.Call(ak::wwise::core::getInfo, args, AkJson(AkJson::Type::Map), queryResult, 10))
         {
-            std::cout << "Session info: " << queryResult["displayName"].GetVariant().GetString() << std::endl;
-            std::cout << "Wwise Version: " << queryResult["version"]["displayName"].GetVariant().GetString() << std::endl;
-            std::cout << "Platform: " << queryResult["platform"].GetVariant().GetString() << std::endl;
-            
-            
+            wwiseVersion = queryResult["version"]["displayName"].GetVariant().GetString();
+            wwisePlatform = queryResult["platform"].GetVariant().GetString();
+
+            std::cout << "Wwise Version: " << wwiseVersion << std::endl;
+            std::cout << "Platform: " << wwisePlatform << std::endl;
         }
         else
         {
             std::cerr << "Failed to retrieve session info!" << std::endl;
+        }
+
+        // Correct API Call to Get Project Info
+        if (waapiClient.Call(ak::wwise::core::getProjectInfo, args, AkJson(AkJson::Type::Map), queryResult, 10))
+        {
+            wwiseProjectName = queryResult["name"].GetVariant().GetString();
+            std::cout << "Project Name: " << wwiseProjectName << std::endl;
+        }
+        else
+        {
+            std::cerr << "Failed to retrieve project info!" << std::endl;
         }
     }
     catch (const std::exception& e)
@@ -157,6 +170,102 @@ void WAAPIManager::GetDefaultWorkUnits()
         std::cerr << "Error while querying work units: " << e.what() << std::endl;
     }
 }
+
+void WAAPIManager::GetAllEvents()
+{
+    using namespace AK::WwiseAuthoringAPI;
+
+    try
+    {
+        if (!waapiClient.IsConnected())
+        {
+            std::cerr << "Not connected to WAAPI!" << std::endl;
+            return;
+        }
+
+        std::cout << "Retrieving all Wwise events..." << std::endl;
+
+        AkJson queryResult;
+
+        // Query all Event objects
+        AkJson args(AkJson::Map{
+            { "from", AkJson::Map{
+                { "ofType", AkJson::Array{ AkVariant("Event") } }
+            }}
+            });
+
+        AkJson options(AkJson::Map{
+            { "return", AkJson::Array{
+                AkVariant("id"),
+                AkVariant("name"),
+                AkVariant("path"),
+                AkVariant("parent.id")  
+            }}
+            });
+
+        if (waapiClient.Call(ak::wwise::core::object::get, args, options, queryResult, 10))
+        {
+            if (queryResult.IsMap() && queryResult.HasKey("return"))
+            {
+                const auto& results = queryResult["return"].GetArray();
+
+                if (results.empty())
+                {
+                    std::cout << "No events found in the project." << std::endl;
+                    return;
+                }
+
+                std::cout << "Wwise Events:" << std::endl;
+                for (const auto& item : results)
+                {
+                    if (item.IsMap())
+                    {
+                        const auto& itemMap = item.GetMap();
+
+                        std::string eventName = itemMap.at("name").GetVariant().GetString();
+                        std::string eventPath = itemMap.at("path").GetVariant().GetString();
+                        std::string parentPath = "Events";  // Default root folder
+
+                        std::string parentID = "N/A";  // Default value
+                        if (itemMap.find("parent.id") != itemMap.end() && itemMap.at("parent.id").IsVariant())
+                        {
+                            parentID = itemMap.at("parent.id").GetVariant().GetString();
+                            parentPath = itemMap.at("path").GetVariant().GetString();
+                        }
+
+                        std::cout << "- " << eventName << " (" << eventPath << ") | Parent ID: " << parentID << std::endl;
+
+                       
+                        // Create event node
+                        WwiseEventNode eventNode = { eventName, eventPath, {} };
+
+                        // Insert into hierarchy
+                        if (wwiseEventsTree.find(parentPath) == wwiseEventsTree.end())
+                        {
+                            wwiseEventsTree[parentPath] = { parentPath, parentPath, {} };
+                        }
+                        wwiseEventsTree[parentPath].children.push_back(eventNode);
+
+                    }
+                }
+            }
+            else
+            {
+                std::cerr << "Unexpected response format!" << std::endl;
+            }
+        }
+        else
+        {
+            std::cerr << "Failed to retrieve events!" << std::endl;
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error while querying events: " << e.what() << std::endl;
+    }
+}
+
+
 
 
 

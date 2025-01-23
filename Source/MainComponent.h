@@ -8,6 +8,7 @@
 #include "Exporter.h"
 #include "WAAPIManager.h"
 
+
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
@@ -25,8 +26,12 @@ public:
     //==============================================================================
     MainComponent();
     ~MainComponent() override;
-    //==============================================================================
 
+    //Wwise API ==============================================================================
+    void updateWwiseStatus();
+
+    void updateWwiseTree();
+    //==============================================================================
 
     void populateAudioDeviceDropdowns();
     void changeAudioDevice(bool isInput);
@@ -115,8 +120,7 @@ private:
     juce::Component contentComponent;            // Holds all buttons and UI elements
     juce::TextButton scanPluginButton{ "Scan Plugins" };
     juce::TextButton loadAudioButton{ "Load Audio File" };
-    // juce::ListBox audioFileListBox{ "Audio File List" }; // ListBox for displaying audio files
-    juce::TreeView audioFileTree{ "Audio File Tree" };
+    
     juce::TextButton deleteButton{ "X" };
     juce::TextButton playButton{ "Play" };
     juce::TextButton stopButton{ "Stop" };
@@ -125,6 +129,14 @@ private:
     juce::TextButton unloadPluginButton{ "X Remove Plugin" };
     juce::TextButton ShowEditorButton{ "Show Plugin UI" };
     juce::TextButton refreshIODevicesListButton{ "Refresh IO Devices list" };
+    juce::TextButton refreshFileTreeButton{ "Refresh file Tree" };
+
+    // Audio File Tree Components
+    juce::TreeView audioFileTree{ "Audio File Tree" };
+
+    // Wwise API /UI Tree View Components
+    juce::Label wwiseStatusLabel;
+    juce::TreeView wwiseTree{"Wwise Tree"};
 
 
 
@@ -765,6 +777,8 @@ private:
     juce::ToggleButton regexToggle;
     juce::TextEditor regexPatternInput, regexReplacementInput;
 
+    
+
 
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::File outputFile;
@@ -777,6 +791,38 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ExportAudioComponent)
 };
+
+
+class WwiseTreeItem : public juce::TreeViewItem
+                    
+                        
+{
+public:
+    WwiseTreeItem(const WwiseEventNode& node) : eventNode(node) {}
+
+    bool mightContainSubItems() override { return !eventNode.children.empty(); }
+    void paintItem(juce::Graphics& g, int width, int height) override
+    {
+        g.drawText(eventNode.name, 4, 0, width - 4, height, juce::Justification::centredLeft);
+       // std::cout << "Wwise Tree Item (paint item): " << eventNode.name << std::endl;
+    }
+    
+
+    void itemOpennessChanged(bool isNowOpen) override
+    {
+        if (isNowOpen && getNumSubItems() == 0)
+        {
+            for (const auto& child : eventNode.children)
+            {
+                addSubItem(new WwiseTreeItem(child));
+            }
+        }
+    }
+
+private:
+    WwiseEventNode eventNode;
+};
+
 
 
 

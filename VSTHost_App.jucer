@@ -50,11 +50,11 @@
     <VS2022 targetFolder="Builds/VisualStudio2022" extraLinkerFlags="ws2_32.lib&#10;user32.lib&#10;advapi32.lib&#10;AkAutobahn.lib&#10;CommunicationCentral.lib"
             externalLibraries="ws2_32.lib&#10;user32.lib&#10;advapi32.lib&#10;AkAutobahn.lib&#10;CommunicationCentral.lib">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="VSTHost_App" libraryPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc160\Debug\lib"
+        <CONFIGURATION isDebug="1" name="Debug" targetName="VSTHost_App" libraryPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc170\Debug\lib"
                        headerPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\include"
                        extraLinkerFlags="AkAutobahn.lib&#10;CommunicationCentral.lib&#10;"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="VSTHost_App" headerPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\include"
-                       libraryPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc160\Release\lib"
+                       libraryPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc170\Release\lib"
                        extraLinkerFlags="AkAutobahn.lib&#10;CommunicationCentral.lib"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
