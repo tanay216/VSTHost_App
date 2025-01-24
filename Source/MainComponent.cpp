@@ -58,6 +58,7 @@ MainComponent::MainComponent()
     audioFileTree.setRootItem(rootItem.release());
     audioFileTree.setInterceptsMouseClicks(true, true); // Enable clicks globally
     audioFileTree.setWantsKeyboardFocus(true);
+    
 
 
     // Configure the multichannel configuration dropdown
@@ -202,14 +203,19 @@ void MainComponent::updateWwiseTree()
     {
         std::cout << "Clearing existing Wwise Events nodes..." << std::endl;
         wwiseRootItem->clearSubItems();
-        wwiseRootItem->itemOpennessChanged(true);
+      
     }
 
     auto eventTree = waapiManager.getWwiseEventsTree();
     for (const auto& [folderPath, folderNode] : eventTree)
     {
-        std::cout << "Adding folder: " << folderPath << std::endl;
-        wwiseRootItem->addSubItem(new WwiseTreeItem(folderNode));
+        for (const auto& event : folderNode.children)
+        {
+            std::cout << "Adding Wwise Event: " << event.name << std::endl;
+            wwiseRootItem->addSubItem(new WwiseTreeItem(event));
+
+        }
+       
     }
 
     audioFileTree.getRootItem()->treeHasChanged();
