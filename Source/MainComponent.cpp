@@ -54,7 +54,7 @@ MainComponent::MainComponent()
     audioFileTree.setDefaultOpenness(true);
     std::string rootName = "Root";
     auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr, nullptr, this);
-    auto wwiseRootItem = std::make_unique<WwiseTreeItem>(WwiseEventNode{ "Wwise Events", "", {} });
+    auto wwiseRootItem = std::make_unique<WwiseTreeItem>(WwiseEventNode{ "Wwise Events", "", {} }, this);
     audioFileTree.setRootItem(rootItem.release());
     audioFileTree.setInterceptsMouseClicks(true, true); // Enable clicks globally
     audioFileTree.setWantsKeyboardFocus(true);
@@ -137,48 +137,25 @@ void MainComponent::updateWwiseStatus()
     wwiseStatusLabel.setText(statusText, juce::dontSendNotification);
 }
 
-//void MainComponent::updateWwiseTree()
-//{
-//    std::cout << "Updating Wwise Tree..." << std::endl;
-//   // waapiManager.connectToWAAPI();
-//   // wwiseTree.removeAllChildren();
-//
-//    // Delete the old root item before creating a new one
-//    if (wwiseTree.getRootItem() != nullptr)
-//    {
-//        std::cout << "Removing old root item..." << std::endl;
-//        wwiseTree.setRootItem(nullptr); // Remove existing root
-//    }
-//    // Create a new root item (must be a raw pointer)
-//  //  auto* rootItem = new WwiseTreeItem(WwiseEventNode{ "Wwise Events", "", {} });
-//    auto* wwiseRootItem = audioFileTree.getRootItem();
-//    
-//
-//    auto eventTree = waapiManager.getWwiseEventsTree();
-//    for (const auto& [folderPath, folderNode] : eventTree)
-//    {
-//        std::cout<<"Adding folder: "<<folderPath<<std::endl;
-//        wwiseRootItem->addSubItem(new WwiseTreeItem(folderNode));
-//    }
-//    wwiseTree.setRootItem(wwiseRootItem);
-//   
-//}
-
 void MainComponent::updateWwiseTree()
 {
     std::cout << "Updating Wwise Tree..." << std::endl;
 
     if (audioFileTree.getRootItem() == nullptr)
     {
-        std::cout << "Initializing audioFileTree root..." << std::endl;
         std::string rootName = "Root";
         auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr, nullptr, this);
         audioFileTree.setRootItem(rootItem.release());
     }
 
     auto* rootItem = audioFileTree.getRootItem();
+    if (!rootItem)
+    {
+        std::cerr << "ERROR: Root item is still null!" << std::endl;
+        return;
+    }
 
-    // Check if "Wwise Events" already exists
+    // Find or create "Wwise Events" root
     WwiseTreeItem* wwiseRootItem = nullptr;
     for (int i = 0; i < rootItem->getNumSubItems(); ++i)
     {
@@ -190,39 +167,52 @@ void MainComponent::updateWwiseTree()
         }
     }
 
-    if (wwiseRootItem == nullptr)
+    if (!wwiseRootItem)
     {
-        std::cout << "Adding Wwise Events Root Node..." << std::endl;
-        wwiseRootItem = new WwiseTreeItem(WwiseEventNode{ "Wwise Events", "", {} });
+        wwiseRootItem = new WwiseTreeItem(WwiseEventNode{ "Wwise Events", "", {} }, this);
         rootItem->addSubItem(wwiseRootItem);
-        
-       /* auto item = std::make_unique<AudioFileTreeItem>(fileName, playCallback, removeCallback, this);
-        rootItem->addSubItem(item.release());*/
     }
     else
     {
-        std::cout << "Clearing existing Wwise Events nodes..." << std::endl;
         wwiseRootItem->clearSubItems();
-      
     }
 
+    // Add Wwise event nodes
     auto eventTree = waapiManager.getWwiseEventsTree();
     for (const auto& [folderPath, folderNode] : eventTree)
     {
         for (const auto& event : folderNode.children)
         {
-            std::cout << "Adding Wwise Event: " << event.name << std::endl;
-            wwiseRootItem->addSubItem(new WwiseTreeItem(event));
+            auto* eventItem = new WwiseTreeItem(event, this);
 
+            // Set remove callback
+            eventItem->setRemoveCallback([this, wwiseRootItem](WwiseTreeItem* item) {
+                if (wwiseRootItem)
+                {
+                    for (int i = 0; i < wwiseRootItem->getNumSubItems(); ++i)
+                    {
+                        if (wwiseRootItem->getSubItem(i) == item)
+                        {
+                            wwiseRootItem->removeSubItem(i, true);
+                            break;
+                        }
+                    }
+                }
+                });
+
+            wwiseRootItem->addSubItem(eventItem);
         }
-       
     }
 
     audioFileTree.getRootItem()->treeHasChanged();
     audioFileTree.repaint();
-
 }
 
+void MainComponent::triggerWwiseEvent(const std::string& eventName)
+{
+    std::cout << "Requesting WAAPI to trigger event: " << eventName << std::endl;
+    waapiManager.postWwiseEvent(eventName);
+}
 
 
 //==============================================================================
@@ -420,10 +410,10 @@ void MainComponent::resized()
 
     // Left column: Audio file tree
     juce::FlexBox leftColumn;
-    leftColumn.items.add(juce::FlexItem(audioFileTree).withMinWidth(200).withFlex(0));
-    leftColumn.items.add(juce::FlexItem(wwiseTree).withMinWidth(200).withFlex(0));
+    leftColumn.items.add(juce::FlexItem(audioFileTree).withMinWidth(300).withFlex(0));
+    leftColumn.items.add(juce::FlexItem(wwiseTree).withMinWidth(300).withFlex(0));
    // wwiseTree.setBounds(10, 50, 300, getHeight() - 60);
-    mainFlexBox.items.add(juce::FlexItem(leftColumn).withMinWidth(200).withFlex(0));
+    mainFlexBox.items.add(juce::FlexItem(leftColumn).withMinWidth(300).withFlex(0));
 
 
     // Middle column: Buttons and plugin UI

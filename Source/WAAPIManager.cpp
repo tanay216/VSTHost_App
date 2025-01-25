@@ -265,6 +265,56 @@ void WAAPIManager::GetAllEvents()
     }
 }
 
+void WAAPIManager::postWwiseEvent(const std::string& eventName)
+{
+    using namespace AK::WwiseAuthoringAPI;
+
+    if (!waapiClient.IsConnected())
+    {
+        std::cerr << "WAAPI is not connected! Cannot post event." << std::endl;
+        return;
+    }
+
+    std::cout << "Posting event: " << eventName << " to Wwise..." << std::endl;
+    std::string qualifiedName = "Event:" + eventName;
+
+    AkJson args(AkJson::Map{
+        { "object", AkVariant(qualifiedName) }  // Send event name to Wwise
+        });
+
+    AkJson result;
+    if (waapiClient.Call(ak::wwise::core::transport::create, args, AkJson(AkJson::Type::Map), result, 10))
+    {
+        uint64_t transportID = result["transport"].GetVariant().GetUInt32();
+        std::cout << "Transport object created for: " << eventName << " with ID: " << transportID << std::endl;
+
+        AkJson playArgs(AkJson::Map{
+            { "action", AkVariant("play") },
+            { "transport", AkVariant(transportID) }
+            });
+
+        if (waapiClient.Call(ak::wwise::core::transport::executeAction,playArgs, AkJson(AkJson::Type::Map), result, 10))
+        {
+            std::cout << "Successfully started playback for: " << eventName << std::endl;
+        }
+        else
+        {
+            std::cerr << "Failed to start playback for: " << eventName << std::endl;
+        }
+
+    }
+    else {
+		std::cerr << "Failed to create transport object for: " << eventName << std::endl;
+    }
+
+}
+
+
+
+
+
+
+
 
 
 

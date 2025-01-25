@@ -33,6 +33,8 @@ public:
     void GetDefaultWorkUnits();
     void GetAllEvents();
 
+    void postWwiseEvent(const std::string& eventName);
+
     //  Wwise Event Tree getter methods
 
     std::map<std::string, WwiseEventNode> getWwiseEventsTree() { return wwiseEventsTree; }
@@ -41,6 +43,7 @@ public:
     std::string getWwiseProjectName() const { return wwiseProjectName; }
     std::string getWwiseVersion() const { return wwiseVersion; }
     std::string getWwisePlatform() const { return wwisePlatform; }
+
 
     // Custom assertion handler for Wwise
     static void AkAssertHookFunc(const char* in_pszExpression, const char* in_pszFileName, int in_lineNumber)

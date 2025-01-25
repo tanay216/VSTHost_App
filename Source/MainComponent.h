@@ -31,6 +31,8 @@ public:
     void updateWwiseStatus();
 
     void updateWwiseTree();
+
+    void triggerWwiseEvent(const std::string& eventName);
     //==============================================================================
 
     void populateAudioDeviceDropdowns();
@@ -793,35 +795,152 @@ private:
 };
 
 
+//class WwiseTreeItem : public juce::TreeViewItem
+//                    
+//                        
+//{
+//public:
+//    WwiseTreeItem(const WwiseEventNode& node) : eventNode(node) {}
+//
+//    bool mightContainSubItems() override { return !eventNode.children.empty(); }
+//    void paintItem(juce::Graphics& g, int width, int height) override
+//    {
+//        g.drawText(eventNode.name, 4, 0, width - 4, height, juce::Justification::centredLeft);
+//       // std::cout << "Wwise Tree Item (paint item): " << eventNode.name << std::endl;
+//    }
+//    
+//
+//    void itemOpennessChanged(bool isNowOpen) override
+//    {
+//        if (isNowOpen && getNumSubItems() == 0)
+//        {
+//            for (const auto& child : eventNode.children)
+//            {
+//                addSubItem(new WwiseTreeItem(child));
+//            }
+//        }
+//    }
+//
+//private:
+//    WwiseEventNode eventNode;
+//};
+
 class WwiseTreeItem : public juce::TreeViewItem
-                    
-                        
 {
 public:
-    WwiseTreeItem(const WwiseEventNode& node) : eventNode(node) {}
+    WwiseTreeItem(const WwiseEventNode& node, MainComponent* mainComponent)
+        : eventNode(node), mainComponent(mainComponent) {
+    }
 
     bool mightContainSubItems() override { return !eventNode.children.empty(); }
+
     void paintItem(juce::Graphics& g, int width, int height) override
     {
+        g.setColour(juce::Colours::lightgrey);
+        g.fillAll(juce::Colours::darkgrey);
+        g.setColour(juce::Colours::black);
         g.drawText(eventNode.name, 4, 0, width - 4, height, juce::Justification::centredLeft);
-       // std::cout << "Wwise Tree Item (paint item): " << eventNode.name << std::endl;
     }
+
     
 
-    void itemOpennessChanged(bool isNowOpen) override
+    // Custom UI component (bypass + remove buttons)
+    std::unique_ptr<juce::Component> createItemComponent() override
     {
-        if (isNowOpen && getNumSubItems() == 0)
-        {
-            for (const auto& child : eventNode.children)
-            {
-                addSubItem(new WwiseTreeItem(child));
-            }
-        }
+        return std::make_unique<ItemComponent>(
+            eventNode.name,
+            [this]() { std::cout << "Playing Wwise Event: " << eventNode.name << std::endl; },
+            [this]() { if (onRemoveCallback) onRemoveCallback(this); },
+            mainComponent);
     }
+
+    void setRemoveCallback(std::function<void(WwiseTreeItem*)> callback)
+    {
+        onRemoveCallback = std::move(callback);
+    }
+
+   
+
+
 
 private:
     WwiseEventNode eventNode;
+    MainComponent* mainComponent;
+    std::function<void(WwiseTreeItem*)> onRemoveCallback;
+
+    class ItemComponent : public juce::Component, public juce::Button::Listener
+    {
+    public:
+        ItemComponent(const std::string& name,
+            std::function<void()> onPlay,
+            std::function<void()> onRemove,
+            MainComponent* mainComponent)
+            : fileName(name), onPlayCallback(std::move(onPlay)), onRemoveCallback(std::move(onRemove)), mainComponent(mainComponent)
+        {
+            addNewButtons(removeButton, "X");
+            addNewToggle(bypassToggleButton, "Bypass");
+        }
+
+        void addNewButtons(juce::TextButton& button, const juce::String& ButtonText)
+        {
+            button.setButtonText(ButtonText);
+            button.addListener(this);
+            addAndMakeVisible(button);
+        }
+
+        void addNewToggle(juce::ToggleButton& button, const juce::String& ButtonText)
+        {
+            button.setButtonText(ButtonText);
+            button.addListener(this);
+            addAndMakeVisible(button);
+        }
+
+        void resized() override
+        {
+            auto bounds = getLocalBounds();
+            bypassToggleButton.setBounds(bounds.removeFromRight(30));
+            removeButton.setBounds(bounds.removeFromRight(30));
+        }
+
+        void buttonClicked(juce::Button* button) override
+        {
+            if (button == &removeButton)
+            {
+                if (onRemoveCallback) onRemoveCallback(); // Trigger remove callback
+            }
+            else if (button == &bypassToggleButton)
+            {
+                bool isBypassed = bypassToggleButton.getToggleState();
+                if (mainComponent)
+                {
+                    mainComponent->setBypassState(fileName, isBypassed);
+                    
+                }
+            }
+        }
+
+        void mouseDown(const juce::MouseEvent& e) override
+        {
+            if (mainComponent)
+            {
+                std::cout << "Triggering Wwise Event: " << fileName << std::endl;
+                mainComponent->triggerWwiseEvent(fileName); // Call function in MainComponent
+            }
+        }
+
+       
+    private:
+        std::string fileName;
+        juce::TextButton removeButton;
+        juce::ToggleButton bypassToggleButton;
+        MainComponent* mainComponent;
+        std::function<void()> onPlayCallback;
+        std::function<void()> onRemoveCallback;
+        
+        
+    };
 };
+
 
 
 
