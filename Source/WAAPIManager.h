@@ -33,6 +33,9 @@ public:
     void GetDefaultWorkUnits();
     void GetAllEvents();
 
+    //void GetEventDescendants(const std::string& eventName, const std::string& parentPath);
+    std::vector<WwiseEventNode> WAAPIManager::GetEventDescendants(const std::string& eventName, const std::string& parentPath);
+
     void postWwiseEvent(const std::string& eventName);
 
     //  Wwise Event Tree getter methods
@@ -59,6 +62,7 @@ private:
     std::string wwiseProjectName = "";
     std::string wwiseVersion = "";
     std::string wwisePlatform = "";
+
 
     std::map<std::string, WwiseEventNode> wwiseEventsTree;
 

@@ -8,12 +8,14 @@
 #include "Exporter.h"
 #include "WAAPIManager.h"
 
-
+//class WwiseTreeItem;
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
+class WwiseTreeItem;
+
 class MainComponent : public juce::AudioAppComponent,
     public juce::Button::Listener,
     public juce::Component,
@@ -31,6 +33,8 @@ public:
     void updateWwiseStatus();
 
     void updateWwiseTree();
+
+    void addChildItems(WwiseTreeItem* parentItem, const std::vector<WwiseEventNode>& children);
 
     void triggerWwiseEvent(const std::string& eventName);
     //==============================================================================
@@ -91,7 +95,7 @@ private:
     VSTPluginComponent vstPluginComponent;
     Exporter exporterComponent;
     WAAPIManager waapiManager;
-    
+   
 
     std::unique_ptr<juce::FileChooser> fileChooser;
 
@@ -833,6 +837,7 @@ public:
     }
 
     bool mightContainSubItems() override { return !eventNode.children.empty(); }
+   
 
     void paintItem(juce::Graphics& g, int width, int height) override
     {
@@ -860,7 +865,16 @@ public:
     }
 
    
-
+    void itemOpennessChanged(bool isNowOpen) override
+    {
+        if (isNowOpen && getNumSubItems() == 0)
+        {
+            for (const auto& child : eventNode.children)
+            {
+                addSubItem(new WwiseTreeItem(child, mainComponent));
+            }
+        }
+    }
 
 
 private:
@@ -880,6 +894,7 @@ private:
             addNewButtons(removeButton, "X");
             addNewToggle(bypassToggleButton, "Bypass");
         }
+
 
         void addNewButtons(juce::TextButton& button, const juce::String& ButtonText)
         {

@@ -238,6 +238,8 @@ void WAAPIManager::GetAllEvents()
                        
                         // Create event node
                         WwiseEventNode eventNode = { eventName, eventPath, {} };
+                        // Fetch its descendants (Containers, Sound SFX)
+                       // GetEventDescendants(eventName, eventPath);
 
                         // Insert into hierarchy
                         if (wwiseEventsTree.find(parentPath) == wwiseEventsTree.end())
@@ -264,6 +266,140 @@ void WAAPIManager::GetAllEvents()
         std::cerr << "Error while querying events: " << e.what() << std::endl;
     }
 }
+
+//void WAAPIManager::GetEventDescendants(const std::string& eventName, const std::string& parentPath)
+//{
+//    using namespace AK::WwiseAuthoringAPI;
+//
+//    if (!waapiClient.IsConnected())
+//    {
+//        std::cerr << "Not connected to WAAPI!" << std::endl;
+//        return;
+//    }
+//
+//    std::cout << "Retrieving children for event: " << eventName << std::endl;
+//
+//    AkJson queryResult;
+//
+//    // WAQL query to get all children (Containers, SFX, etc.) of the event
+//    std::string waqlQuery = "$ from type event where name = \"" + eventName + "\" select children select target select this, descendants";
+//
+//    AkJson args(AkJson::Map{
+//        { "waql", AkVariant(waqlQuery) }
+//        });
+//
+//    AkJson options(AkJson::Map{
+//        { "return", AkJson::Array{
+//            AkVariant("id"),
+//            AkVariant("name"),
+//            AkVariant("path"),
+//            AkVariant("type")
+//        }}
+//        });
+//
+//    if (waapiClient.Call(ak::wwise::core::object::get, args, options, queryResult, 10))
+//    {
+//        if (queryResult.IsMap() && queryResult.HasKey("return"))
+//        {
+//            const auto& results = queryResult["return"].GetArray();
+//
+//            if (results.empty())
+//            {
+//                std::cout << "No child objects found for event: " << eventName << std::endl;
+//                return;
+//            }
+//
+//            for (const auto& item : results)
+//            {
+//                if (item.IsMap())
+//                {
+//                    const auto& itemMap = item.GetMap();
+//                    std::string childName = itemMap.at("name").GetVariant().GetString();
+//                    std::string childPath = itemMap.at("path").GetVariant().GetString();
+//                    std::string type = itemMap.at("type").GetVariant().GetString();
+//
+//                    // Add to the correct parent
+//                    wwiseEventsTree[parentPath].children.push_back({ childName, childPath, {} });
+//
+//                    std::cout << " - Added child: " << childName << " (" << type << ")" << std::endl;
+//                }
+//            }
+//        }
+//        else
+//        {
+//            std::cerr << "Unexpected response format!" << std::endl;
+//        }
+//    }
+//    else
+//    {
+//        std::cerr << "Failed to retrieve child objects!" << std::endl;
+//    }
+//}
+
+std::vector<WwiseEventNode> WAAPIManager::GetEventDescendants(const std::string& eventName, const std::string& parentPath)
+{
+    using namespace AK::WwiseAuthoringAPI;
+
+    std::vector<WwiseEventNode> descendants;
+
+    if (!waapiClient.IsConnected())
+    {
+        std::cerr << "Not connected to WAAPI!" << std::endl;
+        return descendants;
+    }
+
+    std::cout << "Retrieving children for event: " << eventName << std::endl;
+
+    AkJson queryResult;
+
+    // WAQL query to get all children (Containers, SFX, etc.) of the event
+    std::string waqlQuery = "$ from type event where name = \"" + eventName + "\" select children select target select this, descendants";
+
+    AkJson args(AkJson::Map{
+        { "waql", AkVariant(waqlQuery) }
+        });
+
+    AkJson options(AkJson::Map{
+        { "return", AkJson::Array{
+            AkVariant("id"),
+            AkVariant("name"),
+            AkVariant("path"),
+            AkVariant("type")
+        }}
+        });
+
+    if (waapiClient.Call(ak::wwise::core::object::get, args, options, queryResult, 10))
+    {
+        if (queryResult.IsMap() && queryResult.HasKey("return"))
+        {
+            const auto& results = queryResult["return"].GetArray();
+
+            for (const auto& item : results)
+            {
+                if (item.IsMap())
+                {
+                    const auto& itemMap = item.GetMap();
+                    std::string childName = itemMap.at("name").GetVariant().GetString();
+                    std::string childPath = itemMap.at("path").GetVariant().GetString();
+                    std::string type = itemMap.at("type").GetVariant().GetString();
+
+                    WwiseEventNode childNode = { childName, childPath, {} };
+
+                    std::cout << " - Added child: " << childName << " (" << type << ")" << std::endl;
+
+                    descendants.push_back(childNode);
+                }
+            }
+        }
+    }
+
+    return descendants;
+}
+
+
+
+
+
 
 void WAAPIManager::postWwiseEvent(const std::string& eventName)
 {
