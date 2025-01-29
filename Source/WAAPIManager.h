@@ -19,6 +19,8 @@ struct WwiseEventNode
 {
     std::string name;
     std::string path;
+    std::string guid;
+    std::string type;
     std::vector<WwiseEventNode> children;
 };
 
@@ -34,7 +36,9 @@ public:
     void GetAllEvents();
 
     //void GetEventDescendants(const std::string& eventName, const std::string& parentPath);
-    std::vector<WwiseEventNode> WAAPIManager::GetEventDescendants(const std::string& eventName, const std::string& parentPath);
+    std::vector<WwiseEventNode> GetChildrenOfObject(const std::string& objectPath);
+        
+    std::vector<WwiseEventNode> GetEventDescendants(const std::string& eventName, const std::string& parentPath);
 
     void postWwiseEvent(const std::string& eventName);
 

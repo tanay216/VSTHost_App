@@ -209,72 +209,103 @@ void MainComponent::updateWwiseStatus()
 //    audioFileTree.repaint();
 //}
 
-void MainComponent::updateWwiseTree()
-{
+//void MainComponent::updateWwiseTree() {
+//    std::cout << "Updating Wwise Tree..." << std::endl;
+//
+//    if (audioFileTree.getRootItem() == nullptr) {
+//        std::string rootName = "Root";
+//        auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr, nullptr, this);
+//        audioFileTree.setRootItem(rootItem.release());
+//    }
+//
+//    auto* rootItem = audioFileTree.getRootItem();
+//    if (!rootItem) {
+//        std::cerr << "ERROR: Root item is still null!" << std::endl;
+//        return;
+//    }
+//
+//    // Find or create "Wwise Events" root
+//    WwiseTreeItem* wwiseRootItem = nullptr;
+//    for (int i = 0; i < rootItem->getNumSubItems(); ++i) {
+//        auto* subItem = dynamic_cast<WwiseTreeItem*>(rootItem->getSubItem(i));
+//        if (subItem && subItem->getUniqueName() == "Wwise Events") {
+//            wwiseRootItem = subItem;
+//            break;
+//        }
+//    }
+//
+//    if (!wwiseRootItem) {
+//        wwiseRootItem = new WwiseTreeItem(WwiseEventNode{ "Wwise Events", "", {} }, this);
+//        rootItem->addSubItem(wwiseRootItem);
+//    }
+//    else {
+//        wwiseRootItem->clearSubItems();
+//    }
+//
+//    // Fetch Wwise event hierarchy
+//    auto eventFolderMap = waapiManager.getWwiseEventsTree();
+//
+//    // Track added paths to avoid duplication
+//    std::set<std::string> addedPaths;
+//
+//    for (const auto& [folderPath, folderNode] : eventFolderMap) {
+//        for (const auto& event : folderNode.children) {
+//            auto* eventItem = new WwiseTreeItem(event, this);
+//            wwiseRootItem->addSubItem(eventItem);
+//
+//            // Retrieve and add nested hierarchy (containers & SFX)
+//            auto descendants = waapiManager.GetEventDescendants(event.name, event.path);
+//
+//            // Add child items while tracking added paths
+//            addChildItems(eventItem, descendants, addedPaths);
+//        }
+//    }
+//
+//    audioFileTree.getRootItem()->treeHasChanged();
+//    audioFileTree.repaint();
+//}
+
+void MainComponent::updateWwiseTree() {
     std::cout << "Updating Wwise Tree..." << std::endl;
 
-    if (audioFileTree.getRootItem() == nullptr)
-    {
+    if (audioFileTree.getRootItem() == nullptr) {
         std::string rootName = "Root";
         auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr, nullptr, this);
         audioFileTree.setRootItem(rootItem.release());
     }
 
     auto* rootItem = audioFileTree.getRootItem();
-    if (!rootItem)
-    {
+    if (!rootItem) {
         std::cerr << "ERROR: Root item is still null!" << std::endl;
         return;
     }
 
-    // Find or create "Wwise Events" root
-    WwiseTreeItem* wwiseRootItem = nullptr;
-    for (int i = 0; i < rootItem->getNumSubItems(); ++i)
-    {
-        auto* subItem = dynamic_cast<WwiseTreeItem*>(rootItem->getSubItem(i));
-        if (subItem && subItem->getUniqueName() == "Wwise Events")
-        {
-            wwiseRootItem = subItem;
-            break;
-        }
-    }
-
-    if (!wwiseRootItem)
-    {
-        wwiseRootItem = new WwiseTreeItem(WwiseEventNode{ "Wwise Events", "", {} }, this);
-        rootItem->addSubItem(wwiseRootItem);
-    }
-    else
-    {
-        wwiseRootItem->clearSubItems();
-    }
-
-    // Add Wwise event nodes and sub-items
+    // Fetch Wwise event hierarchy
     auto eventFolderMap = waapiManager.getWwiseEventsTree();
-    for (const auto& [folderPath, folderNode] : eventFolderMap)
-    {
-        for (const auto& event : folderNode.children)
-        {
-            auto* eventItem = new WwiseTreeItem(event, this);
 
-            // Set remove callback
-            eventItem->setRemoveCallback([this, wwiseRootItem](WwiseTreeItem* item) {
-                if (wwiseRootItem)
-                {
-                    for (int i = 0; i < wwiseRootItem->getNumSubItems(); ++i)
-                    {
-                        if (wwiseRootItem->getSubItem(i) == item)
-                        {
-                            wwiseRootItem->removeSubItem(i, true);
-                            break;
-                        }
-                    }
+    // Track added paths to avoid duplication
+    std::set<std::string> addedPaths;
+
+    // Add each event as a root item directly
+    for (const auto& [folderPath, folderNode] : eventFolderMap) {
+        for (const auto& event : folderNode.children) {
+            // Only add the event if it's not already added
+            if (addedPaths.find(event.path) == addedPaths.end()) {
+                auto* eventItem = new WwiseTreeItem(event, this);
+                rootItem->addSubItem(eventItem);
+                addedPaths.insert(event.path);
+
+                // Retrieve and add nested hierarchy (containers & SFX)
+                auto descendants = waapiManager.GetEventDescendants(event.name, event.path);
+                addChildItems(eventItem, descendants, addedPaths);
+
+                // DEBUG: Store and print details for verification
+                std::cout << "Added Event: " << event.name << "| Path: " << event.path << std::endl;
+                for (const auto& descendant : descendants) {
+                    std::cout << "  Descendant: " << descendant.name << " Path: " << descendant.path
+                        << " GUID: " << descendant.guid << " Type: " << descendant.type << std::endl;
                 }
-                });
-
-            wwiseRootItem->addSubItem(eventItem);
-            auto descendants = waapiManager.GetEventDescendants(event.name, event.path);
-            addChildItems(eventItem, descendants);
+            }
         }
     }
 
@@ -285,20 +316,34 @@ void MainComponent::updateWwiseTree()
 
 
 
-void MainComponent::addChildItems(WwiseTreeItem* parentItem, const std::vector<WwiseEventNode>& children)
-{
-    for (const auto& childNode : children)
-    {
-        auto* childItem = new WwiseTreeItem(childNode, this);
-        parentItem->addSubItem(childItem); //  Ensure child is nested under parent
+void MainComponent::addChildItems(WwiseTreeItem* parentItem, const std::vector<WwiseEventNode>& children, std::set<std::string>& addedPaths) {
+    for (const auto& childNode : children) {
+        // Skip adding node if we've already added it based on its path
+        if (addedPaths.find(childNode.path) != addedPaths.end()) {
+            continue; // Node already added, skip it
+        }
 
-        // Recursively add children under their respective parents
-        if (!childNode.children.empty())
-        {
-            addChildItems(childItem, childNode.children);
+        // Mark the path as added
+        addedPaths.insert(childNode.path);
+
+        // Create and add the child node
+        auto* childItem = new WwiseTreeItem(childNode, this);
+        parentItem->addSubItem(childItem);
+
+        // Debug output to trace adding nodes
+        std::cout << "Adding child node: " << childNode.name << " to parent: " << parentItem->getUniqueName() << std::endl;
+
+        // Add only children of the current node (no recursive duplication)
+        if (!childNode.children.empty()) {
+            addChildItems(childItem, childNode.children, addedPaths);  // This call will only add sub-items once per node
         }
     }
 }
+
+
+
+
+
 
 
 

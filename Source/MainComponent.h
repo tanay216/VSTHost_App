@@ -34,7 +34,7 @@ public:
 
     void updateWwiseTree();
 
-    void addChildItems(WwiseTreeItem* parentItem, const std::vector<WwiseEventNode>& children);
+    void addChildItems(WwiseTreeItem* parentItem, const std::vector<WwiseEventNode>& children, std::set<std::string>& addedPaths);
 
     void triggerWwiseEvent(const std::string& eventName);
     //==============================================================================
@@ -865,7 +865,7 @@ public:
     }
 
    
-    void itemOpennessChanged(bool isNowOpen) override
+   /* void itemOpennessChanged(bool isNowOpen) override
     {
         if (isNowOpen && getNumSubItems() == 0)
         {
@@ -874,7 +874,31 @@ public:
                 addSubItem(new WwiseTreeItem(child, mainComponent));
             }
         }
+    }*/
+
+    /*void itemOpennessChanged(bool isNowOpen) override
+    {
+        if (isNowOpen && getNumSubItems() == 0)
+        {
+            std::cout << "Expanding node: " << eventNode.name << " - Adding "
+                << eventNode.children.size() << " sub-items." << std::endl;
+
+          
+        }
+    }*/
+
+    void WwiseTreeItem::itemOpennessChanged(bool isNowOpen) override
+    {
+        if (isNowOpen && getNumSubItems() == 0) {  // Only add sub-items if there are none
+            std::cout << "Expanding node: " << eventNode.name << " - Adding "
+                << eventNode.children.size() << " sub-items." << std::endl;
+
+            std::set<std::string> addedPaths;
+
+            
+        }
     }
+
 
 
 private:
