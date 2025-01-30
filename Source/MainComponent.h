@@ -36,7 +36,7 @@ public:
 
     void addChildItems(WwiseTreeItem* parentItem, const std::vector<WwiseEventNode>& children, std::set<std::string>& addedPaths);
 
-    void triggerWwiseEvent(const std::string& eventName);
+    void triggerWwiseEvent(const std::string& ObjectID);
     //==============================================================================
 
     void populateAudioDeviceDropdowns();
@@ -799,45 +799,16 @@ private:
 };
 
 
-//class WwiseTreeItem : public juce::TreeViewItem
-//                    
-//                        
-//{
-//public:
-//    WwiseTreeItem(const WwiseEventNode& node) : eventNode(node) {}
-//
-//    bool mightContainSubItems() override { return !eventNode.children.empty(); }
-//    void paintItem(juce::Graphics& g, int width, int height) override
-//    {
-//        g.drawText(eventNode.name, 4, 0, width - 4, height, juce::Justification::centredLeft);
-//       // std::cout << "Wwise Tree Item (paint item): " << eventNode.name << std::endl;
-//    }
-//    
-//
-//    void itemOpennessChanged(bool isNowOpen) override
-//    {
-//        if (isNowOpen && getNumSubItems() == 0)
-//        {
-//            for (const auto& child : eventNode.children)
-//            {
-//                addSubItem(new WwiseTreeItem(child));
-//            }
-//        }
-//    }
-//
-//private:
-//    WwiseEventNode eventNode;
-//};
-
 class WwiseTreeItem : public juce::TreeViewItem
 {
 public:
-    WwiseTreeItem(const WwiseEventNode& node, MainComponent* mainComponent)
-        : eventNode(node), mainComponent(mainComponent) {
+    WwiseTreeItem(const WwiseEventNode& node, std::function<void(WwiseTreeItem*)> onRemoveCallback ,MainComponent* mainComponent)
+        : eventNode(node), onRemoveCallback(std::move(onRemoveCallback)) ,mainComponent(mainComponent) {
+        std::cout << "Creating WwiseTreeItem: " << eventNode.name << "|GUID: " << eventNode.guid << std::endl;
     }
 
     bool mightContainSubItems() override { return !eventNode.children.empty(); }
-   
+  //  bool setDefaultOpenness() const override { return false; } 
 
     void paintItem(juce::Graphics& g, int width, int height) override
     {
@@ -847,14 +818,22 @@ public:
         g.drawText(eventNode.name, 4, 0, width - 4, height, juce::Justification::centredLeft);
     }
 
-    
 
     // Custom UI component (bypass + remove buttons)
-    std::unique_ptr<juce::Component> createItemComponent() override
+    /*std::unique_ptr<juce::Component> createItemComponent() override
     {
         return std::make_unique<ItemComponent>(
             eventNode.name,
             [this]() { std::cout << "Playing Wwise Event: " << eventNode.name << std::endl; },
+            [this]() { if (onRemoveCallback) onRemoveCallback(this); },
+            mainComponent);
+    }*/
+
+    std::unique_ptr<juce::Component> createItemComponent() override
+    {
+        return std::make_unique<ItemComponent>(
+            eventNode.guid, // Pass the GUID (Object ID) instead of the name
+            [this]() { if (mainComponent) mainComponent->triggerWwiseEvent(eventNode.guid); },
             [this]() { if (onRemoveCallback) onRemoveCallback(this); },
             mainComponent);
     }
@@ -865,28 +844,6 @@ public:
     }
 
    
-   /* void itemOpennessChanged(bool isNowOpen) override
-    {
-        if (isNowOpen && getNumSubItems() == 0)
-        {
-            for (const auto& child : eventNode.children)
-            {
-                addSubItem(new WwiseTreeItem(child, mainComponent));
-            }
-        }
-    }*/
-
-    /*void itemOpennessChanged(bool isNowOpen) override
-    {
-        if (isNowOpen && getNumSubItems() == 0)
-        {
-            std::cout << "Expanding node: " << eventNode.name << " - Adding "
-                << eventNode.children.size() << " sub-items." << std::endl;
-
-          
-        }
-    }*/
-
     void WwiseTreeItem::itemOpennessChanged(bool isNowOpen) override
     {
         if (isNowOpen && getNumSubItems() == 0) {  // Only add sub-items if there are none
@@ -909,11 +866,8 @@ private:
     class ItemComponent : public juce::Component, public juce::Button::Listener
     {
     public:
-        ItemComponent(const std::string& name,
-            std::function<void()> onPlay,
-            std::function<void()> onRemove,
-            MainComponent* mainComponent)
-            : fileName(name), onPlayCallback(std::move(onPlay)), onRemoveCallback(std::move(onRemove)), mainComponent(mainComponent)
+        ItemComponent(const std::string& objectID, std::function<void()> onPlay, std::function<void()> onRemove, MainComponent* mainComponent)
+            : objectID(objectID), onPlayCallback(std::move(onPlay)), onRemoveCallback(std::move(onRemove)), mainComponent(mainComponent)
         {
             addNewButtons(removeButton, "X");
             addNewToggle(bypassToggleButton, "Bypass");
@@ -962,13 +916,20 @@ private:
         {
             if (mainComponent)
             {
-                std::cout << "Triggering Wwise Event: " << fileName << std::endl;
-                mainComponent->triggerWwiseEvent(fileName); // Call function in MainComponent
+                if (objectID.empty())
+                {
+                    std::cerr << "ERROR: Event node '" << fileName<<" | GUID: "<< objectID << "' does not have a valid GUID!" << std::endl;
+                    return;
+                }
+
+                std::cout << "Triggering Wwise Object: " << objectID << std::endl;
+                mainComponent->triggerWwiseEvent(objectID);
             }
         }
 
        
     private:
+        std::string objectID;
         std::string fileName;
         juce::TextButton removeButton;
         juce::ToggleButton bypassToggleButton;

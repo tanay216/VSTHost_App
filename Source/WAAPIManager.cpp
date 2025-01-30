@@ -2,9 +2,7 @@
 
 
 AkAssertHook g_pAssertHook = nullptr;  // Define the global variable
-
     
-
 WAAPIManager::WAAPIManager()
 {
     g_pAssertHook = WAAPIManager::AkAssertHookFunc;  // Assign in constructor
@@ -199,6 +197,7 @@ void WAAPIManager::GetAllEvents()
                 AkVariant("id"),
                 AkVariant("name"),
                 AkVariant("path"),
+                AkVariant("type"),
                 AkVariant("parent.id")  
             }}
             });
@@ -222,8 +221,10 @@ void WAAPIManager::GetAllEvents()
                     {
                         const auto& itemMap = item.GetMap();
 
+                        std::string eventID = itemMap.at("id").GetVariant().GetString();
                         std::string eventName = itemMap.at("name").GetVariant().GetString();
                         std::string eventPath = itemMap.at("path").GetVariant().GetString();
+                        std::string eventType = itemMap.at("type").GetVariant().GetString();
                         std::string parentPath = "Events";  // Default root folder
 
                         std::string parentID = "N/A";  // Default value
@@ -233,11 +234,11 @@ void WAAPIManager::GetAllEvents()
                             parentPath = itemMap.at("path").GetVariant().GetString();
                         }
 
-                        std::cout << "- " << eventName << " (" << eventPath << ") | Parent ID: " << parentID << std::endl;
+                        std::cout << "- " << eventName <<"path:" << eventPath << " (ID: " << eventID << ", Type: " << eventType <<  std::endl;
 
                        
                         // Create event node
-                        WwiseEventNode eventNode = { eventName, eventPath, {} };
+                        WwiseEventNode eventNode = { eventName, eventPath, eventID, eventType, {}};
                         // Fetch its descendants (Containers, Sound SFX)
                        // GetEventDescendants(eventName, eventPath);
 
@@ -402,94 +403,53 @@ std::vector<WwiseEventNode> WAAPIManager::GetEventDescendants(const std::string&
     return descendants;
 }
 
-
-
-
-
-//std::vector<WwiseEventNode> WAAPIManager::GetEventDescendants(const std::string& eventName, const std::string& parentPath) {
-//    // Manually create a simple test hierarchy
-//    std::vector<WwiseEventNode> descendants;
-//
-//    // "Play_Event"
-//    if (eventName == "Play_Event" ) {
-//        WwiseEventNode playEventNode = { "Play_Event", "\\Events\\Play_Event", {} };
-//
-//        // "RandomContainer"
-//        WwiseEventNode randomContainerNode = { "RandomContainer", "\\Events\\Play_Event\\RandomContainer", {} };
-//
-//        // "SFX01"
-//        WwiseEventNode sfx01Node = { "SFX01", "\\Events\\Play_Event\\RandomContainer\\SFX01", {} };
-//
-//        // "SFX02"
-//        WwiseEventNode sfx02Node = { "SFX02", "\\Events\\Play_Event\\RandomContainer\\SFX02", {} };
-//
-//        // Add SFX01 and SFX02 as children to RandomContainer
-//        randomContainerNode.children.push_back(sfx01Node);
-//        randomContainerNode.children.push_back(sfx02Node);
-//
-//        // Add RandomContainer as a child to Play_Event
-//        playEventNode.children.push_back(randomContainerNode);
-//
-//        // Add Play_Event to the descendants vector
-//        descendants.push_back(playEventNode);
-//    }
-//
-//    // Return the manually created hierarchy
-//    return descendants;
-//}
-
-
-
-
-
-
-
-
-void WAAPIManager::postWwiseEvent(const std::string& eventName)
+void WAAPIManager::postWwiseEvent(const std::string& objectID)
 {
     using namespace AK::WwiseAuthoringAPI;
 
     if (!waapiClient.IsConnected())
     {
-        std::cerr << "WAAPI is not connected! Cannot post event." << std::endl;
+        std::cerr << "WAAPI is not connected! Cannot post object." << std::endl;
         return;
     }
 
-    std::cout << "Posting event: " << eventName << " to Wwise..." << std::endl;
-    std::string qualifiedName = "Event:" + eventName;
+    if (objectID.empty())
+    {
+        std::cerr << "ERROR: Trying to play an object with an EMPTY ID!" << std::endl;
+        return;
+    }
+
+    std::cout << "Posting Wwise Object: " << objectID << " to Wwise..." << std::endl;
 
     AkJson args(AkJson::Map{
-        { "object", AkVariant(qualifiedName) }  // Send event name to Wwise
+        { "object", AkVariant(objectID) }
         });
 
     AkJson result;
     if (waapiClient.Call(ak::wwise::core::transport::create, args, AkJson(AkJson::Type::Map), result, 10))
     {
         uint64_t transportID = result["transport"].GetVariant().GetUInt32();
-        std::cout << "Transport object created for: " << eventName << " with ID: " << transportID << std::endl;
+        std::cout << "Transport object created for: " << objectID << " with ID: " << transportID << std::endl;
 
         AkJson playArgs(AkJson::Map{
             { "action", AkVariant("play") },
             { "transport", AkVariant(transportID) }
             });
 
-        if (waapiClient.Call(ak::wwise::core::transport::executeAction,playArgs, AkJson(AkJson::Type::Map), result, 10))
+        if (waapiClient.Call(ak::wwise::core::transport::executeAction, playArgs, AkJson(AkJson::Type::Map), result, 10))
         {
-            std::cout << "Successfully started playback for: " << eventName << std::endl;
+            std::cout << "Successfully started playback for: " << objectID << std::endl;
         }
         else
         {
-            std::cerr << "Failed to start playback for: " << eventName << std::endl;
+            std::cerr << "Failed to start playback for: " << objectID << std::endl;
         }
-
     }
-    else {
-		std::cerr << "Failed to create transport object for: " << eventName << std::endl;
+    else
+    {
+        std::cerr << "Failed to create transport object for: " << objectID << std::endl;
     }
-
 }
-
-
 
 
 

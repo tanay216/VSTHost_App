@@ -9,6 +9,9 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <AK/SoundEngine/Common/AkSoundEngine.h>
+#include <AK/Tools/Common/AkPlatformFuncs.h>
+
 
 using namespace AK::WwiseAuthoringAPI;
 
@@ -21,6 +24,7 @@ struct WwiseEventNode
     std::string path;
     std::string guid;
     std::string type;
+    std::string parentID;
     std::vector<WwiseEventNode> children;
 };
 
@@ -29,6 +33,13 @@ class WAAPIManager
 public:
     WAAPIManager();
     ~WAAPIManager();
+
+    void WwiseAudioCaptureCallback(
+        AkAudioBuffer* io_pBuffer, // Audio buffer
+        AkUInt32 in_uBufferSize    // Buffer size
+    );
+
+    void RegisterWwiseAudioCapture();
 
     void connectToWAAPI();
     void getSessionInfo();
@@ -40,7 +51,15 @@ public:
         
     std::vector<WwiseEventNode> GetEventDescendants(const std::string& eventName, const std::string& parentPath);
 
-    void postWwiseEvent(const std::string& eventName);
+    void postWwiseEvent(const std::string& objectID);
+
+    void subscribeToPlayback();
+    void onPlaybackEvent(const AK::WwiseAuthoringAPI::AkJson& in_json);
+    void getPlayingSoundInstances(const std::string& soundId);
+
+
+
+
 
     //  Wwise Event Tree getter methods
 
@@ -62,6 +81,8 @@ public:
     };
 
 private:
+
+    std::unordered_map<std::string, WwiseEventNode> wwiseObjects;
     Client waapiClient;
     std::string wwiseProjectName = "";
     std::string wwiseVersion = "";

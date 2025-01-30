@@ -54,7 +54,8 @@ MainComponent::MainComponent()
     audioFileTree.setDefaultOpenness(true);
     std::string rootName = "Root";
     auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr, nullptr, this);
-    auto wwiseRootItem = std::make_unique<WwiseTreeItem>(WwiseEventNode{ "Wwise Events", "", {} }, this);
+    auto wwiseRootItem = std::make_unique<WwiseTreeItem>(WwiseEventNode{ "Wwise Events", "", {} },nullptr, this);
+    wwiseTree.setDefaultOpenness(false);
     audioFileTree.setRootItem(rootItem.release());
     audioFileTree.setInterceptsMouseClicks(true, true); // Enable clicks globally
     audioFileTree.setWantsKeyboardFocus(true);
@@ -137,133 +138,6 @@ void MainComponent::updateWwiseStatus()
     wwiseStatusLabel.setText(statusText, juce::dontSendNotification);
 }
 
-//void MainComponent::updateWwiseTree()
-//{
-//    std::cout << "Updating Wwise Tree..." << std::endl;
-//
-//    if (audioFileTree.getRootItem() == nullptr)
-//    {
-//        std::string rootName = "Root";
-//        auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr, nullptr, this);
-//        audioFileTree.setRootItem(rootItem.release());
-//    }
-//
-//    auto* rootItem = audioFileTree.getRootItem();
-//    if (!rootItem)
-//    {
-//        std::cerr << "ERROR: Root item is still null!" << std::endl;
-//        return;
-//    }
-//
-//    // Find or create "Wwise Events" root
-//    WwiseTreeItem* wwiseRootItem = nullptr;
-//    for (int i = 0; i < rootItem->getNumSubItems(); ++i)
-//    {
-//        auto* subItem = dynamic_cast<WwiseTreeItem*>(rootItem->getSubItem(i));
-//        if (subItem && subItem->getUniqueName() == "Wwise Events")
-//        {
-//            wwiseRootItem = subItem;
-//            break;
-//        }
-//    }
-//
-//    if (!wwiseRootItem)
-//    {
-//        wwiseRootItem = new WwiseTreeItem(WwiseEventNode{ "Wwise Events", "", {} }, this);
-//        rootItem->addSubItem(wwiseRootItem);
-//    }
-//    else
-//    {
-//        wwiseRootItem->clearSubItems();
-//    }
-//
-//    // Add Wwise event nodes
-//    auto eventTree = waapiManager.getWwiseEventsTree();
-//    for (const auto& [folderPath, folderNode] : eventTree)
-//    {
-//        for (const auto& event : folderNode.children)
-//        {
-//            auto* eventItem = new WwiseTreeItem(event, this);
-//
-//            // Set remove callback
-//            eventItem->setRemoveCallback([this, wwiseRootItem](WwiseTreeItem* item) {
-//                if (wwiseRootItem)
-//                {
-//                    for (int i = 0; i < wwiseRootItem->getNumSubItems(); ++i)
-//                    {
-//                        if (wwiseRootItem->getSubItem(i) == item)
-//                        {
-//                            wwiseRootItem->removeSubItem(i, true);
-//                            break;
-//                        }
-//                    }
-//                }
-//                });
-//
-//            wwiseRootItem->addSubItem(eventItem);
-//            
-//        }
-//    }
-//
-//    audioFileTree.getRootItem()->treeHasChanged();
-//    audioFileTree.repaint();
-//}
-
-//void MainComponent::updateWwiseTree() {
-//    std::cout << "Updating Wwise Tree..." << std::endl;
-//
-//    if (audioFileTree.getRootItem() == nullptr) {
-//        std::string rootName = "Root";
-//        auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr, nullptr, this);
-//        audioFileTree.setRootItem(rootItem.release());
-//    }
-//
-//    auto* rootItem = audioFileTree.getRootItem();
-//    if (!rootItem) {
-//        std::cerr << "ERROR: Root item is still null!" << std::endl;
-//        return;
-//    }
-//
-//    // Find or create "Wwise Events" root
-//    WwiseTreeItem* wwiseRootItem = nullptr;
-//    for (int i = 0; i < rootItem->getNumSubItems(); ++i) {
-//        auto* subItem = dynamic_cast<WwiseTreeItem*>(rootItem->getSubItem(i));
-//        if (subItem && subItem->getUniqueName() == "Wwise Events") {
-//            wwiseRootItem = subItem;
-//            break;
-//        }
-//    }
-//
-//    if (!wwiseRootItem) {
-//        wwiseRootItem = new WwiseTreeItem(WwiseEventNode{ "Wwise Events", "", {} }, this);
-//        rootItem->addSubItem(wwiseRootItem);
-//    }
-//    else {
-//        wwiseRootItem->clearSubItems();
-//    }
-//
-//    // Fetch Wwise event hierarchy
-//    auto eventFolderMap = waapiManager.getWwiseEventsTree();
-//
-//    // Track added paths to avoid duplication
-//    std::set<std::string> addedPaths;
-//
-//    for (const auto& [folderPath, folderNode] : eventFolderMap) {
-//        for (const auto& event : folderNode.children) {
-//            auto* eventItem = new WwiseTreeItem(event, this);
-//            wwiseRootItem->addSubItem(eventItem);
-//
-//            // Retrieve and add nested hierarchy (containers & SFX)
-//            auto descendants = waapiManager.GetEventDescendants(event.name, event.path);
-//
-//            // Add child items while tracking added paths
-//            addChildItems(eventItem, descendants, addedPaths);
-//        }
-//    }
-//
-//    audioFileTree.getRootItem()->treeHasChanged();
-//    audioFileTree.repaint();
-//}
 
 void MainComponent::updateWwiseTree() {
     std::cout << "Updating Wwise Tree..." << std::endl;
@@ -291,7 +165,24 @@ void MainComponent::updateWwiseTree() {
         for (const auto& event : folderNode.children) {
             // Only add the event if it's not already added
             if (addedPaths.find(event.path) == addedPaths.end()) {
-                auto* eventItem = new WwiseTreeItem(event, this);
+
+                auto removeCallback = [this, rootItem](WwiseTreeItem* item)
+                {
+                    if (rootItem)
+                    {
+                        for (int i = 0; i < rootItem->getNumSubItems(); ++i)
+                        {
+                            if (rootItem->getSubItem(i) == item)
+                            {
+                                rootItem->removeSubItem(i, true);
+                                break;
+                            }
+                        }
+                    }
+                };
+
+                auto* eventItem = new WwiseTreeItem(event,removeCallback, this);
+                
                 rootItem->addSubItem(eventItem);
                 addedPaths.insert(event.path);
 
@@ -327,7 +218,7 @@ void MainComponent::addChildItems(WwiseTreeItem* parentItem, const std::vector<W
         addedPaths.insert(childNode.path);
 
         // Create and add the child node
-        auto* childItem = new WwiseTreeItem(childNode, this);
+        auto* childItem = new WwiseTreeItem(childNode,nullptr, this);
         parentItem->addSubItem(childItem);
 
         // Debug output to trace adding nodes
@@ -342,20 +233,10 @@ void MainComponent::addChildItems(WwiseTreeItem* parentItem, const std::vector<W
 
 
 
-
-
-
-
-
-
-
-
-
-
-void MainComponent::triggerWwiseEvent(const std::string& eventName)
+void MainComponent::triggerWwiseEvent(const std::string& ObjectID)
 {
-    std::cout << "Requesting WAAPI to trigger event: " << eventName << std::endl;
-    waapiManager.postWwiseEvent(eventName);
+    std::cout << "Requesting WAAPI to trigger event: " << ObjectID << std::endl;
+    waapiManager.postWwiseEvent(ObjectID);
 }
 
 
@@ -871,6 +752,8 @@ void MainComponent::buttonClicked(juce::Button* button)
 
     else if (button == &refreshFileTreeButton) {
 
+        // clear the audio file tree
+		audioFileTree.getRootItem()->clearSubItems();
         updateWwiseTree();
         audioFileTree.getRootItem()->treeHasChanged();
         audioFileTree.repaint();
