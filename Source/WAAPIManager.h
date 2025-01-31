@@ -6,9 +6,12 @@
 #include <AK/Tools/Common/AkAssert.h>
 #include <AK/WwiseAuthoringAPI/waapi.h>
 #include <AK/WwiseAuthoringAPI/AkJsonBase.h>
+#include <Ak/WwiseAuthoringAPI/AkAutobahn/JsonProvider.h> // For handling JsonProvider type in the callback
 #include <iostream>
 #include <map>
 #include <vector>
+#include <future>  // For std::promise, std::future
+#include <atomic>  // For std::atomic_bool
 #include <AK/SoundEngine/Common/AkSoundEngine.h>
 #include <AK/Tools/Common/AkPlatformFuncs.h>
 
@@ -53,11 +56,10 @@ public:
 
     void postWwiseEvent(const std::string& objectID);
 
-    void subscribeToPlayback();
-    void onPlaybackEvent(const AK::WwiseAuthoringAPI::AkJson& in_json);
-    void getPlayingSoundInstances(const std::string& soundId);
+    void SubscribeToVoices();
+    void GetVoices();
 
-
+    void WAAPIManager::SendVoiceDataToHost(const std::string& soundName, const std::string& eventName, float volume, float pitch, int gameObject);
 
 
 
@@ -83,10 +85,13 @@ public:
 private:
 
     std::unordered_map<std::string, WwiseEventNode> wwiseObjects;
+    
     Client waapiClient;
+    
     std::string wwiseProjectName = "";
     std::string wwiseVersion = "";
     std::string wwisePlatform = "";
+    
 
 
     std::map<std::string, WwiseEventNode> wwiseEventsTree;

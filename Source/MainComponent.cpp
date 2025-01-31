@@ -25,6 +25,7 @@ MainComponent::MainComponent()
     juce::Component::addAndMakeVisible(audioFileTree);
     juce::Component::addAndMakeVisible(refreshIODevicesListButton);
     juce::Component::addAndMakeVisible(refreshFileTreeButton);
+    refreshFileTreeButton.triggerClick();
 
     juce::Component::addAndMakeVisible(inputDeviceDropdown);
     inputDeviceDropdown.onChange = [this]() { changeAudioDevice(true); }; // Handle input selection
@@ -44,7 +45,7 @@ MainComponent::MainComponent()
     wwiseStatusLabel.setBounds(10, 10, 300, 30); // Adjust size/position
     updateWwiseStatus();
    
-    updateWwiseTree();
+   // updateWwiseTree();
 
     //// Wwise Tree View
     //juce::Component::addAndMakeVisible(wwiseTree);
@@ -411,6 +412,9 @@ void MainComponent::releaseResources()
     transportSource.releaseResources();
 }
 
+
+
+
 //==============================================================================
 
 void MainComponent::paint(juce::Graphics& g)
@@ -757,6 +761,7 @@ void MainComponent::buttonClicked(juce::Button* button)
         updateWwiseTree();
         audioFileTree.getRootItem()->treeHasChanged();
         audioFileTree.repaint();
+        
     }
 
 
