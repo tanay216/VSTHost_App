@@ -440,7 +440,7 @@ void WAAPIManager::postWwiseEvent(const std::string& objectID)
         
         if (waapiClient.Call(ak::wwise::core::transport::executeAction, playArgs, AkJson(AkJson::Type::Map), result, 10))
         {
-            GetVoices();
+            
             std::cout << "Successfully started playback for: " << objectID << std::endl;
         }
         else
@@ -452,6 +452,8 @@ void WAAPIManager::postWwiseEvent(const std::string& objectID)
     {
         std::cerr << "Failed to create transport object for: " << objectID << std::endl;
     }
+
+    GetVoices(objectID);
 }
 //void WAAPIManager::SubscribeToVoices()
 //{
@@ -611,7 +613,7 @@ void WAAPIManager::postWwiseEvent(const std::string& objectID)
 //    }
 //}
 
-void WAAPIManager::GetVoices()
+void WAAPIManager::GetVoices(const std::string& objectID)
 {
     using namespace AK::WwiseAuthoringAPI;
 
@@ -621,7 +623,7 @@ void WAAPIManager::GetVoices()
         return;
     }
 
-    std::cout << "Retrieving Wwise Voices..." << std::endl;
+    std::cout << "Retrieving Wwise Voices for Object: " << objectID << "..." << std::endl;
 
     // Define the query arguments
     AkJson args(AkJson::Map{
@@ -645,6 +647,7 @@ void WAAPIManager::GetVoices()
     // Execute the WAAPI call
     if (waapiClient.Call(ak::wwise::core::profiler::getVoices, args, options, result))
     {
+        std::cout << "===GetVoices result===" << std::endl;
         if (!result.HasKey("return"))
         {
             std::cerr << "No 'return' key found in WAAPI response." << std::endl;
@@ -657,21 +660,28 @@ void WAAPIManager::GetVoices()
             std::cout << "No active voices found." << std::endl;
             return;
         }
-
+        bool foundVoices = false;
         for (const auto& voice : voicesArray)
         {
-            int gameObjectID = voice["gameObjectID"].GetVariant().GetInt32();
-            int soundID = voice["soundID"].GetVariant().GetInt32();
-            int playingID = voice["playingID"].GetVariant().GetInt32();
+            std::string gameObjectID = voice["gameObjectID"].GetVariant().GetString();
+            std::string soundID = voice["soundID"].GetVariant().GetString();
+            std::string  playingID = voice["playingID"].GetVariant().GetString();
             std::string objectName = voice["objectName"].GetVariant().GetString();
             std::string playTargetName = voice["playTargetName"].GetVariant().GetString();
 
-            std::cout << "[Voice Data] Object: " << objectName
-                << ", Play Target: " << playTargetName
-                << ", GameObject ID: " << gameObjectID
-                << ", Sound ID: " << soundID
-                << ", Playing ID: " << playingID
-                << std::endl;
+            // Filter by objectID (this ensures you only get voices triggered by this object)
+            if (objectName == objectID)
+            {
+                foundVoices = true;
+                std::cout << "[Voice Data] Object: " << objectName
+                    << ", Play Target: " << playTargetName
+                    << ", GameObject ID: " << gameObjectID
+                    << ", Sound ID: " << soundID
+                    << ", Playing ID: " << playingID
+                    << std::endl;
+            }
+
+            
         }
     }
     else

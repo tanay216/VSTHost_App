@@ -57,7 +57,7 @@ public:
     void postWwiseEvent(const std::string& objectID);
 
     void SubscribeToVoices();
-    void GetVoices();
+    void GetVoices(const std::string& objectID);
 
     void WAAPIManager::SendVoiceDataToHost(const std::string& soundName, const std::string& eventName, float volume, float pitch, int gameObject);
 
