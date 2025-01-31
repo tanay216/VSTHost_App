@@ -647,7 +647,7 @@ void WAAPIManager::GetVoices(const std::string& objectID)
     // Execute the WAAPI call
     if (waapiClient.Call(ak::wwise::core::profiler::getVoices, args, options, result))
     {
-        std::cout << "===GetVoices result===" << std::endl;
+        
         if (!result.HasKey("return"))
         {
             std::cerr << "No 'return' key found in WAAPI response." << std::endl;
@@ -660,26 +660,81 @@ void WAAPIManager::GetVoices(const std::string& objectID)
             std::cout << "No active voices found." << std::endl;
             return;
         }
-        bool foundVoices = false;
+       
         for (const auto& voice : voicesArray)
         {
-            std::string gameObjectID = voice["gameObjectID"].GetVariant().GetString();
+            std::cout << "===Voice Data===" << std::endl;
+            if (!voice.IsMap()) continue;
+            
+            
+            const auto& voiceMap = voice.GetMap();
+
+
+
+            /*std::string gameObjectID = voice["gameObjectID"].GetVariant().GetString();
             std::string soundID = voice["soundID"].GetVariant().GetString();
             std::string  playingID = voice["playingID"].GetVariant().GetString();
             std::string objectName = voice["objectName"].GetVariant().GetString();
-            std::string playTargetName = voice["playTargetName"].GetVariant().GetString();
+            std::string playTargetName = voice["playTargetName"].GetVariant().GetString();*/
+
+            // Extract data correctly based on type
+            uint64_t gameObjectID = 0;
+            int32_t soundID = 0;
+            int32_t playingID = 0;
+            std::string objectName;
+            std::string playTargetName;
+
+
+            // Extract `gameObjectID` (uint64_t)
+            if (voiceMap.find("gameObjectID") != voiceMap.end() && voiceMap.at("gameObjectID").IsVariant())
+            {
+                const auto& var = voiceMap.at("gameObjectID").GetVariant();
+                if (var.GetUInt64())
+                    gameObjectID = var.GetUInt64();
+                else if (var.GetInt32())
+                    gameObjectID = static_cast<uint64_t>(var.GetInt32()); // Convert safely if needed
+            }
+
+            // Extract `soundID`
+            if (voiceMap.find("soundID") != voiceMap.end() && voiceMap.at("soundID").IsVariant())
+            {
+                const auto& var = voiceMap.at("soundID").GetVariant();
+                if (var.GetInt32()) soundID = var.GetInt32();
+            }
+
+            // Extract `playingID`
+            if (voiceMap.find("playingID") != voiceMap.end() && voiceMap.at("playingID").IsVariant())
+            {
+                const auto& var = voiceMap.at("playingID").GetVariant();
+                if (var.GetInt32()) playingID = var.GetInt32();
+            }
+
+            // Extract `objectName`
+            if (voiceMap.find("objectName") != voiceMap.end() && voiceMap.at("objectName").IsVariant())
+            {
+                const auto& var = voiceMap.at("objectName").GetVariant();
+                if (var.IsString()) objectName = var.GetString();
+            }
+
+            // Extract `playTargetName`
+            if (voiceMap.find("playTargetName") != voiceMap.end() && voiceMap.at("playTargetName").IsVariant())
+            {
+                const auto& var = voiceMap.at("playTargetName").GetVariant();
+                if (var.IsString()) playTargetName = var.GetString();
+            }
+
+
 
             // Filter by objectID (this ensures you only get voices triggered by this object)
-            if (objectName == objectID)
-            {
-                foundVoices = true;
-                std::cout << "[Voice Data] Object: " << objectName
+           
+               
+                std::cout << "[Voice] Object: " << objectName
                     << ", Play Target: " << playTargetName
                     << ", GameObject ID: " << gameObjectID
                     << ", Sound ID: " << soundID
                     << ", Playing ID: " << playingID
                     << std::endl;
-            }
+            
 
             
         }
