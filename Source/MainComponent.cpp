@@ -1,13 +1,18 @@
 #include "MainComponent.h"
+#define NUM_VOICE_BUFFERS 4 
 
 
 //==============================================================================
 MainComponent::MainComponent()
 {
-    waapiManager.connectToWAAPI();
     // Make sure you set the size of the component after
-    // you add any child components.
+   // you add any child components.
+
+    waapiManager.connectToWAAPI();
+    OpenSharedMemory();
+   
     formatManager.registerBasicFormats();
+
 
     juce::Component::addAndMakeVisible(viewport);
     viewport.setViewedComponent(&contentComponent, false);
@@ -240,6 +245,52 @@ void MainComponent::triggerWwiseEvent(const std::string& ObjectID)
     waapiManager.postWwiseEvent(ObjectID);
 }
 
+//==============================================================================
+void MainComponent::OpenSharedMemory()
+{
+    std::cout << "Opening shared memory..." << std::endl;
+    const char *memName = "WWISE_TO_VST_HOST";
+    hMapFile = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, memName);
+
+    if (hMapFile == NULL)
+    {
+        
+        std::cout << "Could not open shared memory." << std::endl;
+        return;
+    }
+
+    pBuf = MapViewOfFile(hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, BUF_SIZE);
+    if (pBuf == NULL)
+    {
+        
+        std::cout << "Could not map view of shared memory." << std::endl;
+        CloseHandle(hMapFile);
+        return;
+    }
+}
+
+void MainComponent::ReadFromSharedMemory(juce::AudioBuffer<float>& buffer)
+{
+    if (pBuf == NULL) return;
+
+    struct SharedAudioData {
+        AkUInt32 numFrames;
+        AkUInt32 numChannels;
+        AkReal32 data[NUM_VOICE_BUFFERS * 1024];
+    };
+
+    SharedAudioData* sharedData = (SharedAudioData*)pBuf;
+
+    if (sharedData->numFrames > 0)
+    {
+        int numSamples = sharedData->numFrames * sharedData->numChannels;
+
+        for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
+        {
+            buffer.copyFrom(ch, 0, sharedData->data + (ch * sharedData->numFrames), sharedData->numFrames);
+        }
+    }
+}
 
 //==============================================================================
 void MainComponent::populateAudioDeviceDropdowns()
@@ -340,8 +391,6 @@ void MainComponent::changeAudioDevice(bool isInput)
 }
 
 
-
-
 //==============================================================================
 void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
@@ -356,6 +405,8 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
         if (vstPluginComponent.pluginInstance != nullptr)
         {
             try {
+
+
                 juce::MidiBuffer midiBuffer;
 
                 //std::cout << "Buffer Channels: " << bufferToFill.buffer->getNumChannels() << std::endl;
@@ -373,6 +424,7 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
                 }
                 else
                 {
+                    ReadFromSharedMemory(*bufferToFill.buffer);
                     vstPluginComponent.pluginInstance->processBlock(*bufferToFill.buffer, midiBuffer);
 
                     if (!pluginLoaded)
@@ -411,9 +463,6 @@ void MainComponent::releaseResources()
 {
     transportSource.releaseResources();
 }
-
-
-
 
 //==============================================================================
 

@@ -56,10 +56,11 @@ public:
 
     void postWwiseEvent(const std::string& objectID);
 
-    void SubscribeToVoices();
+   // void SubscribeToVoices();
     void GetVoices(const std::string& objectID);
+    void GetOriginalFilePath( std::string& objectGUID);
 
-    void WAAPIManager::SendVoiceDataToHost(const std::string& soundName, const std::string& eventName, float volume, float pitch, int gameObject);
+   // void WAAPIManager::SendVoiceDataToHost(const std::string& soundName, const std::string& eventName, float volume, float pitch, int gameObject);
 
 
 
@@ -87,7 +88,7 @@ private:
     std::unordered_map<std::string, WwiseEventNode> wwiseObjects;
     
     Client waapiClient;
-    
+    std::string originalFilePath;
     std::string wwiseProjectName = "";
     std::string wwiseVersion = "";
     std::string wwisePlatform = "";

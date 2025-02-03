@@ -548,70 +548,6 @@ void WAAPIManager::postWwiseEvent(const std::string& objectID)
 //}
 
 
-//void WAAPIManager::GetVoices()
-//{
-//    using namespace AK::WwiseAuthoringAPI;
-//
-//    if (!waapiClient.IsConnected())
-//    {
-//        std::cerr << "Not connected to WAAPI!" << std::endl;
-//        return;
-//    }
-//
-//    std::cout << "Retrieving Wwise Voices..." << std::endl;
-//
-//    // Define the query arguments
-//    AkJson args(AkJson::Map{
-//        { "time", AkVariant(0) }  // 0 means latest available profiler capture time
-//        });
-//
-//    // Define the return options (valid property names)
-//    AkJson result(AkJson::Map{
-//        { "return", AkJson::Array{
-//                 // GameObject ID
-//            AkVariant("soundID"),           // Sound Name
-//            AkVariant("playingID"),       // Unique playing instance ID
-//                  // 3D position of the sound (if applicable)
-//        }}
-//        });
-//
-//    AkJson options;
-//
-//    // Execute the WAAPI call
-//    if (waapiClient.Call(ak::wwise::core::profiler::getVoices, args, options, result))
-//    {
-//        if (!result.HasKey("voices"))
-//        {
-//            std::cerr << "No 'voices' key found in WAAPI response." << std::endl;
-//            return;
-//        }
-//
-//        const auto& voicesArray = result["voices"].GetArray();
-//        if (voicesArray.empty())
-//        {
-//            std::cout << "No active voices found." << std::endl;
-//            return;
-//        }
-//
-//        for (const auto& voice : voicesArray)
-//        {
-//            std::string soundName = voice["sound"].GetVariant().GetString();
-//            std::string eventName = voice["event"].GetVariant().GetString();
-//            int gameObjectID = voice["gameObject"].GetVariant().GetInt32();
-//            int playingID = voice["playingId"].GetVariant().GetInt32();
-//
-//            std::cout << "[Voice Data] Sound: " << soundName
-//                << ", Event: " << eventName
-//                << ", GameObject ID: " << gameObjectID
-//                << ", Playing ID: " << playingID
-//                << std::endl;
-//        }
-//    }
-//    else
-//    {
-//        std::cerr << "Failed to retrieve voice data from Wwise." << std::endl;
-//    }
-//}
 
 void WAAPIManager::GetVoices(const std::string& objectID)
 {
@@ -669,14 +605,6 @@ void WAAPIManager::GetVoices(const std::string& objectID)
             
             const auto& voiceMap = voice.GetMap();
 
-
-
-            /*std::string gameObjectID = voice["gameObjectID"].GetVariant().GetString();
-            std::string soundID = voice["soundID"].GetVariant().GetString();
-            std::string  playingID = voice["playingID"].GetVariant().GetString();
-            std::string objectName = voice["objectName"].GetVariant().GetString();
-            std::string playTargetName = voice["playTargetName"].GetVariant().GetString();*/
-
             // Extract data correctly based on type
             uint64_t gameObjectID = 0;
             int32_t soundID = 0;
@@ -684,6 +612,15 @@ void WAAPIManager::GetVoices(const std::string& objectID)
             std::string objectName;
             std::string playTargetName;
 
+            // store objectGUID as well, this is the variable we will pass to getOriginalFilePath
+			std::string objectGUID;
+
+               // Extract 'objectGUID'
+			if (voiceMap.find("objectGUID") != voiceMap.end() && voiceMap.at("objectGUID").IsVariant())
+			{
+				const auto& var = voiceMap.at("objectGUID").GetVariant();
+				if (var.IsString()) objectGUID = var.GetString();
+			}
 
             // Extract `gameObjectID` (uint64_t)
             if (voiceMap.find("gameObjectID") != voiceMap.end() && voiceMap.at("gameObjectID").IsVariant())
@@ -727,12 +664,13 @@ void WAAPIManager::GetVoices(const std::string& objectID)
 
             // Filter by objectID (this ensures you only get voices triggered by this object)
            
-               
+               GetOriginalFilePath(objectGUID);
                 std::cout << "[Voice] Object: " << objectName
                     << ", Play Target: " << playTargetName
                     << ", GameObject ID: " << gameObjectID
                     << ", Sound ID: " << soundID
                     << ", Playing ID: " << playingID
+                    <<" Original File Path: "<< originalFilePath
                     << std::endl;
             
 
@@ -744,6 +682,76 @@ void WAAPIManager::GetVoices(const std::string& objectID)
         std::cerr << "Failed to retrieve voice data from Wwise." << std::endl;
     }
 }
+
+void WAAPIManager::GetOriginalFilePath( std::string& objectGUID)
+{
+    if (!waapiClient.IsConnected())
+    {
+        std::cerr << "Not connected to WAAPI!" << std::endl;
+        return;
+    }
+    // store soundID as a string
+
+    AkJson args(AkJson::Map{
+        { "from", AkJson::Map{
+            { "id", AkJson::Array{AkVariant(objectGUID)}}
+        }}
+        });
+
+    AkJson options(AkJson::Map{
+        { "return", AkJson::Array{
+            AkVariant("type"),
+            AkVariant("originalRelativeFilePath"),
+            AkVariant("parent")
+        }}
+        });
+
+    AkJson result;
+    if (waapiClient.Call(ak::wwise::core::object::get, args, options, result))
+    {
+        if (!result.HasKey("return"))
+        {
+            std::cerr << "No 'return' key found in WAAPI response." << std::endl;
+            return;
+        }
+
+        const auto& objects = result["return"].GetArray();
+        if (objects.empty())
+        {
+            std::cerr << "No objects found for soundID: " << objectGUID << std::endl;
+            return;
+        }
+
+        for (const auto& obj : objects)
+        {
+            if (!obj.IsMap()) continue;
+            const auto& objMap = obj.GetMap();
+
+            std::string type;
+           
+
+            if (objMap.find("type") != objMap.end() && objMap.at("type").IsVariant())
+                type = objMap.at("type").GetVariant().GetString();
+
+            if (objMap.find("originalRelativeFilePath") != objMap.end() && objMap.at("originalRelativeFilePath").IsVariant())
+                originalFilePath = objMap.at("originalRelativeFilePath").GetVariant().GetString();
+
+            if (type == "Sound")  // Ensure it's an actual Sound SFX
+            {
+                std::cout << "[File Path] Sound ID: " << objectGUID << " -> " << originalFilePath << std::endl;
+            }
+            else
+            {
+                std::cerr << "Sound ID: " << objectGUID << " is not a raw Sound object." << std::endl;
+            }
+        }
+    }
+    else
+    {
+        std::cerr << "Failed to retrieve file path for soundID: " << objectGUID << std::endl;
+    }
+}
+
 
 
 

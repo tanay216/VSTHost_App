@@ -37,6 +37,13 @@ public:
     void addChildItems(WwiseTreeItem* parentItem, const std::vector<WwiseEventNode>& children, std::set<std::string>& addedPaths);
 
     void triggerWwiseEvent(const std::string& ObjectID);
+
+
+    //Shared Memory Functions for SInk Plugin ==============================================================================
+   
+    void OpenSharedMemory();
+    void ReadFromSharedMemory(juce::AudioBuffer<float>& buffer);
+
     //==============================================================================
 
     void populateAudioDeviceDropdowns();
@@ -98,6 +105,9 @@ private:
     VSTPluginComponent vstPluginComponent;
     Exporter exporterComponent;
     WAAPIManager waapiManager;
+    HANDLE hMapFile;
+    LPVOID pBuf;
+    static const int BUF_SIZE = 1024 * 1024;
    
 
     std::unique_ptr<juce::FileChooser> fileChooser;
