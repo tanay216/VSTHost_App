@@ -8,10 +8,6 @@
             file="Source/SharedMemoryHandler.cpp"/>
       <FILE id="Nhl4fT" name="SharedMemoryHandler.h" compile="0" resource="0"
             file="Source/SharedMemoryHandler.h"/>
-      <FILE id="xuWjeD" name="AudioInputSInkPlugin.cpp" compile="1" resource="0"
-            file="Source/AudioInputSInkPlugin.cpp"/>
-      <FILE id="PX1Oc7" name="AudioInputSInkPlugin.h" compile="0" resource="0"
-            file="Source/AudioInputSInkPlugin.h"/>
       <FILE id="kk5evR" name="WAAPIManager.cpp" compile="1" resource="0"
             file="Source/WAAPIManager.cpp"/>
       <FILE id="LnPekS" name="WAAPIManager.h" compile="0" resource="0" file="Source/WAAPIManager.h"/>
@@ -55,15 +51,15 @@
   </MODULES>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_PLUGINHOST_VST3="1"/>
   <EXPORTFORMATS>
-    <VS2022 targetFolder="Builds/VisualStudio2022" extraLinkerFlags="ws2_32.lib&#10;user32.lib&#10;advapi32.lib&#10;AkAutobahn.lib&#10;CommunicationCentral.lib"
-            externalLibraries="ws2_32.lib&#10;user32.lib&#10;advapi32.lib&#10;AkAutobahn.lib&#10;CommunicationCentral.lib">
+    <VS2022 targetFolder="Builds/VisualStudio2022" extraLinkerFlags="ws2_32.lib&#10;user32.lib&#10;advapi32.lib&#10;AkAutobahn.lib&#10;CommunicationCentral.lib&#10;AkMemoryMgr.lib&#10;AkMusicEngine.lib&#10;AkSoundEngine.lib&#10;AkStreamMgr.lib"
+            externalLibraries="ws2_32.lib&#10;user32.lib&#10;advapi32.lib&#10;AkAutobahn.lib&#10;CommunicationCentral.lib&#10;AkMemoryMgr.lib&#10;AkMusicEngine.lib&#10;AkSoundEngine.lib&#10;AkStreamMgr.lib">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="VSTHost_App" libraryPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc170\Debug\lib"
                        headerPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\include"
-                       extraLinkerFlags="AkAutobahn.lib&#10;CommunicationCentral.lib&#10;"/>
+                       extraLinkerFlags="AkAutobahn.lib&#10;CommunicationCentral.lib&#10;AkMemoryMgr.lib&#10;AkMusicEngine.lib&#10;AkSoundEngine.lib&#10;AkStreamMgr.lib&#10;"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="VSTHost_App" headerPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\include"
                        libraryPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\x64_vc170\Release\lib"
-                       extraLinkerFlags="AkAutobahn.lib&#10;CommunicationCentral.lib"/>
+                       extraLinkerFlags="AkAutobahn.lib&#10;CommunicationCentral.lib&#10;AkMemoryMgr.lib&#10;AkMusicEngine.lib&#10;AkSoundEngine.lib&#10;AkStreamMgr.lib"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="C:/Programs/JUCE/modules"/>

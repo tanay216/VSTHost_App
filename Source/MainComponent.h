@@ -7,6 +7,14 @@
 #include "VSTPluginComponent.h"
 #include "Exporter.h"
 #include "WAAPIManager.h"
+#include <AK/SoundEngine/Common/AkTypes.h>
+#include <AK/SoundEngine/Common/AkSoundEngine.h>
+#include <AK/SoundEngine/Common/IAkStreamMgr.h>
+#include <AK/SoundEngine/Common/AkMemoryMgr.h>
+#include <AK/SoundEngine/Common/AkModule.h>
+#include <AK/SoundEngine/Common/AkStreamMgrModule.h>
+#include <AK/MusicEngine/Common/AkMusicEngine.h>
+
 
 //class WwiseTreeItem;
 //==============================================================================
@@ -28,6 +36,10 @@ public:
     //==============================================================================
     MainComponent();
     ~MainComponent() override;
+
+
+    
+
 
     //Wwise API ==============================================================================
     void updateWwiseStatus();

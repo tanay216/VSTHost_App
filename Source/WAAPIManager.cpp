@@ -13,6 +13,7 @@ WAAPIManager::~WAAPIManager()
     waapiClient.Disconnect();
 }
 
+
 void WAAPIManager::connectToWAAPI()
 {
     try
@@ -455,99 +456,6 @@ void WAAPIManager::postWwiseEvent(const std::string& objectID)
 
     GetVoices(objectID);
 }
-//void WAAPIManager::SubscribeToVoices()
-//{
-//    using namespace AK::WwiseAuthoringAPI;
-//
-//    if (!waapiClient.IsConnected())
-//    {
-//        std::cerr << "Not connected to WAAPI!" << std::endl;
-//        return;
-//    }
-//
-//    std::cout << "Subscribing to Wwise Voices..." << std::endl;
-//
-//    // Define options for subscription (what data to return)
-//    const AkJson& options(AkJson::Map{
-//        { "return", AkJson::Array{
-//            AkVariant("gameObject"),
-//            AkVariant("sound"),
-//            AkVariant("playingId"),
-//            AkVariant("event"),
-//            AkVariant("position"),
-//            AkVariant("volume"),
-//            AkVariant("pitch")
-//        }}
-//        });
-//
-//    // Future and promise setup
-//    std::promise<bool> subscriptionPromise;
-//    std::future<bool> subscriptionFuture = subscriptionPromise.get_future();
-//    std::atomic_bool subscriptionCalled = false;
-//
-//    // Define callback to handle results
-//    auto callback = [ &subscriptionCalled, &subscriptionPromise](uint64_t, const JsonProvider& result)
-//        {
-//            if (!subscriptionCalled)
-//            {
-//                subscriptionCalled = true;
-//
-//                // Extract voice data from result
-//                const auto& voicesArray = result.GetAkJson()["voices"].GetArray();
-//                for (const auto& voice : voicesArray)
-//                {
-//                    std::string soundName = voice["sound"].GetVariant().GetString();
-//                    std::string eventName = voice["event"].GetVariant().GetString();
-//
-//                 //  float volume = voice["volume"].GetVariant().GetFloatValue();
-//                    //float pitch = voice["pitch"].GetVariant().GetFloatValue();
-//                    int gameObject = voice["gameObject"].GetVariant().GetInt32();
-//
-//                    std::cout << "[Voice Update] Sound: " << soundName
-//                        << ", Event: " << eventName
-//                        
-//                        << ", GameObject ID: " << gameObject << std::endl;
-//
-//                    // Forward this data to the VST Host
-//                   // SendVoiceDataToHost(soundName, eventName, volume, pitch, gameObject);
-//                }
-//
-//                // Set the promise to signal that the subscription was processed
-//                subscriptionPromise.set_value(true);
-//            }
-//        };
-//
-//    uint64_t subscriptionId = 0;
-//    
-//     
-//    // Subscribe to the profiler for voices
-//    AkJson subscribeResult;
-//    if (!waapiClient.Subscribe(ak::wwise::core::profiler::getVoices, AkJson(AkJson::Type::Map), callback, subscriptionId, subscribeResult))
-//    {
-//        std::cerr << "Failed to subscribe to voice profiler." << std::endl;
-//    }
-//    else
-//    {
-//        std::cout << "Successfully subscribed to Wwise Voices!" << std::endl;
-//        std::cout << "Subscription ID: " << subscriptionId << std::endl;
-//        std::cout << "Waiting for voice updates..." << std::endl;
-//
-//       
-//    }
-//    
-//
-//    
-//    // Block here until the subscription event has been processed
-//  //  subscriptionFuture.get();
-//
-//    // Optionally unsubscribe or handle cleanup if needed
-//   /* AkJson unsubscribeResult;
-//    waapiClient.Unsubscribe(subscriptionId, unsubscribeResult);
-//
-//    std::cout << "Voice subscription completed." << std::endl;*/
-//}
-
-
 
 void WAAPIManager::GetVoices(const std::string& objectID)
 {
@@ -660,7 +568,7 @@ void WAAPIManager::GetVoices(const std::string& objectID)
                 if (var.IsString()) playTargetName = var.GetString();
             }
 
-
+           // CaptureAudioStreams();
 
             // Filter by objectID (this ensures you only get voices triggered by this object)
            
@@ -752,14 +660,114 @@ void WAAPIManager::GetOriginalFilePath( std::string& objectGUID)
     }
 }
 
+void WAAPIManager::RegisterGameObjects() {
+    // Use existing GetVoices data
+    for (auto& voice : capturedVoices) {
+        AK::SoundEngine::RegisterGameObj(voice.gameObjectID, voice.objectName.c_str());
+    }
+}
 
 
+void WAAPIManager::InitializeSoundEngine() {
+
+    std::cout << "[Wwise] Initializing Sound Engine..." << std::endl;
+    // Memory Manager
+    AkMemSettings memSettings;
+    AK::MemoryMgr::GetDefaultSettings(memSettings);
+   
+    if (AK::MemoryMgr::Init(&memSettings) != AK_Success)
+    {
+        std::cerr << "[Wwise] Memory Manager Initialization Failed!" << std::endl;
+        return;
+    }
+
+    
+
+    // Stream Manager
+    AkStreamMgrSettings stmSettings;
+    AK::StreamMgr::GetDefaultSettings(stmSettings);
+   
+    if (!AK::StreamMgr::Create(stmSettings))
+    {
+        std::cerr << "[Wwise] Stream Manager Initialization Failed!" << std::endl;
+        return;
+    }
+    
+
+    // Sound Engine
+    AkInitSettings initSettings;
+    AkPlatformInitSettings platformSettings;
+    AK::SoundEngine::GetDefaultInitSettings(initSettings);
+    AK::SoundEngine::GetDefaultPlatformInitSettings(platformSettings);
+    AK::SoundEngine::Init(&initSettings, &platformSettings);
+
+    soundEngineContext = AK::SoundEngine::GetGlobalPluginContext();
+
+    // Register audio render callback
+    AK::SoundEngine::RegisterGlobalCallback(
+        AudioRenderCallback,
+        AkGlobalCallbackLocation_Begin,
+        this
+    );
+
+    std::cout << "[Wwise] Sound Engine Initialized Successfully." << std::endl;
+}
+
+void WAAPIManager::ShutdownSoundEngine() {
+    AK::SoundEngine::UnregisterGlobalCallback(AudioRenderCallback);
+    AK::SoundEngine::Term();
+   // AK::StreamMgr::Destroy();
+    AK::MemoryMgr::Term();
+}
+
+void WAAPIManager::AudioRenderCallback(
+    AK::IAkGlobalPluginContext* in_pContext,
+    AkGlobalCallbackLocation in_eLocation,
+    void* in_pCookie
+) {
+    if (in_eLocation == AkGlobalCallbackLocation_Begin) {
+        WAAPIManager* manager = static_cast<WAAPIManager*>(in_pCookie);
+
+        
+       // std::cout << "[Wwise] Audio Render Callback Triggered!" << std::endl;
+            for (auto& voice : manager->capturedVoices) {
+                if (voice.audioBuffer == nullptr) {
+                    voice.audioBuffer = new AkAudioBuffer();
+                    voice.audioBuffer->uValidFrames = 0;
+                    std::cout << "[Wwise] Initialized buffer for " << voice.objectName << std::endl;
+                }
+
+                if (voice.audioBuffer->uValidFrames > 0) {
+                    std::cout << "[Wwise] Audio Buffer Filled for " << voice.objectName
+                        << " | Frames: " << voice.audioBuffer->uValidFrames << std::endl;
+                }
+            }
+        
+    }
+}
+
+void WAAPIManager::CaptureAudioStreams()
+{
+    std::cout << "========================" << std::endl;
+    std::cout << "[Wwise] Capturing Audio Streams..." << std::endl;
 
 
+    AK::SoundEngine::RenderAudio(); // This should update capturedVoices
+
+    if (capturedVoices.empty()) {
+        std::cerr << "[Wwise] No voices captured!" << std::endl;
+    }
+
+    for (auto& voice : capturedVoices) {
+        if (voice.audioBuffer && voice.audioBuffer->uValidFrames > 0) {
+            std::cout << "[Wwise] Captured Voice: " << voice.objectName
+                << " | Frames: " << voice.audioBuffer->uValidFrames
+                << " | Channels: " << voice.audioBuffer->NumChannels() << std::endl;
+        }
+        else {
+            std::cout << "[Wwise] No valid audio captured for " << voice.objectName << std::endl;
+        }
+    }
+}
 
 
-//void WAAPIManager::SendVoiceDataToHost(const std::string& soundName, const std::string& eventName, float volume, float pitch, int gameObject)
-//{
-//    // Implement your method to send voice data to your JUCE-based VST host
-//    // Example: Using JUCE Message Manager or Networking
-//}

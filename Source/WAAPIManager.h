@@ -14,6 +14,13 @@
 #include <atomic>  // For std::atomic_bool
 #include <AK/SoundEngine/Common/AkSoundEngine.h>
 #include <AK/Tools/Common/AkPlatformFuncs.h>
+#include <AK/SoundEngine/Common/AkTypes.h>
+#include <AK/SoundEngine/Common/IAkStreamMgr.h>
+#include <AK/SoundEngine/Common/AkMemoryMgr.h>
+#include <AK/SoundEngine/Common/AkModule.h>
+#include <AK/SoundEngine/Common/AkStreamMgrModule.h>
+#include <AK/MusicEngine/Common/AkMusicEngine.h>
+#include <AK/SoundEngine/Common/AkCallback.h>
 
 
 using namespace AK::WwiseAuthoringAPI;
@@ -62,10 +69,27 @@ public:
 
    // void WAAPIManager::SendVoiceDataToHost(const std::string& soundName, const std::string& eventName, float volume, float pitch, int gameObject);
 
+    // Sound Engine ======================================================================
+
+    struct VoiceData {
+        uint64_t gameObjectID;
+        std::string objectName;
+        std::string objectGUID;
+        std::string originalFilePath;
+        AkAudioBuffer* audioBuffer;
+    };
+
+    void InitializeSoundEngine();
+    void ShutdownSoundEngine();
+    void RegisterGameObjects();
+    void CaptureAudioStreams();
+    const std::vector<VoiceData>& GetCapturedVoices() const { return capturedVoices;}
+
+
+
 
 
     //  Wwise Event Tree getter methods
-
     std::map<std::string, WwiseEventNode> getWwiseEventsTree() { return wwiseEventsTree; }
 
     // Wwise Project Info getter methods
@@ -83,17 +107,26 @@ public:
         std::cerr << "Line: " << in_lineNumber << std::endl;
     };
 
+
+
 private:
 
     std::unordered_map<std::string, WwiseEventNode> wwiseObjects;
+    std::vector<VoiceData> capturedVoices;
+    AK::IAkGlobalPluginContext* soundEngineContext = nullptr;
     
     Client waapiClient;
     std::string originalFilePath;
     std::string wwiseProjectName = "";
     std::string wwiseVersion = "";
     std::string wwisePlatform = "";
-    
 
+    static void AudioRenderCallback(
+        AK::IAkGlobalPluginContext* in_pContext,
+        AkGlobalCallbackLocation in_eLocation,
+        void* in_pCookie
+    );
+    
 
     std::map<std::string, WwiseEventNode> wwiseEventsTree;
 
