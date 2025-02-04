@@ -87,7 +87,26 @@ public:
 
     void WAAPIManager::CapturedAudioStreamsDetails();
 
+    void AutoAttachCapturePlugin() {
+        AkJson args(AkJson::Map{
+            {"from", AkJson::Map{{"ofType", AkJson::Array{AkVariant("Sound")}}}}
+            });
 
+        AkJson options(AkJson::Map{
+            {"return", AkJson::Array{AkVariant("id"), AkVariant("path")}}
+            });
+
+        AkJson result;
+        if (waapiClient.Call(ak::wwise::core::object::get, args, options, result)) {
+            auto& sounds = result["return"].GetArray();
+            for (auto& sound : sounds) {
+                AttachPluginToObject(
+                    sound["id"].GetVariant().GetString(),
+                    "CapturePlugin"
+                );
+            }
+        }
+    }
 
 
 
@@ -113,6 +132,18 @@ public:
 
 private:
 
+    void AttachPluginToObject(const std::string& objectID, const std::string& pluginName) {
+        AkJson args(AkJson::Map{
+            {"object", objectID},
+            {"effects", AkJson::Array{AkJson::Map{
+                {"name", pluginName},
+                {"id", "MyCompany::CapturePlugin"}
+            }}}
+            });
+
+        waapiClient.Call(ak::wwise::core::object::set, args, AkJson(AkJson::Type::Map), AkJson(AkJson::Type::Map));
+    }
+
     std::unordered_map<std::string, WwiseEventNode> wwiseObjects;
     std::vector<VoiceData> capturedVoices;
     AK::IAkGlobalPluginContext* soundEngineContext = nullptr;
@@ -133,3 +164,4 @@ private:
     std::map<std::string, WwiseEventNode> wwiseEventsTree;
 
 };
+

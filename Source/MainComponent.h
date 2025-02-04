@@ -14,6 +14,7 @@
 #include <AK/SoundEngine/Common/AkModule.h>
 #include <AK/SoundEngine/Common/AkStreamMgrModule.h>
 #include <AK/MusicEngine/Common/AkMusicEngine.h>
+#include "MetadataReceiver.h"
 
 
 //class WwiseTreeItem;
@@ -120,6 +121,7 @@ private:
     HANDLE hMapFile;
     LPVOID pBuf;
     static const int BUF_SIZE = 1024 * 1024;
+    MetadataReceiver metadataReceiver;
    
 
     std::unique_ptr<juce::FileChooser> fileChooser;

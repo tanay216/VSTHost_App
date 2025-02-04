@@ -1,8 +1,11 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VSTHost_App - App", "VSTHost_App_App.vcxproj", "{4E9CD915-A6B0-0A3C-4E14-267F5AC8E9F2}"
+VisualStudioVersion = 17.12.35514.174 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VSTHost_App_App", "VSTHost_App_App.vcxproj", "{4E9CD915-A6B0-0A3C-4E14-267F5AC8E9F2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WwiseVSTBridgePlugin", "..\WwiseVSTBridgePlugin\WwiseVSTBridgePlugin.vcxproj", "{88F9EC08-C4F2-46CE-BB40-EDE1335A6AE0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +17,10 @@ Global
 		{4E9CD915-A6B0-0A3C-4E14-267F5AC8E9F2}.Debug|x64.Build.0 = Debug|x64
 		{4E9CD915-A6B0-0A3C-4E14-267F5AC8E9F2}.Release|x64.ActiveCfg = Release|x64
 		{4E9CD915-A6B0-0A3C-4E14-267F5AC8E9F2}.Release|x64.Build.0 = Release|x64
+		{88F9EC08-C4F2-46CE-BB40-EDE1335A6AE0}.Debug|x64.ActiveCfg = Debug|x64
+		{88F9EC08-C4F2-46CE-BB40-EDE1335A6AE0}.Debug|x64.Build.0 = Debug|x64
+		{88F9EC08-C4F2-46CE-BB40-EDE1335A6AE0}.Release|x64.ActiveCfg = Release|x64
+		{88F9EC08-C4F2-46CE-BB40-EDE1335A6AE0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

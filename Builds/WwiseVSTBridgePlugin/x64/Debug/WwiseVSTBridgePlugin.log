@@ -1,0 +1,58 @@
+﻿  CapturePlugin.cpp
+  PluginExports.cpp
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(7,17): error C2871: 'AK': a namespace with this name does not exist
+  (compiling source file '/PluginExports.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(7,17): error C2065: 'AK': undeclared identifier
+  (compiling source file '/PluginExports.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,1): error C2653: 'AK': is not a class or namespace name
+  (compiling source file '/PluginExports.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,14): error C2143: syntax error: missing ';' before '*'
+  (compiling source file '/PluginExports.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/PluginExports.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,36): error C2653: 'AK': is not a class or namespace name
+  (compiling source file '/PluginExports.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,16): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/PluginExports.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,40): error C2065: 'IAkPluginMemAlloc': undeclared identifier
+  (compiling source file '/PluginExports.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,59): error C2065: 'alloc': undeclared identifier
+  (compiling source file '/PluginExports.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,66): error C2059: syntax error: '{'
+  (compiling source file '/PluginExports.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,66): error C2143: syntax error: missing ';' before '{'
+  (compiling source file '/PluginExports.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,66): error C2447: '{': missing function header (old-style formal list?)
+  (compiling source file '/PluginExports.cpp')
+  
+  SinkPlugin.cpp
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,10): error C2653: 'SinkPlugin': is not a class or namespace name
+  (compiling source file '/SinkPlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/SinkPlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,22): error C2146: syntax error: missing ';' before identifier 'Term'
+  (compiling source file '/SinkPlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,27): error C2653: 'AK': is not a class or namespace name
+  (compiling source file '/SinkPlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,65): error C2143: syntax error: missing ';' before '{'
+  (compiling source file '/SinkPlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,65): error C2447: '{': missing function header (old-style formal list?)
+  (compiling source file '/SinkPlugin.cpp')
+  
+  Generating Code...

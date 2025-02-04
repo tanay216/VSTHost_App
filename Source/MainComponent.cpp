@@ -12,6 +12,7 @@ MainComponent::MainComponent()
    // OpenSharedMemory();
     waapiManager.InitializeSoundEngine();
     waapiManager.RegisterGameObjects();
+    metadataReceiver.startListening();
    
     formatManager.registerBasicFormats();
 
@@ -136,6 +137,7 @@ MainComponent::~MainComponent()
     // This shuts down the audio device and clears the audio source.
     //shutdownAudio();
     waapiManager.ShutdownSoundEngine();
+    metadataReceiver.stopListening();
 }
 
 
