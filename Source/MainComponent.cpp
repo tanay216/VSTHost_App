@@ -9,7 +9,7 @@ MainComponent::MainComponent()
    // you add any child components.
 
     waapiManager.connectToWAAPI();
-    OpenSharedMemory();
+   // OpenSharedMemory();
     waapiManager.InitializeSoundEngine();
     waapiManager.RegisterGameObjects();
    

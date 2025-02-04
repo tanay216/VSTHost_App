@@ -467,6 +467,15 @@ void WAAPIManager::GetVoices(const std::string& objectID)
         return;
     }
 
+    std::cout << "Starting Wwise Profiler Capture..." << std::endl;
+
+    // Start profiler capture
+    if (!waapiClient.Call(ak::wwise::core::profiler::startCapture, AkJson(AkJson::Map{}), AkJson(AkJson::Type::Map), AkJson(AkJson::Type::Map), 10))
+    {
+        std::cerr << "Failed to start Wwise profiler capture." << std::endl;
+        return;
+    }
+
     std::cout << "Retrieving Wwise Voices for Object: " << objectID << "..." << std::endl;
 
     // Define the query arguments
@@ -568,19 +577,29 @@ void WAAPIManager::GetVoices(const std::string& objectID)
                 if (var.IsString()) playTargetName = var.GetString();
             }
 
-           // CaptureAudioStreams();
+            VoiceData newVoice;
+            newVoice.gameObjectID = gameObjectID;
+            newVoice.objectName = objectName;
+            newVoice.objectGUID = objectGUID;
+            newVoice.originalFilePath = originalFilePath;
+            newVoice.audioBuffer = new AkAudioBuffer(); // Initialize buffer
+            
+
+            capturedVoices.push_back(newVoice);
 
             // Filter by objectID (this ensures you only get voices triggered by this object)
            
                GetOriginalFilePath(objectGUID);
                 std::cout << "[Voice] Object: " << objectName
+                    << " Object GUID: " << objectGUID
                     << ", Play Target: " << playTargetName
                     << ", GameObject ID: " << gameObjectID
                     << ", Sound ID: " << soundID
                     << ", Playing ID: " << playingID
                     <<" Original File Path: "<< originalFilePath
                     << std::endl;
-            
+
+                CapturedAudioStreamsDetails();
 
             
         }
@@ -588,6 +607,15 @@ void WAAPIManager::GetVoices(const std::string& objectID)
     else
     {
         std::cerr << "Failed to retrieve voice data from Wwise." << std::endl;
+    }
+
+    std::cout << "Stopping Wwise Profiler Capture..." << std::endl;
+
+    // Start profiler capture
+    if (!waapiClient.Call(ak::wwise::core::profiler::stopCapture, AkJson(AkJson::Map{}), AkJson(AkJson::Type::Map), AkJson(AkJson::Type::Map), 10))
+    {
+        std::cerr << "Failed to stop Wwise profiler capture." << std::endl;
+        return;
     }
 }
 
@@ -661,10 +689,23 @@ void WAAPIManager::GetOriginalFilePath( std::string& objectGUID)
 }
 
 void WAAPIManager::RegisterGameObjects() {
+
+    std::cout << "[DEBUG] RegisterGameObjects() called!" << std::endl;
     // Use existing GetVoices data
     for (auto& voice : capturedVoices) {
         AK::SoundEngine::RegisterGameObj(voice.gameObjectID, voice.objectName.c_str());
     }
+
+
+    AkGameObjectID gameObjectID = 100; // Arbitrary ID
+
+    if (AK::SoundEngine::RegisterGameObj(gameObjectID, "VST_Host_GameObject") != AK_Success)
+    {
+        std::cerr << "[Wwise] Failed to register game object!" << std::endl;
+        return;
+    }
+
+    std::cout << "[Wwise] Game Object Registered Successfully: " << gameObjectID << std::endl;
 }
 
 
@@ -728,46 +769,55 @@ void WAAPIManager::AudioRenderCallback(
     if (in_eLocation == AkGlobalCallbackLocation_Begin) {
         WAAPIManager* manager = static_cast<WAAPIManager*>(in_pCookie);
 
-        
+      /*  if (manager->capturedVoices.empty()) {
+            std::cerr << "[Wwise] No active voices in AudioRenderCallback!" << std::endl;
+        }*/
        // std::cout << "[Wwise] Audio Render Callback Triggered!" << std::endl;
-            for (auto& voice : manager->capturedVoices) {
-                if (voice.audioBuffer == nullptr) {
-                    voice.audioBuffer = new AkAudioBuffer();
-                    voice.audioBuffer->uValidFrames = 0;
-                    std::cout << "[Wwise] Initialized buffer for " << voice.objectName << std::endl;
-                }
 
-                if (voice.audioBuffer->uValidFrames > 0) {
-                    std::cout << "[Wwise] Audio Buffer Filled for " << voice.objectName
-                        << " | Frames: " << voice.audioBuffer->uValidFrames << std::endl;
-                }
-            }
+
+
+        manager->CaptureAudioStreams();
+
         
     }
 }
 
 void WAAPIManager::CaptureAudioStreams()
 {
-    std::cout << "========================" << std::endl;
-    std::cout << "[Wwise] Capturing Audio Streams..." << std::endl;
+    /*std::cout << "========================" << std::endl;
+    std::cout << "[Wwise] Capturing Audio Streams..." << std::endl;*/
 
 
     AK::SoundEngine::RenderAudio(); // This should update capturedVoices
 
-    if (capturedVoices.empty()) {
+   /* if (capturedVoices.empty()) {
         std::cerr << "[Wwise] No voices captured!" << std::endl;
-    }
+    }*/
 
     for (auto& voice : capturedVoices) {
-        if (voice.audioBuffer && voice.audioBuffer->uValidFrames > 0) {
-            std::cout << "[Wwise] Captured Voice: " << voice.objectName
-                << " | Frames: " << voice.audioBuffer->uValidFrames
-                << " | Channels: " << voice.audioBuffer->NumChannels() << std::endl;
+        if (!voice.audioBuffer) {
+            voice.audioBuffer = new AkAudioBuffer();
         }
-        else {
-            std::cout << "[Wwise] No valid audio captured for " << voice.objectName << std::endl;
-        }
+
+       
     }
 }
 
+void WAAPIManager::CapturedAudioStreamsDetails() {
 
+    for (auto& voice : capturedVoices) {
+
+        if (voice.audioBuffer->uValidFrames > 0) {
+            std::cout << "[Wwise] Captured Voice: " << voice.objectName
+                << " | Object GUID: " << voice.gameObjectID
+                << " | Frames: " << voice.audioBuffer->uValidFrames
+                << " | Channels: " << voice.audioBuffer->NumChannels() << std::endl;
+
+        }
+        else {
+            std::cerr << "[Wwise] No valid audio captured for " << voice.objectName << std::endl;
+        }
+
+    }
+   
+}

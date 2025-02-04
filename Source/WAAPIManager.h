@@ -85,6 +85,8 @@ public:
     void CaptureAudioStreams();
     const std::vector<VoiceData>& GetCapturedVoices() const { return capturedVoices;}
 
+    void WAAPIManager::CapturedAudioStreamsDetails();
+
 
 
 
