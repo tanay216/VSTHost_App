@@ -33,10 +33,14 @@ extern "C" {
         return CreateCapturePlugin(in_pAllocator);
     }
 
-   
+
 
 }
 
 
+
+
 // Plugin Registration
 AK_IMPLEMENT_PLUGIN_FACTORY(CreateCapturePlugin,AkPluginTypeEffect, 12345, 0  );
+AK_STATIC_LINK_PLUGIN(CreateCapturePlugin);
+DEFINE_PLUGIN_REGISTER_HOOK;

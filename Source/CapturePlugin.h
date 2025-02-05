@@ -28,6 +28,7 @@ public:
         // Update voice registry
         VoiceRegistry::Instance().UpdateBuffer(playingID, io_pBuffer);
         sharedMem.WriteBuffer(io_pBuffer, playingID);
+        AKPLATFORM::OutputDebugMsg("CapturePlugin::Execute()");
 
        
     }

@@ -1,14 +1,4 @@
-﻿  pch.cpp
-  CapturePlugin.cpp
-D:\VSTHost_App\Source\SharedMemoryHandler.h(12,11): warning C4200: nonstandard extension used: zero-sized array in struct/union
-  (compiling source file '/CapturePlugin.cpp')
-      D:\VSTHost_App\Source\SharedMemoryHandler.h(12,11):
-      This member will be ignored by a defaulted constructor or copy/move assignment operator
-  
-  CapturePluginParams.cpp
-  CapturePluginParams.h
-  dllmain.cpp
-  PluginExports.cpp
+﻿  PluginExports.cpp
 D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(1,9): warning C4603: 'AK_DEFINE_GLOBALS': macro is not defined or definition is different after precompiled header use
   (compiling source file '/PluginExports.cpp')
       D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(1,9):
@@ -23,8 +13,6 @@ D:\VSTHost_App\Source\SharedMemoryHandler.h(12,11): warning C4200: nonstandard e
   
 x64\Release\CapturePluginParams.obj : warning LNK4042: object specified more than once; extras ignored
      Creating library D:\VSTHost_App\x64\Release\WwiseVSTBridgePlugin.lib and object D:\VSTHost_App\x64\Release\WwiseVSTBridgePlugin.exp
-  Generating code
-  Previous IPDB not found, fall back to full compilation.
-  All 170 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-  Finished generating code
-  WwiseVSTBridgePlugin.vcxproj -> D:\VSTHost_App\x64\Release\WwiseVSTBridgePlugin.dll
+PluginExports.obj : error LNK2001: unresolved external symbol "class AK::IAkPluginParam * __cdecl CreateCreateCapturePluginParams(class AK::IAkPluginMemAlloc *)" (?CreateCreateCapturePluginParams@@YAPEAVIAkPluginParam@AK@@PEAVIAkPluginMemAlloc@2@@Z)
+PluginExports.obj : error LNK2001: unresolved external symbol "class AK::IAkPlugin * __cdecl CreateCreateCapturePlugin(class AK::IAkPluginMemAlloc *)" (?CreateCreateCapturePlugin@@YAPEAVIAkPlugin@AK@@PEAVIAkPluginMemAlloc@2@@Z)
+D:\VSTHost_App\x64\Release\WwiseVSTBridgePlugin.dll : fatal error LNK1120: 2 unresolved externals
