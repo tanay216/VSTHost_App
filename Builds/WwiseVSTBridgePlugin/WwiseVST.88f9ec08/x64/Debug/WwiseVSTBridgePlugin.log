@@ -1,0 +1,164 @@
+﻿  CapturePlugin.cpp
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(4,10): error C2653: 'CapturePlugin': is not a class or namespace name
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(4,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(4,25): error C2146: syntax error: missing ';' before identifier 'Init'
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(4,30): error C2653: 'AK': is not a class or namespace name
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(5,5): error C2653: 'AK': is not a class or namespace name
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(6,5): error C2653: 'AK': is not a class or namespace name
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(8,1): error C2143: syntax error: missing ';' before '{'
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(8,1): error C2447: '{': missing function header (old-style formal list?)
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(13,10): error C2653: 'CapturePlugin': is not a class or namespace name
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(13,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(13,1): error C2086: 'int AKRESULT': redefinition
+  (compiling source file '/CapturePlugin.cpp')
+      D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(4,1):
+      see declaration of 'AKRESULT'
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(13,25): error C2146: syntax error: missing ';' before identifier 'Term'
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(13,30): error C2653: 'AK': is not a class or namespace name
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(14,1): error C2143: syntax error: missing ';' before '{'
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(14,1): error C2447: '{': missing function header (old-style formal list?)
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(19,10): error C2653: 'CapturePlugin': is not a class or namespace name
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(19,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(19,1): error C2086: 'int AKRESULT': redefinition
+  (compiling source file '/CapturePlugin.cpp')
+      D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(4,1):
+      see declaration of 'AKRESULT'
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(19,25): error C2146: syntax error: missing ';' before identifier 'Reset'
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(20,1): error C2143: syntax error: missing ';' before '{'
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(20,1): error C2447: '{': missing function header (old-style formal list?)
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(24,10): error C2653: 'CapturePlugin': is not a class or namespace name
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(24,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(24,1): error C2086: 'int AKRESULT': redefinition
+  (compiling source file '/CapturePlugin.cpp')
+      D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(4,1):
+      see declaration of 'AKRESULT'
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(24,25): error C2146: syntax error: missing ';' before identifier 'GetPluginInfo'
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(25,1): error C2143: syntax error: missing ';' before '{'
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(25,1): error C2447: '{': missing function header (old-style formal list?)
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(32,6): error C2653: 'CapturePlugin': is not a class or namespace name
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(32,21): error C2182: 'Execute': this use of 'void' is not valid
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(32,29): error C2065: 'AkAudioBuffer': undeclared identifier
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(32,44): error C2065: 'io_pBuffer': undeclared identifier
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(33,1): error C2143: syntax error: missing ';' before '{'
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(36,5): error C2059: syntax error: 'if'
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(38,1): error C2059: syntax error: '}'
+  (compiling source file '/CapturePlugin.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\CapturePlugin.cpp(38,1): error C2143: syntax error: missing ';' before '}'
+  (compiling source file '/CapturePlugin.cpp')
+  
+  PluginExports.cpp
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(19,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "pch.h"' to your source?
+  PluginFactory.cpp
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(7,1): error C2653: 'AK': is not a class or namespace name
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(7,14): error C2143: syntax error: missing ';' before '*'
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(7,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(7,36): error C2653: 'AK': is not a class or namespace name
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(7,16): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(7,40): error C2065: 'IAkPluginMemAlloc': undeclared identifier
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(7,59): error C2065: 'in_pAllocator': undeclared identifier
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(8,1): error C2059: syntax error: '{'
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(8,1): error C2143: syntax error: missing ';' before '{'
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(8,1): error C2447: '{': missing function header (old-style formal list?)
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(12,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(12,29): error C2065: 'CapturePlugin': undeclared identifier
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(12,44): error C2065: 'AkPluginTypeEffect': undeclared identifier
+  (compiling source file '/PluginFactory.cpp')
+  
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(12,28): error C2440: 'initializing': cannot convert from 'initializer list' to 'int'
+  (compiling source file '/PluginFactory.cpp')
+      D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginFactory.cpp(12,28):
+      The initializer contains too many elements
+  
+  SinkPlugin.cpp
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(18,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "pch.h"' to your source?
+  WaapiAutomationHelper.cpp
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\WaapiAutomationHelper.cpp(61,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "pch.h"' to your source?
+  Generating Code...

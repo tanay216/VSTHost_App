@@ -24,13 +24,7 @@
     <ClInclude Include="..\..\Source\CapturePlugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\SinkPlugin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\VoiceRegistry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PluginExporters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\SharedMemoryHandler.h">
@@ -53,7 +47,10 @@
     <ClCompile Include="CapturePlugin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SinkPlugin.cpp">
+    <ClCompile Include="CapturePluginParams.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CapturePluginParams.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -9,9 +9,11 @@
 
 class CapturePlugin : public AK::IAkInPlaceEffectPlugin {
 public:
-   CapturePlugin() = default;
-    ~CapturePlugin() = default;
+   CapturePlugin();
+   virtual ~CapturePlugin();
 
+   
+   AKRESULT GetPluginInfo(AkPluginInfo& out_rPluginInfo) override;
 
     AKRESULT Init(AK::IAkPluginMemAlloc* alloc, AK::IAkEffectPluginContext* context,
         AK::IAkPluginParam* params, AkAudioFormat& format) override {
@@ -35,12 +37,11 @@ public:
         return AK_Success;
     }
 
-
-    // Required overrides
+    
   
   
     AKRESULT Reset() override;
-    AKRESULT  AK::IAkPlugin::GetPluginInfo(AkPluginInfo& out_pPluginInfo);
+   // AKRESULT  AK::IAkPlugin::GetPluginInfo(AkPluginInfo& out_pPluginInfo);
     AKRESULT TimeSkip(AkUInt32 in_uFrames) override;
    
     

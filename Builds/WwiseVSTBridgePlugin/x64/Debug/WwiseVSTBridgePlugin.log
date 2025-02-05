@@ -1,58 +1,30 @@
-﻿  CapturePlugin.cpp
+﻿  pch.cpp
+  CapturePlugin.cpp
+D:\VSTHost_App\Source\SharedMemoryHandler.h(12,11): warning C4200: nonstandard extension used: zero-sized array in struct/union
+  (compiling source file '/CapturePlugin.cpp')
+      D:\VSTHost_App\Source\SharedMemoryHandler.h(12,11):
+      This member will be ignored by a defaulted constructor or copy/move assignment operator
+  
+  CapturePluginParams.cpp
+  CapturePluginParams.h
+  dllmain.cpp
   PluginExports.cpp
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(7,17): error C2871: 'AK': a namespace with this name does not exist
+D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(1,9): warning C4603: 'AK_DEFINE_GLOBALS': macro is not defined or definition is different after precompiled header use
   (compiling source file '/PluginExports.cpp')
+      D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(1,9):
+      Add macro to precompiled header instead of defining here
+      D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(2,1):
+      use of precompiled header
   
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(7,17): error C2065: 'AK': undeclared identifier
+D:\VSTHost_App\Source\SharedMemoryHandler.h(12,11): warning C4200: nonstandard extension used: zero-sized array in struct/union
   (compiling source file '/PluginExports.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,1): error C2653: 'AK': is not a class or namespace name
-  (compiling source file '/PluginExports.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,14): error C2143: syntax error: missing ';' before '*'
-  (compiling source file '/PluginExports.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file '/PluginExports.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,36): error C2653: 'AK': is not a class or namespace name
-  (compiling source file '/PluginExports.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,16): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file '/PluginExports.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,40): error C2065: 'IAkPluginMemAlloc': undeclared identifier
-  (compiling source file '/PluginExports.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,59): error C2065: 'alloc': undeclared identifier
-  (compiling source file '/PluginExports.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,66): error C2059: syntax error: '{'
-  (compiling source file '/PluginExports.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,66): error C2143: syntax error: missing ';' before '{'
-  (compiling source file '/PluginExports.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\PluginExports.cpp(9,66): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file '/PluginExports.cpp')
-  
-  SinkPlugin.cpp
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,10): error C2653: 'SinkPlugin': is not a class or namespace name
-  (compiling source file '/SinkPlugin.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file '/SinkPlugin.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,22): error C2146: syntax error: missing ';' before identifier 'Term'
-  (compiling source file '/SinkPlugin.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,27): error C2653: 'AK': is not a class or namespace name
-  (compiling source file '/SinkPlugin.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,65): error C2143: syntax error: missing ';' before '{'
-  (compiling source file '/SinkPlugin.cpp')
-  
-D:\VSTHost_App\Builds\WwiseVSTBridgePlugin\SinkPlugin.cpp(5,65): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file '/SinkPlugin.cpp')
+      D:\VSTHost_App\Source\SharedMemoryHandler.h(12,11):
+      This member will be ignored by a defaulted constructor or copy/move assignment operator
   
   Generating Code...
+x64\Debug\CapturePluginParams.obj : warning LNK4042: object specified more than once; extras ignored
+     Creating library D:\VSTHost_App\x64\Debug\WwiseVSTBridgePlugin.lib and object D:\VSTHost_App\x64\Debug\WwiseVSTBridgePlugin.exp
+AkSoundEngine.lib(RendererProxyConnected.obj) : error LNK2019: unresolved external symbol "public: unsigned short __cdecl AK::SwapPolicy::Swap(unsigned short const &)const " (?Swap@SwapPolicy@AK@@QEBAGAEBG@Z) referenced in function "public: bool __cdecl AK::Serializer<class AK::ALWriteBytesMem,struct AK::SwapPolicy>::Put(unsigned short)" (?Put@?$Serializer@VALWriteBytesMem@AK@@USwapPolicy@2@@AK@@QEAA_NG@Z)
+AkSoundEngine.lib(RendererProxyConnected.obj) : error LNK2019: unresolved external symbol "public: int __cdecl AK::SwapPolicy::Swap(int const &)const " (?Swap@SwapPolicy@AK@@QEBAHAEBH@Z) referenced in function "public: bool __cdecl AK::Serializer<class AK::ALWriteBytesMem,struct AK::SwapPolicy>::Put(int)" (?Put@?$Serializer@VALWriteBytesMem@AK@@USwapPolicy@2@@AK@@QEAA_NH@Z)
+AkSoundEngine.lib(RendererProxyConnected.obj) : error LNK2019: unresolved external symbol "public: unsigned int __cdecl AK::SwapPolicy::Swap(unsigned int const &)const " (?Swap@SwapPolicy@AK@@QEBAIAEBI@Z) referenced in function "public: bool __cdecl AK::Serializer<class AK::ALWriteBytesMem,struct AK::SwapPolicy>::Put(unsigned int)" (?Put@?$Serializer@VALWriteBytesMem@AK@@USwapPolicy@2@@AK@@QEAA_NI@Z)
+D:\VSTHost_App\x64\Debug\WwiseVSTBridgePlugin.dll : fatal error LNK1120: 3 unresolved externals
