@@ -664,9 +664,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\SharedMemoryHandler.cpp">
-      <Filter>VSTHost_App\Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\WAAPIManager.cpp">
       <Filter>VSTHost_App\Source</Filter>
     </ClCompile>
@@ -3528,19 +3525,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\SharedMemoryManager.h">
+      <Filter>VSTHost_App\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\MetadataReceiver.h">
       <Filter>VSTHost_App\Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\SinkPlugin.h">
-      <Filter>VSTHost_App\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\CapturePlugin.h">
-      <Filter>VSTHost_App\Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\VoiceRegistry.h">
-      <Filter>VSTHost_App\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\SharedMemoryHandler.h">
       <Filter>VSTHost_App\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\WAAPIManager.h">

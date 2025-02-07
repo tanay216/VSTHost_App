@@ -10,9 +10,9 @@ MainComponent::MainComponent()
 
     waapiManager.connectToWAAPI();
    // OpenSharedMemory();
-    waapiManager.InitializeSoundEngine();
-    waapiManager.RegisterGameObjects();
-    metadataReceiver.startListening();
+   // waapiManager.InitializeSoundEngine();
+    //waapiManager.RegisterGameObjects();
+   // metadataReceiver.startListening();
    
     formatManager.registerBasicFormats();
 
@@ -136,8 +136,8 @@ MainComponent::~MainComponent()
 {
     // This shuts down the audio device and clears the audio source.
     //shutdownAudio();
-    waapiManager.ShutdownSoundEngine();
-    metadataReceiver.stopListening();
+ //   waapiManager.ShutdownSoundEngine();
+   // metadataReceiver.stopListening();
 }
 
 
@@ -254,51 +254,7 @@ void MainComponent::triggerWwiseEvent(const std::string& ObjectID)
 
 
 // Shared Memory ==============================================================================
-void MainComponent::OpenSharedMemory()
-{
-    std::cout << "Opening shared memory..." << std::endl;
-    const char *memName = "WWISE_TO_VST_HOST";
-    hMapFile = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, memName);
 
-    if (hMapFile == NULL)
-    {
-        
-        std::cout << "Could not open shared memory." << std::endl;
-        return;
-    }
-
-    pBuf = MapViewOfFile(hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, BUF_SIZE);
-    if (pBuf == NULL)
-    {
-        
-        std::cout << "Could not map view of shared memory." << std::endl;
-        CloseHandle(hMapFile);
-        return;
-    }
-}
-
-void MainComponent::ReadFromSharedMemory(juce::AudioBuffer<float>& buffer)
-{
-    if (pBuf == NULL) return;
-
-    struct SharedAudioData {
-        AkUInt32 numFrames;
-        AkUInt32 numChannels;
-        AkReal32 data[NUM_VOICE_BUFFERS * 1024];
-    };
-
-    SharedAudioData* sharedData = (SharedAudioData*)pBuf;
-
-    if (sharedData->numFrames > 0)
-    {
-        int numSamples = sharedData->numFrames * sharedData->numChannels;
-
-        for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
-        {
-            buffer.copyFrom(ch, 0, sharedData->data + (ch * sharedData->numFrames), sharedData->numFrames);
-        }
-    }
-}
 
 //==============================================================================
 void MainComponent::populateAudioDeviceDropdowns()
@@ -405,72 +361,12 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
-//void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
-//{
-//    if (readerSource.get() != nullptr)
-//    {
-//        transportSource.getNextAudioBlock(bufferToFill);
-//        if (vstPluginComponent.pluginInstance != nullptr)
-//        {
-//            try {
-//
-//
-//                juce::MidiBuffer midiBuffer;
-//
-//                //std::cout << "Buffer Channels: " << bufferToFill.buffer->getNumChannels() << std::endl;
-//
-//                auto busLayout = vstPluginComponent.pluginInstance->getBusesLayout();
-//                auto selectedFileName = audioFileNames[selectedFileIndex].toStdString();
-//                auto isBypassed = bypassStates.find(selectedFileName) != bypassStates.end() && bypassStates[selectedFileName];
-//
-//                // std::cout << "Bypass state for " << selectedFileName << ": " << isBypassed << std::endl; // Debugging
-//                if (isBypassed)
-//                {
-//                    // If bypassed, skip processing and just output the raw audio data
-//                    std::cout << "Bypassed: Playing raw audio for " << selectedFileName << std::endl;
-//                    // bufferToFill.clearActiveBufferRegion();
-//                }
-//                else
-//                {
-//                    ReadFromSharedMemory(*bufferToFill.buffer);
-//                    vstPluginComponent.pluginInstance->processBlock(*bufferToFill.buffer, midiBuffer);
-//
-//                    if (!pluginLoaded)
-//                    {
-//                        pluginLoaded = true;
-//                        std::cout << "Processing. [Audio Stream is Active...]" << std::endl;
-//                    }
-//
-//                }
-//
-//            }
-//            catch (const std::exception& e)
-//            {
-//                std::cerr << "Error processing audio block: " << e.what() << std::endl;
-//            }
-//
-//        }
-//
-//        else
-//        {
-//            if (pluginLoaded)
-//            {
-//                pluginLoaded = false;
-//                std::cout << "Plugin not loaded. [Audio Stream is Active...]" << std::endl;
-//
-//            }
-//        }
-//    }
-//    else
-//    {
-//        bufferToFill.clearActiveBufferRegion();
-//    }
-//}
 
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) {
     if (readerSource.get() != nullptr) {
         // 1. Get audio from transportSource (existing files)
         transportSource.getNextAudioBlock(bufferToFill);
+
 
         if (vstPluginComponent.pluginInstance != nullptr) {
             try {
@@ -480,32 +376,19 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
                 auto isBypassed = bypassStates.find(selectedFileName) != bypassStates.end() && bypassStates[selectedFileName];
 
                 if (!isBypassed) {
-                    // 2. Get Wwise audio and mix it with transportSource audio
-                    const auto& voices = waapiManager.GetCapturedVoices();
-                    for (const auto& voice : voices) {
-                        if (voice.audioBuffer && voice.audioBuffer->uValidFrames > 0) {
-                            // Convert AkAudioBuffer to JUCE AudioBuffer
-                            std::cout << "[VST Host] Processing Wwise Audio: " << voice.objectName
-                                << " | Frames: " << voice.audioBuffer->uValidFrames << std::endl;
 
-                            juce::AudioBuffer<float> wwiseBuffer(
-                                
-                                voice.audioBuffer->NumChannels(),
-                                voice.audioBuffer->uValidFrames
-                            );
+                    juce::ScopedLock lock(audioLock);
 
-                            // Copy audio data from Wwise to JUCE buffer
-                            for (int ch = 0; ch < voice.audioBuffer->NumChannels(); ++ch) {
-                                wwiseBuffer.copyFrom(
-                                    ch,
-                                    0,
-                                    voice.audioBuffer->GetChannel(ch),
-                                    voice.audioBuffer->uValidFrames
-                                );
-                            }
-                        }
+                    if (!sharedMemoryReader.readAvailable()) {
+                        bufferToFill.clearActiveBufferRegion();
+                        std::cout << "[VST Host] No audio available." << std::endl;
+                        return;
                     }
 
+                    sharedMemoryReader.readAudio(*bufferToFill.buffer);
+                    std::cout<<"[VST Host] Reading audio from shared memory." << std::endl;
+                    std::cout<<" - Channels: " <<juce::String(bufferToFill.buffer->getNumChannels())  << std::endl;
+                    std::cout<<" - Samples: " <<juce::String(bufferToFill.buffer->getNumSamples())  << std::endl;
                    
                     vstPluginComponent.pluginInstance->processBlock(*bufferToFill.buffer, midiBuffer);
 
@@ -513,6 +396,8 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
                         pluginLoaded = true;
                         std::cout << "Processing. [Audio Stream is Active...]" << std::endl;
                     }
+
+                    sharedMemoryReader.writeProcessedAudio(*bufferToFill.buffer);
 
 
                 }

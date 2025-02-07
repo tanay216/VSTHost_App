@@ -1,4 +1,8 @@
 #pragma once
+
+#include <Windows.h>
+#include <string>
+#include <AK/SoundEngine/Common/AkCommonDefs.h>
 #include <iostream>
 #include <JuceHeader.h>
 #include "VSTPluginHost.h"
@@ -14,7 +18,9 @@
 #include <AK/SoundEngine/Common/AkModule.h>
 #include <AK/SoundEngine/Common/AkStreamMgrModule.h>
 #include <AK/MusicEngine/Common/AkMusicEngine.h>
-#include "MetadataReceiver.h"
+#include "SharedMemoryManager.h"
+
+//#include "MetadataReceiver.h"
 
 
 //class WwiseTreeItem;
@@ -24,6 +30,7 @@
     your controls and content.
 */
 class WwiseTreeItem;
+
 
 class MainComponent : public juce::AudioAppComponent,
     public juce::Button::Listener,
@@ -121,7 +128,10 @@ private:
     HANDLE hMapFile;
     LPVOID pBuf;
     static const int BUF_SIZE = 1024 * 1024;
-    MetadataReceiver metadataReceiver;
+  //  MetadataReceiver metadataReceiver;
+    SharedMemoryManager sharedMemoryReader;
+    std::atomic<bool> newAudioAvailable{ false };
+    juce::CriticalSection audioLock;
    
 
     std::unique_ptr<juce::FileChooser> fileChooser;
@@ -967,15 +977,3 @@ private:
         
     };
 };
-
-
-
-
-
-
-
-
-
-
-
-

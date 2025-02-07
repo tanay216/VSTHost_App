@@ -585,7 +585,7 @@ void WAAPIManager::GetVoices(const std::string& objectID)
             newVoice.audioBuffer = new AkAudioBuffer(); // Initialize buffer
             
 
-            capturedVoices.push_back(newVoice);
+            //capturedVoices.push_back(newVoice);
 
             // Filter by objectID (this ensures you only get voices triggered by this object)
            
@@ -599,7 +599,7 @@ void WAAPIManager::GetVoices(const std::string& objectID)
                     <<" Original File Path: "<< originalFilePath
                     << std::endl;
 
-                CapturedAudioStreamsDetails();
+             //   CapturedAudioStreamsDetails();
 
             
         }
@@ -688,136 +688,3 @@ void WAAPIManager::GetOriginalFilePath( std::string& objectGUID)
     }
 }
 
-void WAAPIManager::RegisterGameObjects() {
-
-    std::cout << "[DEBUG] RegisterGameObjects() called!" << std::endl;
-    // Use existing GetVoices data
-    for (auto& voice : capturedVoices) {
-        AK::SoundEngine::RegisterGameObj(voice.gameObjectID, voice.objectName.c_str());
-    }
-
-
-    AkGameObjectID gameObjectID = 100; // Arbitrary ID
-
-    if (AK::SoundEngine::RegisterGameObj(gameObjectID, "VST_Host_GameObject") != AK_Success)
-    {
-        std::cerr << "[Wwise] Failed to register game object!" << std::endl;
-        return;
-    }
-
-    std::cout << "[Wwise] Game Object Registered Successfully: " << gameObjectID << std::endl;
-}
-
-
-void WAAPIManager::InitializeSoundEngine() {
-
-    std::cout << "[Wwise] Initializing Sound Engine..." << std::endl;
-    // Memory Manager
-    AkMemSettings memSettings;
-    AK::MemoryMgr::GetDefaultSettings(memSettings);
-   
-    if (AK::MemoryMgr::Init(&memSettings) != AK_Success)
-    {
-        std::cerr << "[Wwise] Memory Manager Initialization Failed!" << std::endl;
-        return;
-    }
-
-    
-
-    // Stream Manager
-    AkStreamMgrSettings stmSettings;
-    AK::StreamMgr::GetDefaultSettings(stmSettings);
-   
-    if (!AK::StreamMgr::Create(stmSettings))
-    {
-        std::cerr << "[Wwise] Stream Manager Initialization Failed!" << std::endl;
-        return;
-    }
-    
-
-    // Sound Engine
-    AkInitSettings initSettings;
-    AkPlatformInitSettings platformSettings;
-    AK::SoundEngine::GetDefaultInitSettings(initSettings);
-    AK::SoundEngine::GetDefaultPlatformInitSettings(platformSettings);
-    AK::SoundEngine::Init(&initSettings, &platformSettings);
-
-    soundEngineContext = AK::SoundEngine::GetGlobalPluginContext();
-
-    // Register audio render callback
-    AK::SoundEngine::RegisterGlobalCallback(
-        AudioRenderCallback,
-        AkGlobalCallbackLocation_Begin,
-        this
-    );
-
-    std::cout << "[Wwise] Sound Engine Initialized Successfully." << std::endl;
-}
-
-void WAAPIManager::ShutdownSoundEngine() {
-    AK::SoundEngine::UnregisterGlobalCallback(AudioRenderCallback);
-    AK::SoundEngine::Term();
-   // AK::StreamMgr::Destroy();
-    AK::MemoryMgr::Term();
-}
-
-void WAAPIManager::AudioRenderCallback(
-    AK::IAkGlobalPluginContext* in_pContext,
-    AkGlobalCallbackLocation in_eLocation,
-    void* in_pCookie
-) {
-    if (in_eLocation == AkGlobalCallbackLocation_Begin) {
-        WAAPIManager* manager = static_cast<WAAPIManager*>(in_pCookie);
-
-      /*  if (manager->capturedVoices.empty()) {
-            std::cerr << "[Wwise] No active voices in AudioRenderCallback!" << std::endl;
-        }*/
-       // std::cout << "[Wwise] Audio Render Callback Triggered!" << std::endl;
-
-
-
-        manager->CaptureAudioStreams();
-
-        
-    }
-}
-
-void WAAPIManager::CaptureAudioStreams()
-{
-    /*std::cout << "========================" << std::endl;
-    std::cout << "[Wwise] Capturing Audio Streams..." << std::endl;*/
-
-
-    AK::SoundEngine::RenderAudio(); // This should update capturedVoices
-
-   /* if (capturedVoices.empty()) {
-        std::cerr << "[Wwise] No voices captured!" << std::endl;
-    }*/
-
-    for (auto& voice : capturedVoices) {
-        if (!voice.audioBuffer) {
-            voice.audioBuffer = new AkAudioBuffer();
-        }
-
-       
-    }
-}
-
-void WAAPIManager::CapturedAudioStreamsDetails() {
-
-    for (auto& voice : capturedVoices) {
-
-        if (voice.audioBuffer->uValidFrames > 0) {
-            std::cout << "[Wwise] Captured Voice: " << voice.objectName
-                << " | Object GUID: " << voice.gameObjectID
-                << " | Frames: " << voice.audioBuffer->uValidFrames
-                << " | Channels: " << voice.audioBuffer->NumChannels() << std::endl;
-
-        }
-        else {
-            std::cerr << "[Wwise] No valid audio captured for " << voice.objectName << std::endl;
-        }
-
-    }
-   
-}

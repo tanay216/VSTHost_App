@@ -155,7 +155,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\SharedMemoryHandler.cpp"/>
     <ClCompile Include="..\..\Source\WAAPIManager.cpp"/>
     <ClCompile Include="..\..\Source\MultiChannelComponent.cpp"/>
     <ClCompile Include="..\..\Source\Exporter.cpp"/>
@@ -2833,11 +2832,9 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\SharedMemoryManager.h"/>
     <ClInclude Include="..\..\Source\MetadataReceiver.h"/>
-    <ClInclude Include="..\..\Source\SinkPlugin.h"/>
-    <ClInclude Include="..\..\Source\CapturePlugin.h"/>
     <ClInclude Include="..\..\Source\VoiceRegistry.h"/>
-    <ClInclude Include="..\..\Source\SharedMemoryHandler.h"/>
     <ClInclude Include="..\..\Source\WAAPIManager.h"/>
     <ClInclude Include="..\..\Source\MultiChannelComponent.h"/>
     <ClInclude Include="..\..\Source\Exporter.h"/>

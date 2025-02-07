@@ -4,15 +4,11 @@
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1" headerPath="C:\Program Files (x86)\Audiokinetic\Wwise2023.1.6.8555\SDK\include">
   <MAINGROUP id="l9CN2X" name="VSTHost_App">
     <GROUP id="{11C4BD75-CF17-0105-2F86-B6C295FABAAA}" name="Source">
+      <FILE id="fALCJg" name="SharedMemoryManager.h" compile="0" resource="0"
+            file="Source/SharedMemoryManager.h"/>
       <FILE id="daRe5u" name="MetadataReceiver.h" compile="0" resource="0"
             file="Source/MetadataReceiver.h"/>
-      <FILE id="IIk4eE" name="SinkPlugin.h" compile="0" resource="0" file="Source/SinkPlugin.h"/>
-      <FILE id="N6CMgC" name="CapturePlugin.h" compile="0" resource="0" file="Source/CapturePlugin.h"/>
       <FILE id="rlzbnm" name="VoiceRegistry.h" compile="0" resource="0" file="Source/VoiceRegistry.h"/>
-      <FILE id="fO474m" name="SharedMemoryHandler.cpp" compile="1" resource="0"
-            file="Source/SharedMemoryHandler.cpp"/>
-      <FILE id="Nhl4fT" name="SharedMemoryHandler.h" compile="0" resource="0"
-            file="Source/SharedMemoryHandler.h"/>
       <FILE id="kk5evR" name="WAAPIManager.cpp" compile="1" resource="0"
             file="Source/WAAPIManager.cpp"/>
       <FILE id="LnPekS" name="WAAPIManager.h" compile="0" resource="0" file="Source/WAAPIManager.h"/>
