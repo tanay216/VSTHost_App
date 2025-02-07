@@ -1,9 +1,0 @@
-<PluginModule>
-	<EffectPlugin Name="CapturePlugin" CompanyID="0" PluginID="12345">
-		<PluginInfo>
-			<PluginName>Capture Plugin</PluginName>
-			<SupportMono>true</SupportMono>
-			<SupportStereo>true</SupportStereo>
-		</PluginInfo>
-	</EffectPlugin>
-</PluginModule>

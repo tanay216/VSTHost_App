@@ -21,7 +21,7 @@ struct SharedAudioBuffer {
     AkPlayingID playingID;
     AkUInt32 numChannels;
     AkUInt32 numSamples;
-    float samples[][8]; // [frames][channels]
+    float samples[8][1024]; // [frames][channels]
 };
 
 class SharedMemoryManager {
@@ -72,6 +72,12 @@ public:
         }
 
         buffer->updated = true;
+    }
+
+    void markProcessed() {
+        if (buffer) {
+            buffer->updated = false; // Reset flag after reading
+        }
     }
 
     AkPlayingID getCurrentPlayingID() const {
