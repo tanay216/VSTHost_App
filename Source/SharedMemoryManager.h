@@ -18,6 +18,7 @@
 
 struct SharedAudioBuffer {
     volatile bool updated;
+    volatile bool processing;
     AkPlayingID playingID;
     AkUInt32 numChannels;
     AkUInt32 numSamples;

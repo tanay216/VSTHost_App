@@ -362,61 +362,9 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 }
 
 
-//void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) {
-//    if (readerSource.get() != nullptr) {
-//        // 1. Get audio from transportSource (existing files)
-//        transportSource.getNextAudioBlock(bufferToFill);
-//
-//
-//        if (vstPluginComponent.pluginInstance != nullptr) {
-//            try {
-//                juce::MidiBuffer midiBuffer;
-//                auto busLayout = vstPluginComponent.pluginInstance->getBusesLayout();
-//                auto selectedFileName = audioFileNames[selectedFileIndex].toStdString();
-//                auto isBypassed = bypassStates.find(selectedFileName) != bypassStates.end() && bypassStates[selectedFileName];
-//
-//                if (!isBypassed) {
-//
-//                    juce::ScopedLock lock(audioLock);
-//
-//                    if (!sharedMemoryReader.readAvailable()) {
-//                        bufferToFill.clearActiveBufferRegion();
-//                        std::cout << "[VST Host] No audio available." << std::endl;
-//                        return;
-//                    }
-//
-//                    sharedMemoryReader.readAudio(*bufferToFill.buffer);
-//                    std::cout<<"[VST Host] Reading audio from shared memory." << std::endl;
-//                    std::cout<<" - Channels: " <<juce::String(bufferToFill.buffer->getNumChannels())  << std::endl;
-//                    std::cout<<" - Samples: " <<juce::String(bufferToFill.buffer->getNumSamples())  << std::endl;
-//                   
-//                    vstPluginComponent.pluginInstance->processBlock(*bufferToFill.buffer, midiBuffer);
-//
-//                    if (!pluginLoaded) {
-//                        pluginLoaded = true;
-//                        std::cout << "Processing. [Audio Stream is Active...]" << std::endl;
-//                    }
-//
-//                    sharedMemoryReader.writeProcessedAudio(*bufferToFill.buffer);
-//                    sharedMemoryReader.markProcessed();
-//
-//
-//                }
-//            }
-//            catch (const std::exception& e) {
-//                std::cerr << "Error processing audio block: " << e.what() << std::endl;
-//            }
-//        }
-//    }
-//    else {
-//        bufferToFill.clearActiveBufferRegion();
-//    }
-//}
-
 
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) {
-    if (readerSource.get() != nullptr) {
-        // 1. Get audio from transportSource (existing files)
+  
         transportSource.getNextAudioBlock(bufferToFill);
 
 
@@ -433,7 +381,7 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
 
                     if (!sharedMemoryReader.readAvailable()) {
                         bufferToFill.clearActiveBufferRegion();
-                        std::cout << "[VST Host] No audio available." << std::endl;
+                      //  std::cout << "[VST Host] No audio available." << std::endl;
                         return;
                     }
 
@@ -450,6 +398,7 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
                     }
 
                     sharedMemoryReader.writeProcessedAudio(*bufferToFill.buffer);
+                    sharedMemoryReader.markProcessed();
 
 
                 }
@@ -458,11 +407,35 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
                 std::cerr << "Error processing audio block: " << e.what() << std::endl;
             }
         }
-    }
-    else {
-        bufferToFill.clearActiveBufferRegion();
-    }
+  
 }
+
+//void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) {
+//    juce::ScopedLock lock(audioLock);
+//
+//    if (!sharedMemoryReader.readAvailable()) {
+//        bufferToFill.clearActiveBufferRegion();
+//        return;
+//    }
+//
+//    sharedMemoryReader.readAudio(*bufferToFill.buffer);
+//    std::cout << "[VST Host] Reading audio from shared memory." << std::endl;
+//    std::cout << " - Channels: " << juce::String(bufferToFill.buffer->getNumChannels()) << std::endl;
+//    std::cout << " - Samples: " << juce::String(bufferToFill.buffer->getNumSamples()) << std::endl;
+//
+//    if (vstPluginComponent.pluginInstance) {
+//        juce::MidiBuffer midiBuffer;
+//        vstPluginComponent.pluginInstance->processBlock(*bufferToFill.buffer, midiBuffer);
+//        std::cout << "[VST Host] Applied VST Processing." << std::endl;
+//    }
+//    else {
+//        std::cout << "[VST Host] No VST Plugin loaded. Passing audio through unchanged." << std::endl;
+//    }
+//
+//    sharedMemoryReader.writeProcessedAudio(*bufferToFill.buffer);
+//    sharedMemoryReader.markProcessed();
+//}
+
 
 
 

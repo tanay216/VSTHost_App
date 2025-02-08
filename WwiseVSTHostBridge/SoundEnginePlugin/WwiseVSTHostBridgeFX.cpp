@@ -132,6 +132,41 @@ AKRESULT WwiseVSTHostBridgeFX::GetPluginInfo(AkPluginInfo& out_rPluginInfo)
 //
 //}
 
+//void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
+//    if (!io_pBuffer || io_pBuffer->uValidFrames == 0) return;
+//
+//    const AkUInt32 numChannels = io_pBuffer->NumChannels();
+//    const AkUInt32 numSamples = io_pBuffer->uValidFrames;
+//
+//    // Write raw audio to shared memory
+//    sharedMem.WriteBuffer(io_pBuffer, m_playingID);
+//
+//    // Wait for processed audio (but don’t get stuck if missing)
+//    int maxRetries = 10;
+//    while (!sharedMem.readAvailable() && maxRetries-- > 0) {
+//        AKPLATFORM::AkSleep(1); // Allow time for processing
+//    }
+//
+//    bool hasProcessedAudio = sharedMem.readAvailable(); // Check if valid processed data is available
+//
+//    // Read processed audio or pass dry input if no processed data exists
+//    for (AkUInt32 ch = 0; ch < numChannels; ++ch) {
+//        AkReal32* pBuf = io_pBuffer->GetChannel(ch);
+//        const float* processedData = hasProcessedAudio ? sharedMem.getProcessedSamples(ch) : nullptr;
+//
+//        if (processedData) {
+//            memcpy(pBuf, processedData, numSamples * sizeof(float)); // Use processed audio
+//        }
+//        else {
+//            std::cout << "[Wwise FX] No processed audio. Using dry input." << std::endl;
+//            memcpy(pBuf, io_pBuffer->GetChannel(ch), numSamples * sizeof(float)); // Use dry input
+//        }
+//    }
+//
+//    // Reset shared memory flag
+//   // sharedMem.markProcessed();
+//}
+
 void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
     if (!io_pBuffer || io_pBuffer->uValidFrames == 0) return;
 
@@ -142,10 +177,10 @@ void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
     sharedMem.WriteBuffer(io_pBuffer, m_playingID);
 
     // Wait for processed audio (but don’t get stuck if missing)
-    int maxRetries = 10;
-    while (!sharedMem.readAvailable() && maxRetries-- > 0) {
-        AKPLATFORM::AkSleep(1); // Allow time for processing
-    }
+    //int maxRetries = 10;
+    //while (!sharedMem.readAvailable() && maxRetries-- > 0) {
+    //    AKPLATFORM::AkSleep(1); // Allow time for processing
+    //}
 
     bool hasProcessedAudio = sharedMem.readAvailable(); // Check if valid processed data is available
 
@@ -162,11 +197,10 @@ void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
             memcpy(pBuf, io_pBuffer->GetChannel(ch), numSamples * sizeof(float)); // Use dry input
         }
     }
-
+    
     // Reset shared memory flag
    // sharedMem.markProcessed();
 }
-
 
 AKRESULT WwiseVSTHostBridgeFX::TimeSkip(AkUInt32 in_uFrames)
 {
