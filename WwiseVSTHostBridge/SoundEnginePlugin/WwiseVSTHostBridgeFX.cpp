@@ -194,9 +194,12 @@ void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
         }
         else {
             std::cout << "[Wwise FX] No processed audio. Using dry input." << std::endl;
-            memcpy(pBuf, io_pBuffer->GetChannel(ch), numSamples * sizeof(float)); // Use dry input
+           // memcpy(pBuf, io_pBuffer->GetChannel(ch), numSamples * sizeof(float)); // Use dry input
+            memset(pBuf, 0, numSamples * sizeof(float)); // Output silence while waiting
         }
     }
+
+    sharedMem.markProcessed();
 
    
 }

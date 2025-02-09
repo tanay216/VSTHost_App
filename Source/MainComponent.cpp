@@ -416,7 +416,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) {
   
-       
+        
         transportSource.getNextAudioBlock(bufferToFill);
 
 
@@ -436,13 +436,17 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
                       //  std::cout << "[VST Host] No audio available." << std::endl;
                         return;
                     }
-
+                    auto startTime = juce::Time::getMillisecondCounterHiRes();
                     sharedMemoryReader.readAudio(*bufferToFill.buffer);
+                    
                     std::cout << "[VST Host] Reading audio from shared memory." << std::endl;
                     std::cout << " - Channels: " << juce::String(bufferToFill.buffer->getNumChannels()) << std::endl;
                     std::cout << " - Samples: " << juce::String(bufferToFill.buffer->getNumSamples()) << std::endl;
-
-                    vstPluginComponent.pluginInstance->processBlock(*bufferToFill.buffer, midiBuffer);
+                    
+                   // vstPluginComponent.pluginInstance->processBlock(*bufferToFill.buffer, midiBuffer);
+                    auto endTime = juce::Time::getMillisecondCounterHiRes();
+                    double latencyMs = endTime - startTime;
+                    std::cout << "[VST Host] Processing latency: " << latencyMs << " ms" << std::endl;
 
                     if (!pluginLoaded) {
                         pluginLoaded = true;

@@ -8,6 +8,7 @@
 
 struct SharedAudioBuffer {
     volatile bool updated;
+    volatile bool processing;
     AkPlayingID playingID;
     AkUInt32 numChannels;
     AkUInt32 numSamples;
@@ -34,7 +35,7 @@ public:
 
     void markProcessed() {
         if (buffer) {
-            buffer->updated = false; // Reset flag after reading
+            buffer->updated = true; // Reset flag after reading
         }
     }
 
@@ -47,6 +48,7 @@ public:
             const AkReal32* src = wwiseBuffer->GetChannel(ch);
             memcpy(buffer->samples[ch], src, buffer->numSamples * sizeof(float));
         }
+        buffer->processing = true;
         buffer->updated = true;
     }
 
