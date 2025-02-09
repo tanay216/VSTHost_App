@@ -60,6 +60,7 @@ public:
         }
 
         buffer->updated = false;  // Reset the flag
+        buffer->processing = true;
     }
 
     void writeProcessedAudio(const juce::AudioBuffer<float>& processedBuffer) {

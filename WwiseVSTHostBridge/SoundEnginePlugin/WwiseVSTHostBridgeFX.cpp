@@ -1,4 +1,4 @@
-/*******************************************************************************
+ï»¿/*******************************************************************************
 The content of this file includes portions of the AUDIOKINETIC Wwise Technology
 released in source code form as part of the SDK installer package.
 
@@ -78,7 +78,7 @@ AKRESULT WwiseVSTHostBridgeFX::GetPluginInfo(AkPluginInfo& out_rPluginInfo)
 {
     out_rPluginInfo.eType = AkPluginTypeEffect;
     out_rPluginInfo.bIsInPlace = true;
-	out_rPluginInfo.bCanProcessObjects = false;
+    out_rPluginInfo.bCanProcessObjects = false;
     out_rPluginInfo.uBuildVersion = AK_WWISESDK_VERSION_COMBINED;
     return AK_Success;
 }
@@ -141,7 +141,7 @@ AKRESULT WwiseVSTHostBridgeFX::GetPluginInfo(AkPluginInfo& out_rPluginInfo)
 //    // Write raw audio to shared memory
 //    sharedMem.WriteBuffer(io_pBuffer, m_playingID);
 //
-//    // Wait for processed audio (but don’t get stuck if missing)
+//    // Wait for processed audio (but donï¿½t get stuck if missing)
 //    int maxRetries = 10;
 //    while (!sharedMem.readAvailable() && maxRetries-- > 0) {
 //        AKPLATFORM::AkSleep(1); // Allow time for processing
@@ -176,11 +176,11 @@ void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
     // Write raw audio to shared memory
     sharedMem.WriteBuffer(io_pBuffer, m_playingID);
 
-    // Wait for processed audio (but don’t get stuck if missing)
-    //int maxRetries = 10;
-    //while (!sharedMem.readAvailable() && maxRetries-- > 0) {
-    //    AKPLATFORM::AkSleep(1); // Allow time for processing
-    //}
+    
+    int maxRetries = 10;
+    while (!sharedMem.readAvailable() && maxRetries-- > 0) {
+        AKPLATFORM::AkSleep(1); // Allow time for processing
+    }
 
     bool hasProcessedAudio = sharedMem.readAvailable(); // Check if valid processed data is available
 
@@ -197,9 +197,8 @@ void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
             memcpy(pBuf, io_pBuffer->GetChannel(ch), numSamples * sizeof(float)); // Use dry input
         }
     }
-    
-    // Reset shared memory flag
-   // sharedMem.markProcessed();
+
+   
 }
 
 AKRESULT WwiseVSTHostBridgeFX::TimeSkip(AkUInt32 in_uFrames)
