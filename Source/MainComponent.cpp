@@ -9,11 +9,11 @@ MainComponent::MainComponent()
    // you add any child components.
 
     waapiManager.connectToWAAPI();
-   // OpenSharedMemory();
-   // waapiManager.InitializeSoundEngine();
-    //waapiManager.RegisterGameObjects();
-   // metadataReceiver.startListening();
-   
+    // OpenSharedMemory();
+    // waapiManager.InitializeSoundEngine();
+     //waapiManager.RegisterGameObjects();
+    // metadataReceiver.startListening();
+
     formatManager.registerBasicFormats();
 
 
@@ -52,23 +52,23 @@ MainComponent::MainComponent()
     wwiseStatusLabel.setJustificationType(juce::Justification::centred);
     wwiseStatusLabel.setBounds(10, 10, 300, 30); // Adjust size/position
     updateWwiseStatus();
-   
-   // updateWwiseTree();
 
-    //// Wwise Tree View
-    //juce::Component::addAndMakeVisible(wwiseTree);
-    //updateWwiseTree();
+    // updateWwiseTree();
+
+     //// Wwise Tree View
+     //juce::Component::addAndMakeVisible(wwiseTree);
+     //updateWwiseTree();
 
     audioFileTree.setColour(juce::TreeView::backgroundColourId, juce::Colours::antiquewhite);
     audioFileTree.setDefaultOpenness(true);
     std::string rootName = "Root";
     auto rootItem = std::make_unique<AudioFileTreeItem>(rootName, nullptr, nullptr, this);
-    auto wwiseRootItem = std::make_unique<WwiseTreeItem>(WwiseEventNode{ "Wwise Events", "", {} },nullptr, this);
+    auto wwiseRootItem = std::make_unique<WwiseTreeItem>(WwiseEventNode{ "Wwise Events", "", {} }, nullptr, this);
     wwiseTree.setDefaultOpenness(false);
     audioFileTree.setRootItem(rootItem.release());
     audioFileTree.setInterceptsMouseClicks(true, true); // Enable clicks globally
     audioFileTree.setWantsKeyboardFocus(true);
-    
+
 
 
     // Configure the multichannel configuration dropdown
@@ -181,22 +181,22 @@ void MainComponent::updateWwiseTree() {
             if (addedPaths.find(event.path) == addedPaths.end()) {
 
                 auto removeCallback = [this, rootItem](WwiseTreeItem* item)
-                {
-                    if (rootItem)
                     {
-                        for (int i = 0; i < rootItem->getNumSubItems(); ++i)
+                        if (rootItem)
                         {
-                            if (rootItem->getSubItem(i) == item)
+                            for (int i = 0; i < rootItem->getNumSubItems(); ++i)
                             {
-                                rootItem->removeSubItem(i, true);
-                                break;
+                                if (rootItem->getSubItem(i) == item)
+                                {
+                                    rootItem->removeSubItem(i, true);
+                                    break;
+                                }
                             }
                         }
-                    }
-                };
+                    };
 
-                auto* eventItem = new WwiseTreeItem(event,removeCallback, this);
-                
+                auto* eventItem = new WwiseTreeItem(event, removeCallback, this);
+
                 rootItem->addSubItem(eventItem);
                 addedPaths.insert(event.path);
 
@@ -229,7 +229,7 @@ void MainComponent::addChildItems(WwiseTreeItem* parentItem, const std::vector<W
         addedPaths.insert(childNode.path);
 
         // Create and add the child node
-        auto* childItem = new WwiseTreeItem(childNode,nullptr, this);
+        auto* childItem = new WwiseTreeItem(childNode, nullptr, this);
         parentItem->addSubItem(childItem);
 
         // Debug output to trace adding nodes
@@ -415,55 +415,64 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
 
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) {
-  
-        
-        transportSource.getNextAudioBlock(bufferToFill);
 
 
-        if (vstPluginComponent.pluginInstance != nullptr) {
-            try {
-                juce::MidiBuffer midiBuffer;
-                auto busLayout = vstPluginComponent.pluginInstance->getBusesLayout();
-                auto selectedFileName = audioFileNames[selectedFileIndex].toStdString();
-                auto isBypassed = bypassStates.find(selectedFileName) != bypassStates.end() && bypassStates[selectedFileName];
-
-                if (!isBypassed) {
-
-                    juce::ScopedLock lock(audioLock);
-
-                    if (!sharedMemoryReader.readAvailable()) {
-                        bufferToFill.clearActiveBufferRegion();
-                      //  std::cout << "[VST Host] No audio available." << std::endl;
-                        return;
-                    }
-                    auto startTime = juce::Time::getMillisecondCounterHiRes();
-                    sharedMemoryReader.readAudio(*bufferToFill.buffer);
-                    
-                    std::cout << "[VST Host] Reading audio from shared memory." << std::endl;
-                    std::cout << " - Channels: " << juce::String(bufferToFill.buffer->getNumChannels()) << std::endl;
-                    std::cout << " - Samples: " << juce::String(bufferToFill.buffer->getNumSamples()) << std::endl;
-                    
-                   // vstPluginComponent.pluginInstance->processBlock(*bufferToFill.buffer, midiBuffer);
-                    auto endTime = juce::Time::getMillisecondCounterHiRes();
-                    double latencyMs = endTime - startTime;
-                    std::cout << "[VST Host] Processing latency: " << latencyMs << " ms" << std::endl;
-
-                    if (!pluginLoaded) {
-                        pluginLoaded = true;
-                        std::cout << "Processing. [Audio Stream is Active...]" << std::endl;
-                    }
-
-                    sharedMemoryReader.writeProcessedAudio(*bufferToFill.buffer);
-                    sharedMemoryReader.markProcessed();
+    transportSource.getNextAudioBlock(bufferToFill);
 
 
+    if (vstPluginComponent.pluginInstance != nullptr) {
+        try {
+            juce::MidiBuffer midiBuffer;
+            auto busLayout = vstPluginComponent.pluginInstance->getBusesLayout();
+            auto selectedFileName = audioFileNames[selectedFileIndex].toStdString();
+            auto isBypassed = bypassStates.find(selectedFileName) != bypassStates.end() && bypassStates[selectedFileName];
+
+            if (!isBypassed) {
+
+                juce::ScopedLock lock(audioLock);
+
+
+                if (!sharedMemoryReader.readAvailable()) {
+                    bufferToFill.clearActiveBufferRegion();
+                    //  std::cout << "[VST Host] No audio available." << std::endl;
+                    return;
                 }
-            }
-            catch (const std::exception& e) {
-                std::cerr << "Error processing audio block: " << e.what() << std::endl;
+
+                int numSamplesFromMemory = sharedMemoryReader.getNumSamples(); // Get Wwise’s buffer size
+                std::cout << "[VST Host] Shared memory buffer size from wwise: " << numSamplesFromMemory << " samples." << std::endl;
+                if (numSamplesFromMemory != bufferToFill.buffer->getNumSamples()) {
+                    std::cerr << "[VST Host] WARNING: Mismatch in buffer sizes. Resizing to " << numSamplesFromMemory << " samples." << std::endl;
+                    bufferToFill.buffer->setSize(bufferToFill.buffer->getNumChannels(), numSamplesFromMemory, false, false, true);
+                }
+
+                sharedMemoryReader.readAudio(*bufferToFill.buffer);
+                auto startTime = juce::Time::getMillisecondCounterHiRes();
+
+                std::cout << "[VST Host] Reading audio from shared memory." << std::endl;
+                std::cout << " - Channels: " << juce::String(bufferToFill.buffer->getNumChannels()) << std::endl;
+                std::cout << " - Samples: " << juce::String(bufferToFill.buffer->getNumSamples()) << std::endl;
+
+                vstPluginComponent.pluginInstance->processBlock(*bufferToFill.buffer, midiBuffer);
+                auto endTime = juce::Time::getMillisecondCounterHiRes();
+                double latencyMs = endTime - startTime;
+                std::cout << "[VST Host] Processing latency: " << latencyMs << " ms" << std::endl;
+
+                if (!pluginLoaded) {
+                    pluginLoaded = true;
+                    std::cout << "Processing. [Audio Stream is Active...]" << std::endl;
+                }
+
+                sharedMemoryReader.writeProcessedAudio(*bufferToFill.buffer);
+                sharedMemoryReader.markProcessed();
+
+
             }
         }
- 
+        catch (const std::exception& e) {
+            std::cerr << "Error processing audio block: " << e.what() << std::endl;
+        }
+    }
+
 }
 
 
@@ -500,7 +509,7 @@ void MainComponent::resized()
     juce::FlexBox leftColumn;
     leftColumn.items.add(juce::FlexItem(audioFileTree).withMinWidth(300).withFlex(0));
     leftColumn.items.add(juce::FlexItem(wwiseTree).withMinWidth(300).withFlex(0));
-   // wwiseTree.setBounds(10, 50, 300, getHeight() - 60);
+    // wwiseTree.setBounds(10, 50, 300, getHeight() - 60);
     mainFlexBox.items.add(juce::FlexItem(leftColumn).withMinWidth(300).withFlex(0));
 
 
@@ -816,11 +825,11 @@ void MainComponent::buttonClicked(juce::Button* button)
     else if (button == &refreshFileTreeButton) {
 
         // clear the audio file tree
-		audioFileTree.getRootItem()->clearSubItems();
+        audioFileTree.getRootItem()->clearSubItems();
         updateWwiseTree();
         audioFileTree.getRootItem()->treeHasChanged();
         audioFileTree.repaint();
-        
+
     }
 
 

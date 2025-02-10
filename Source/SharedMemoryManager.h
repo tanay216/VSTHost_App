@@ -47,27 +47,42 @@ public:
         return buffer && buffer->updated;
     }
 
+    int getNumSamples() {
+        return buffer ? buffer->numSamples : 0;
+    }
     void readAudio(juce::AudioBuffer<float>& outputBuffer) {
-        if (!buffer || !buffer->updated) return;
+        if (!buffer || !buffer->updated){ 
+            outputBuffer.clear();
+            return; }
 
-        const int numChannels = juce::jmin(outputBuffer.getNumChannels(),
+        int numChannels = juce::jmin(outputBuffer.getNumChannels(),
             static_cast<int>(buffer->numChannels));
-        const int numSamples = juce::jmin(outputBuffer.getNumSamples(),
-            static_cast<int>(buffer->numSamples));
+        int numSamples = buffer->numSamples;
 
+        std::cout << "[VST Host] Reading " << numSamples << " samples from shared memory." << std::endl;
+
+        if (numSamples > outputBuffer.getNumSamples()) {
+            std::cerr << "[VST Host] WARNING: Shared memory samples exceed buffer size! Clamping." << std::endl;
+            numSamples = outputBuffer.getNumSamples();
+        }
+
+        else {
+            std::cout << "[VST Host] Shared memory samples match buffer size." << std::endl;
+        }
         for (int ch = 0; ch < numChannels; ++ch) {
             outputBuffer.copyFrom(ch, 0, buffer->samples[ch], numSamples);
         }
 
         buffer->updated = false;  // Reset the flag
-        buffer->processing = false;
+        buffer->processing = true;
     }
 
     void writeProcessedAudio(const juce::AudioBuffer<float>& processedBuffer) {
         if (!buffer) return;
 
         int numChannels = juce::jmin(processedBuffer.getNumChannels(), static_cast<int>(buffer->numChannels));
-        int numSamples = juce::jmin(processedBuffer.getNumSamples(), static_cast<int>(buffer->numSamples));
+        int numSamples = buffer->numSamples;
+        std::cout << "[VST Host] Writing " << numSamples << " samples to shared memory." << std::endl;
 
         for (int ch = 0; ch < numChannels; ++ch) {
             memcpy(buffer->samples[ch], processedBuffer.getReadPointer(ch), numSamples * sizeof(float));

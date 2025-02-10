@@ -26,9 +26,11 @@ the specific language governing permissions and limitations under the License.
 
 #include "WwiseVSTHostBridgeFX.h"
 #include "../WwiseVSTHostBridgeConfig.h"
-
+#include <AK/Tools/Common/AkMonitorError.h>
+#include <AK/Tools/Common/AkMonitorErrorImpl.h>
 #include <AK/AkWwiseSDKVersion.h>
 #include "VoiceRegistry.h"
+#include <windows.h>
 
 
 AK::IAkPlugin* CreateWwiseVSTHostBridgeFX(AK::IAkPluginMemAlloc* in_pAllocator)
@@ -172,15 +174,27 @@ void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
 
     const AkUInt32 numChannels = io_pBuffer->NumChannels();
     const AkUInt32 numSamples = io_pBuffer->uValidFrames;
+    
+
+    char logMsg[256];
+    sprintf(logMsg, "[Wwise FX] Executing with Samples: %d, Channels: %d", numSamples, numChannels);
+    OutputDebugStringA(logMsg);
+
+    // Prevent sending tiny buffers (which cause distortion)
+    if (numSamples < 128) {
+        std::cout << "[Wwise FX] WARNING: Very small buffer size (" << numSamples << "). Possible artifacting." << std::endl;
+        memset(io_pBuffer->GetChannel(0), 0, numSamples * sizeof(float));  // Output silence
+        return;
+    }
 
     // Write raw audio to shared memory
     sharedMem.WriteBuffer(io_pBuffer, m_playingID);
 
-    
-    int maxRetries = 10;
-    while (!sharedMem.readAvailable() && maxRetries-- > 0) {
-        AKPLATFORM::AkSleep(1); // Allow time for processing
-    }
+
+    //int maxRetries = 10;
+    //while (!sharedMem.readAvailable() && maxRetries-- > 0) {
+    //    AKPLATFORM::AkSleep(1); // Allow time for processing
+    //}
 
     bool hasProcessedAudio = sharedMem.readAvailable(); // Check if valid processed data is available
 
@@ -194,14 +208,13 @@ void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
         }
         else {
             std::cout << "[Wwise FX] No processed audio. Using dry input." << std::endl;
-           // memcpy(pBuf, io_pBuffer->GetChannel(ch), numSamples * sizeof(float)); // Use dry input
-            memset(pBuf, 0, numSamples * sizeof(float)); // Output silence while waiting
+            memcpy(pBuf, io_pBuffer->GetChannel(ch), numSamples * sizeof(float)); // Use dry input
         }
     }
 
-    sharedMem.markProcessed();
+   // sharedMem.markProcessed();
 
-   
+
 }
 
 AKRESULT WwiseVSTHostBridgeFX::TimeSkip(AkUInt32 in_uFrames)
