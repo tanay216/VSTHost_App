@@ -422,6 +422,7 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
 
     if (vstPluginComponent.pluginInstance != nullptr) {
         try {
+            
             juce::MidiBuffer midiBuffer;
             auto busLayout = vstPluginComponent.pluginInstance->getBusesLayout();
             auto selectedFileName = audioFileNames[selectedFileIndex].toStdString();
@@ -439,13 +440,18 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
                 }
 
                 int numSamplesFromMemory = sharedMemoryReader.getNumSamples(); // Get Wwise’s buffer size
+                int numChannelsFromMemory = sharedMemoryReader.getNumChannels(); // Get Wwise’s buffer size
+                std::cout << "=========================================" << std::endl;
                 std::cout << "[VST Host] Shared memory buffer size from wwise: " << numSamplesFromMemory << " samples." << std::endl;
                 if (numSamplesFromMemory != bufferToFill.buffer->getNumSamples()) {
                     std::cerr << "[VST Host] WARNING: Mismatch in buffer sizes. Resizing to " << numSamplesFromMemory << " samples." << std::endl;
-                    bufferToFill.buffer->setSize(bufferToFill.buffer->getNumChannels(), numSamplesFromMemory, false, false, true);
+                    bufferToFill.buffer->setSize(numChannelsFromMemory, numSamplesFromMemory, true, false, true);
                 }
 
                 sharedMemoryReader.readAudio(*bufferToFill.buffer);
+
+                std::cout << "[VST Host] BEFORE processing:" << std::endl;
+                std::cout << " - First Sample (Channel 0): " << bufferToFill.buffer->getReadPointer(0)[0] << std::endl;
                 auto startTime = juce::Time::getMillisecondCounterHiRes();
 
                 std::cout << "[VST Host] Reading audio from shared memory." << std::endl;
@@ -455,6 +461,8 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
                 vstPluginComponent.pluginInstance->processBlock(*bufferToFill.buffer, midiBuffer);
                 auto endTime = juce::Time::getMillisecondCounterHiRes();
                 double latencyMs = endTime - startTime;
+                std::cout << "[VST Host] AFTER processing:" << std::endl;
+                std::cout << " - First Sample (Channel 0): " << bufferToFill.buffer->getReadPointer(0)[0] << std::endl;
                 std::cout << "[VST Host] Processing latency: " << latencyMs << " ms" << std::endl;
 
                 if (!pluginLoaded) {

@@ -47,18 +47,17 @@ public:
         return buffer && buffer->updated;
     }
 
-    int getNumSamples() {
-        return buffer ? buffer->numSamples : 0;
-    }
+   
     void readAudio(juce::AudioBuffer<float>& outputBuffer) {
         if (!buffer || !buffer->updated){ 
-            outputBuffer.clear();
+           // outputBuffer.clear();
             return; }
 
         int numChannels = juce::jmin(outputBuffer.getNumChannels(),
             static_cast<int>(buffer->numChannels));
-        int numSamples = buffer->numSamples;
+        int numSamples = outputBuffer.getNumSamples();
 
+        std::cout << "------" << std::endl;
         std::cout << "[VST Host] Reading " << numSamples << " samples from shared memory." << std::endl;
 
         if (numSamples > outputBuffer.getNumSamples()) {
@@ -81,8 +80,11 @@ public:
         if (!buffer) return;
 
         int numChannels = juce::jmin(processedBuffer.getNumChannels(), static_cast<int>(buffer->numChannels));
-        int numSamples = buffer->numSamples;
+       // int numSamples = processedBuffer.getNumSamples();
+        int numSamples = juce::jmin(processedBuffer.getNumSamples(), static_cast<int>(buffer->numSamples));
         std::cout << "[VST Host] Writing " << numSamples << " samples to shared memory." << std::endl;
+        std::cout << " - First Sample (Channel 0): " << processedBuffer.getReadPointer(0)[0] << std::endl;
+        std::cout << "=========================================" << std::endl;
 
         for (int ch = 0; ch < numChannels; ++ch) {
             memcpy(buffer->samples[ch], processedBuffer.getReadPointer(ch), numSamples * sizeof(float));
@@ -99,6 +101,14 @@ public:
 
     AkPlayingID getCurrentPlayingID() const {
         return buffer ? buffer->playingID : 0;
+    }
+
+    int getNumSamples() {
+        return buffer ? buffer->numSamples : 0;
+    }
+    
+    int getNumChannels() {
+        return buffer ? buffer->numChannels : 0;
     }
 private:
     HANDLE hMapFile;
