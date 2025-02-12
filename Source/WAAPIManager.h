@@ -59,7 +59,7 @@ public:
     //void GetEventDescendants(const std::string& eventName, const std::string& parentPath);
     std::vector<WwiseEventNode> GetChildrenOfObject(const std::string& objectPath);
         
-    std::vector<WwiseEventNode> GetEventDescendants(const std::string& eventName, const std::string& parentPath);
+    std::vector<WwiseEventNode> GetEventDescendants(const std::string& guid, const std::string& parentPath);
 
     void postWwiseEvent(const std::string& objectID);
 
@@ -67,6 +67,23 @@ public:
     void GetVoices(const std::string& objectID);
     void GetOriginalFilePath( std::string& objectGUID);
 
+    void updatePlayingIDToGUIDMap(AkPlayingID playingID, const std::string& objectGUID);
+
+    std::string getGUIDFromPlayingID(AkPlayingID playingID);
+
+    bool isSoundObject(const std::string& objectID);
+
+    std::string getWwisePathFromID(const std::string& objectID);
+
+    void addWwisePluginToPath(const std::string& objectPath);
+    void removeWwisePluginFromPath(const std::string& objectPath);
+
+   
+    bool WAAPIManager::RemoveEffectFromObject(std::string& targetID);
+
+    bool SetEffectSlot0ToVSTBridge(const char* objectPath);
+
+    bool WAAPIManager::AddEffectToObject(std::string& objectPath, const std::string& pluginName);
    // void WAAPIManager::SendVoiceDataToHost(const std::string& soundName, const std::string& eventName, float volume, float pitch, int gameObject);
 
     // Sound Engine ======================================================================
@@ -112,14 +129,16 @@ private:
     
     Client waapiClient;
     std::string originalFilePath;
+    std::string systemFilePath;
     std::string wwiseProjectName = "";
     std::string wwiseVersion = "";
     std::string wwisePlatform = "";
 
    
     
-
+    std::unordered_map<std::string, std::string> m_activeEffects;
     std::map<std::string, WwiseEventNode> wwiseEventsTree;
-
+    std::unordered_map<AkPlayingID, std::string> playingIDToGUID;
+    
 };
 

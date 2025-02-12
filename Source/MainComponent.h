@@ -97,10 +97,67 @@ public:
 
     const std::string getLoadedAudiFileNames();
 
-    void setBypassState(const std::string& fileName, bool state)
+    void setBypassState(const std::string& eventID, bool state)
     {
-        bypassStates[fileName] = state;
-        std::cout << "Bypass state updated for " << fileName << ": " << state << std::endl;
+        bypassStates[eventID] = state;
+        std::cout << "Bypass state updated for " << eventID << ": " << state << std::endl;
+    }
+
+    void setSelectedWwiseEvent( std::string& eventID, bool isSelected) {
+        if (!eventID.empty()) // Ensure we are not storing empty event IDs
+        {
+            selectedWwiseEvents[eventID] = isSelected;
+            std::cout << "[Wwise] Event " << eventID << (isSelected ? " selected" : " deselected") << std::endl;
+            if (isSelected)
+            {
+                std::cout << "--------" << std::endl;
+                if (waapiManager.isSoundObject(eventID))
+                {
+
+                    std::cout << "[Wwise] Extracting file path for selected sound object." << std::endl;
+                    std::string objectPath = waapiManager.getWwisePathFromID(eventID);
+                    waapiManager.GetOriginalFilePath(objectPath);
+ 
+                  //  exporterComponent.addFileForExport(filePath);
+
+                    if (!objectPath.empty())
+                    {
+
+                        waapiManager.AddEffectToObject(eventID, "WwiseVSTHostBridge");
+                    }
+                }
+
+                // Get event data and descendants
+                auto eventNode = waapiManager.GetEventDescendants(eventID, "");
+
+                for (auto& descendant : eventNode)
+                {
+                    if (descendant.type == "Sound")
+                    {
+                        std::cout<<"******"<<std::endl;
+                        std::cout << "[Wwise] Extracting file path for: " << descendant.name << " | GUID: " << descendant.guid << "| Type: "<<descendant.type << std::endl;
+                        waapiManager.GetOriginalFilePath(descendant.guid);
+                        waapiManager.AddEffectToObject(descendant.guid, "WwiseVSTHostBridge");
+                    }
+                    else {
+						
+						waapiManager.GetChildrenOfObject(descendant.path);
+                        for (auto& child : descendant.children) {
+                            if (child.type == "Sound"){
+                            std::cout << "******" << std::endl;
+							std::cout << "[Wwise] Extracting file path for: " << child.name << " | GUID: " << child.guid << "| Type: " << child.type << std::endl;
+							waapiManager.GetOriginalFilePath(child.guid);
+                            waapiManager.AddEffectToObject(child.guid, "WwiseVSTHostBridge");
+                            }
+						}
+                    }
+                }
+            }
+        }
+        else
+        {
+            std::cerr << "[Wwise] ERROR: Attempted to select an event with an empty ID!" << std::endl;
+        }
     }
 
     /* Getter Functions */
@@ -117,6 +174,7 @@ private:
     /* Variables */
     bool pluginLoaded = false;
     double sampleRate = 44100.0;
+
 
     /* Initialise */
     juce::AudioDeviceManager audioDeviceManager;
@@ -138,6 +196,7 @@ private:
 
     /* Audio & Files */
     std::unordered_map<std::string, bool> bypassStates; // Tracks bypass state for each file
+    std::unordered_map<std::string, bool> selectedWwiseEvents;
     juce::AudioBuffer<float> audioBuffer;
     std::string loadedAudioFileNames;
     juce::StringArray audioFileNames; // Array to store loaded audio files names
@@ -180,6 +239,7 @@ private:
     // Wwise API /UI Tree View Components
     juce::Label wwiseStatusLabel;
     juce::TreeView wwiseTree{"Wwise Tree"};
+    
 
 
 
@@ -907,7 +967,7 @@ private:
             : objectID(objectID), onPlayCallback(std::move(onPlay)), onRemoveCallback(std::move(onRemove)), mainComponent(mainComponent)
         {
             addNewButtons(removeButton, "X");
-            addNewToggle(bypassToggleButton, "Bypass");
+            addNewToggle(selectToggleButton, "Select");
         }
 
 
@@ -928,7 +988,7 @@ private:
         void resized() override
         {
             auto bounds = getLocalBounds();
-            bypassToggleButton.setBounds(bounds.removeFromRight(30));
+            selectToggleButton.setBounds(bounds.removeFromRight(30));
             removeButton.setBounds(bounds.removeFromRight(30));
         }
 
@@ -938,12 +998,12 @@ private:
             {
                 if (onRemoveCallback) onRemoveCallback(); // Trigger remove callback
             }
-            else if (button == &bypassToggleButton)
+            else if (button == &selectToggleButton)
             {
-                bool isBypassed = bypassToggleButton.getToggleState();
+                bool isBypassed = selectToggleButton.getToggleState();
                 if (mainComponent)
                 {
-                    mainComponent->setBypassState(fileName, isBypassed);
+                    mainComponent->setSelectedWwiseEvent(objectID, isBypassed);
                     
                 }
             }
@@ -966,10 +1026,11 @@ private:
 
        
     private:
+        std::string eventGUID; // Store GUID instead of objectID
         std::string objectID;
         std::string fileName;
         juce::TextButton removeButton;
-        juce::ToggleButton bypassToggleButton;
+        juce::ToggleButton selectToggleButton;
         MainComponent* mainComponent;
         std::function<void()> onPlayCallback;
         std::function<void()> onRemoveCallback;

@@ -11,7 +11,7 @@ struct SharedAudioBuffer {
     AkPlayingID playingID;
     AkUInt32 numChannels;
     AkUInt32 numSamples;
-    float samples[8][1024]; // [channels][frames]
+    float samples[8][1024]; // [frames][channels]
 };
 
 class SharedMemoryManager {
@@ -34,7 +34,7 @@ public:
 
     void markProcessed() {
         if (buffer) {
-            buffer->updated = true; // Reset flag after reading
+            buffer->updated = false; // Reset flag after reading
         }
     }
 
@@ -47,7 +47,6 @@ public:
             const AkReal32* src = wwiseBuffer->GetChannel(ch);
             memcpy(buffer->samples[ch], src, buffer->numSamples * sizeof(float));
         }
-       
         buffer->updated = true;
     }
 

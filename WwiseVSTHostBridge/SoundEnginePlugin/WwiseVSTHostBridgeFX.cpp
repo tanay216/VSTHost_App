@@ -26,11 +26,9 @@ the specific language governing permissions and limitations under the License.
 
 #include "WwiseVSTHostBridgeFX.h"
 #include "../WwiseVSTHostBridgeConfig.h"
-#include <AK/Tools/Common/AkMonitorError.h>
-#include <AK/Tools/Common/AkMonitorErrorImpl.h>
+
 #include <AK/AkWwiseSDKVersion.h>
 #include "VoiceRegistry.h"
-#include <windows.h>
 
 
 AK::IAkPlugin* CreateWwiseVSTHostBridgeFX(AK::IAkPluginMemAlloc* in_pAllocator)
@@ -134,72 +132,22 @@ AKRESULT WwiseVSTHostBridgeFX::GetPluginInfo(AkPluginInfo& out_rPluginInfo)
 //
 //}
 
-//void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
-//    if (!io_pBuffer || io_pBuffer->uValidFrames == 0) return;
-//
-//    const AkUInt32 numChannels = io_pBuffer->NumChannels();
-//    const AkUInt32 numSamples = io_pBuffer->uValidFrames;
-//
-//    // Write raw audio to shared memory
-//    sharedMem.WriteBuffer(io_pBuffer, m_playingID);
-//
-//    // Wait for processed audio (but don�t get stuck if missing)
-//    int maxRetries = 10;
-//    while (!sharedMem.readAvailable() && maxRetries-- > 0) {
-//        AKPLATFORM::AkSleep(1); // Allow time for processing
-//    }
-//
-//    bool hasProcessedAudio = sharedMem.readAvailable(); // Check if valid processed data is available
-//
-//    // Read processed audio or pass dry input if no processed data exists
-//    for (AkUInt32 ch = 0; ch < numChannels; ++ch) {
-//        AkReal32* pBuf = io_pBuffer->GetChannel(ch);
-//        const float* processedData = hasProcessedAudio ? sharedMem.getProcessedSamples(ch) : nullptr;
-//
-//        if (processedData) {
-//            memcpy(pBuf, processedData, numSamples * sizeof(float)); // Use processed audio
-//        }
-//        else {
-//            std::cout << "[Wwise FX] No processed audio. Using dry input." << std::endl;
-//            memcpy(pBuf, io_pBuffer->GetChannel(ch), numSamples * sizeof(float)); // Use dry input
-//        }
-//    }
-//
-//    // Reset shared memory flag
-//   // sharedMem.markProcessed();
-//}
-
 void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
     if (!io_pBuffer || io_pBuffer->uValidFrames == 0) return;
 
     const AkUInt32 numChannels = io_pBuffer->NumChannels();
     const AkUInt32 numSamples = io_pBuffer->uValidFrames;
-    
-
-    char logMsg[256];
-    sprintf(logMsg, "[Wwise FX] Executing with Samples: %d, Channels: %d", numSamples, numChannels);
-    OutputDebugStringA(logMsg);
-
-    // Prevent sending tiny buffers (which cause distortion)
-    if (numSamples < 128) {
-        std::cout << "[Wwise FX] WARNING: Very small buffer size (" << numSamples << "). Possible artifacting." << std::endl;
-        memset(io_pBuffer->GetChannel(0), 0, numSamples * sizeof(float));  // Output silence
-        return;
-    }
 
     // Write raw audio to shared memory
     sharedMem.WriteBuffer(io_pBuffer, m_playingID);
 
-
+    // Wait for processed audio (but don�t get stuck if missing)
     int maxRetries = 10;
     while (!sharedMem.readAvailable() && maxRetries-- > 0) {
         AKPLATFORM::AkSleep(1); // Allow time for processing
     }
 
     bool hasProcessedAudio = sharedMem.readAvailable(); // Check if valid processed data is available
-    sprintf(logMsg, "[Wwise FX] Has processed audio: %d", hasProcessedAudio);
-    OutputDebugStringA(logMsg);
-    std::cout << "[Wwise FX] Reading processed audio from shared memory: " << (hasProcessedAudio ? "Yes" : "No") << std::endl;
 
     // Read processed audio or pass dry input if no processed data exists
     for (AkUInt32 ch = 0; ch < numChannels; ++ch) {
@@ -210,18 +158,15 @@ void WwiseVSTHostBridgeFX::Execute(AkAudioBuffer* io_pBuffer) {
             memcpy(pBuf, processedData, numSamples * sizeof(float)); // Use processed audio
         }
         else {
-            sprintf(logMsg, "[Wwise FX] No processed audio. Using dry input.");
-            OutputDebugStringA(logMsg);
-           
-           // memcpy(pBuf, io_pBuffer->GetChannel(ch), numSamples * sizeof(float)); // Use dry input
-            memset(pBuf, 0, numSamples * sizeof(float)); // ✅ MUTE DRY SIGNAL
+            std::cout << "[Wwise FX] No processed audio. Using dry input." << std::endl;
+            memcpy(pBuf, io_pBuffer->GetChannel(ch), numSamples * sizeof(float)); // Use dry input
         }
     }
 
-    sharedMem.markProcessed();
-
-
+    // Reset shared memory flag
+   // sharedMem.markProcessed();
 }
+
 
 AKRESULT WwiseVSTHostBridgeFX::TimeSkip(AkUInt32 in_uFrames)
 {

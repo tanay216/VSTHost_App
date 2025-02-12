@@ -296,6 +296,7 @@ std::vector<WwiseEventNode> WAAPIManager::GetChildrenOfObject(const std::string&
 
     if (waapiClient.Call(ak::wwise::core::object::get, args, options, queryResult, 10))
     {
+       
         if (queryResult.IsMap() && queryResult.HasKey("return"))
         {
             const auto& results = queryResult["return"].GetArray();
@@ -327,7 +328,7 @@ std::vector<WwiseEventNode> WAAPIManager::GetChildrenOfObject(const std::string&
     return children;
 }
 
-std::vector<WwiseEventNode> WAAPIManager::GetEventDescendants(const std::string& eventName, const std::string& parentPath)
+std::vector<WwiseEventNode> WAAPIManager::GetEventDescendants(const std::string& guid, const std::string& parentPath)
 {
     using namespace AK::WwiseAuthoringAPI;
 
@@ -339,11 +340,12 @@ std::vector<WwiseEventNode> WAAPIManager::GetEventDescendants(const std::string&
         return descendants;
     }
 
-    std::cout << "Retrieving descendants for event: " << eventName << std::endl;
+    std::cout << "Retrieving descendants for event: " << guid << std::endl;
+    std::cout << "---" << std::endl;
 
     // WAQL query to get all children directly associated with the event
     AkJson queryResult;
-    std::string waqlQuery = "$ from type event where name = \"" + eventName + "\" select children select target";
+    std::string waqlQuery = "$ from type event where id = \"" + guid + "\" select children select target";
 
     AkJson args(AkJson::Map{
         { "waql", AkVariant(waqlQuery) }
@@ -377,6 +379,11 @@ std::vector<WwiseEventNode> WAAPIManager::GetEventDescendants(const std::string&
                     // Create the current child node
                     WwiseEventNode childNode = { childName, childPath, guid, type };
 
+                    //if (type == "Sound") {
+                    //    std::cout << "[Wwise] Found Sound Object: " << childName << " | GUID: " << guid << std::endl;
+                    //    GetOriginalFilePath(guid); // Retrieve file path
+                    //}
+
                     // Recursive call to get children of this child
                     childNode.children = GetChildrenOfObject(childPath);
 
@@ -394,12 +401,12 @@ std::vector<WwiseEventNode> WAAPIManager::GetEventDescendants(const std::string&
         }
         else
         {
-            std::cerr << "No descendants found for event: " << eventName << std::endl;
+            std::cerr << "No descendants found for event: " << guid << std::endl;
         }
     }
     else
     {
-        std::cerr << "WAAPI query failed for event: " << eventName << std::endl;
+        std::cerr << "WAAPI query failed for event: " << guid << std::endl;
     }
 
     return descendants;
@@ -563,6 +570,7 @@ void WAAPIManager::GetVoices(const std::string& objectID)
                 if (var.GetInt32()) playingID = var.GetInt32();
             }
 
+
             // Extract `objectName`
             if (voiceMap.find("objectName") != voiceMap.end() && voiceMap.at("objectName").IsVariant())
             {
@@ -575,6 +583,12 @@ void WAAPIManager::GetVoices(const std::string& objectID)
             {
                 const auto& var = voiceMap.at("playTargetName").GetVariant();
                 if (var.IsString()) playTargetName = var.GetString();
+            }
+
+            // Extract GUID and update map
+            if (!objectGUID.empty() && playingID != 0)
+            {
+                updatePlayingIDToGUIDMap(playingID, objectGUID);
             }
 
             VoiceData newVoice;
@@ -638,6 +652,7 @@ void WAAPIManager::GetOriginalFilePath( std::string& objectGUID)
         { "return", AkJson::Array{
             AkVariant("type"),
             AkVariant("originalRelativeFilePath"),
+            AkVariant("originalFilePath"),
             AkVariant("parent")
         }}
         });
@@ -671,10 +686,13 @@ void WAAPIManager::GetOriginalFilePath( std::string& objectGUID)
 
             if (objMap.find("originalRelativeFilePath") != objMap.end() && objMap.at("originalRelativeFilePath").IsVariant())
                 originalFilePath = objMap.at("originalRelativeFilePath").GetVariant().GetString();
+            
+            if (objMap.find("originalFilePath") != objMap.end() && objMap.at("originalFilePath").IsVariant())
+                systemFilePath = objMap.at("originalFilePath").GetVariant().GetString();
 
             if (type == "Sound")  // Ensure it's an actual Sound SFX
             {
-                std::cout << "[File Path] Sound ID: " << objectGUID << " -> " << originalFilePath << std::endl;
+                std::cout << "[File Path] Sound ID: " << objectGUID << " | Wwise Original's folder: " << originalFilePath << " | System's folder: "<< systemFilePath << std::endl;
             }
             else
             {
@@ -688,3 +706,237 @@ void WAAPIManager::GetOriginalFilePath( std::string& objectGUID)
     }
 }
 
+void WAAPIManager::updatePlayingIDToGUIDMap(AkPlayingID playingID, const std::string& objectGUID)
+{
+    if (!objectGUID.empty())
+    {
+        playingIDToGUID[playingID] = objectGUID;
+        std::cout << "[WAAPI] Mapped PlayingID " << playingID << " -> GUID: " << objectGUID << std::endl;
+    }
+}
+
+std::string WAAPIManager::getGUIDFromPlayingID(AkPlayingID playingID)
+{
+    if (playingIDToGUID.find(playingID) != playingIDToGUID.end())
+    {
+        return playingIDToGUID[playingID];
+    }
+    return "";
+}
+
+bool WAAPIManager::isSoundObject(const std::string& objectID)
+{
+    using namespace AK::WwiseAuthoringAPI;
+
+    if (!waapiClient.IsConnected())
+    {
+        std::cerr << "Not connected to WAAPI!" << std::endl;
+        return false;
+    }
+
+    std::string waqlQuery = "$ from type Sound where id = \"" + objectID + "\"";
+    AkJson args(AkJson::Map{
+        { "waql", AkVariant(waqlQuery) }
+        });
+
+    AkJson options(AkJson::Map{
+        { "return", AkJson::Array{ AkVariant("id"), AkVariant("type") } }
+        });
+
+    AkJson result;
+    if (waapiClient.Call(ak::wwise::core::object::get, args, options, result))
+    {
+        if (result.HasKey("return") && !result["return"].GetArray().empty())
+        {
+            std::cout << "[WAAPI] Object " << objectID << " is a Sound object." << std::endl;
+            return true;
+        }
+    }
+
+   // std::cout << "[WAAPI] Object " << objectID << " is NOT a Sound object." << std::endl;
+    return false;
+}
+
+std::string WAAPIManager::getWwisePathFromID(const std::string& objectID)
+{
+    using namespace AK::WwiseAuthoringAPI;
+
+    if (!waapiClient.IsConnected())
+    {
+        std::cerr << "Not connected to WAAPI!" << std::endl;
+        return "";
+    }
+
+    AkJson args(AkJson::Map{
+        { "from", AkJson::Map{ { "id", AkJson::Array{AkVariant(objectID)} } } }
+        });
+
+    AkJson options(AkJson::Map{
+        { "return", AkJson::Array{ AkVariant("path") } }
+        });
+
+    AkJson result;
+    if (waapiClient.Call(ak::wwise::core::object::get, args, options, result))
+    {
+        if (result.HasKey("return") && !result["return"].GetArray().empty())
+        {
+            std::string wwisePath = result["return"].GetArray()[0]["path"].GetVariant().GetString();
+            std::cout << "[WAAPI] Retrieved Wwise Path for ID " << objectID << ": " << wwisePath << std::endl;
+            return wwisePath;
+        }
+    }
+
+    std::cerr << "[WAAPI] Failed to retrieve Wwise path for ID: " << objectID << std::endl;
+    return "";
+}
+
+//void WAAPIManager::addWwisePluginToPath(const std::string& objectPath)
+//{
+//    using namespace AK::WwiseAuthoringAPI;
+//
+//    if (!waapiClient.IsConnected())
+//    {
+//        std::cerr << "Not connected to WAAPI!" << std::endl;
+//        return;
+//    }
+//
+//    AkJson args(AkJson::Map{
+//        { "object", AkVariant(objectPath) },
+//        { "pluginName", AkVariant("WwiseVSTHostBridge") } // Replace with your actual plugin name
+//        });
+//
+//    AkJson result;
+//    if (waapiClient.Call(ak::wwise::core::object::setProperty, args, AkJson(AkJson::Type::Map), result, 10))
+//    {
+//        std::cout << "[WAAPI] Plugin added to: " << objectPath << std::endl;
+//    }
+//    else
+//    {
+//        std::cerr << "[WAAPI] Failed to add plugin to: " << objectPath << std::endl;
+//    }
+//}
+
+/*void WAAPIManager::removeWwisePluginFromPath(const std::string& objectPath)
+{
+    using namespace AK::WwiseAuthoringAPI;
+
+    if (!waapiClient.IsConnected())
+    {
+        std::cerr << "Not connected to WAAPI!" << std::endl;
+        return;
+    }
+
+    AkJson args(AkJson::Map{
+        { "object", AkVariant(objectPath) },
+        { "pluginName", AkVariant("MyWwiseVSTPlugin") }
+        });
+
+    AkJson result;
+    if (waapiClient.Call(ak::wwise::core::object::setProperty, args, AkJson(AkJson::Type::Map), result, 10))
+    {
+        std::cout << "[WAAPI] Plugin removed from: " << objectPath << std::endl;
+    }
+    else
+    {
+        std::cerr << "[WAAPI] Failed to remove plugin from: " << objectPath << std::endl;
+    }
+}*/
+
+// WAAPIManager.cpp
+//bool WAAPIManager::AddEffectToObject(std::string& objectPath,
+//    const std::string& pluginName) {
+//    using namespace AK::WwiseAuthoringAPI;
+//
+//    std::cout << "Adding effect to object: " << objectPath << std::endl;
+//    // Check if effect already exists
+//    if (auto it = m_activeEffects.find(objectPath); it != m_activeEffects.end()) {
+//        std::cout << "Effect already exists for object: " << objectPath << std::endl;
+//        return true;
+//    }
+//
+//    AkJson args(AkJson::Map{
+//        {"object", AkVariant(objectPath)},
+//        {"reference", AkVariant("Bus")},
+//        {"value", AkVariant("{B09E43E4-A5DD-47F3-8288-64DA9891B72D}")}
+//        });
+//
+//    AkJson result;
+//    if (waapiClient.Call(ak::wwise::core::object::setReference, args, AkJson::Map{}, result)) {
+//        if (result.HasKey("id")) {
+//            m_activeEffects[objectPath] = result["id"].GetVariant().GetString();
+//            return true;
+//        }
+//    }
+//    return false;
+//}
+
+bool WAAPIManager::RemoveEffectFromObject( std::string& targetID) {
+    using namespace AK::WwiseAuthoringAPI;
+
+    std::cout << "Removing effect from object: " << targetID << std::endl;
+
+    if (auto it = m_activeEffects.find(targetID); it != m_activeEffects.end()) {
+        AkJson args(AkJson::Map{
+            {"object", AkVariant(it->second)}
+            });
+
+        AkJson result;
+        if (waapiClient.Call(ak::wwise::core::object::delete_, args, AkJson::Map{}, result)) {
+            m_activeEffects.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool WAAPIManager::AddEffectToObject(std::string& objectPath, const std::string& pluginName) {
+    using namespace AK::WwiseAuthoringAPI;
+
+    std::cout << "Adding effect to object: " << objectPath << std::endl;
+
+    // Check if effect already exists
+    if (auto it = m_activeEffects.find(objectPath); it != m_activeEffects.end()) {
+        std::cout << "Effect already exists for object: " << objectPath << std::endl;
+        return true;
+    }
+
+    // Construct the arguments for ak.wwise.core.object.set
+    AkJson setEffectArgs(AkJson::Map{
+        {"objects", AkJson::Array{
+            AkJson::Map{
+                {"object", AkVariant(objectPath)}, // The object to modify
+                {"@Effects", AkJson::Array{
+                    AkJson::Map{
+                        {"type", AkVariant("EffectSlot")}, // Effect slot type
+                        {"name", AkVariant("")},           // Empty name for the slot
+                        {"@Effect", AkJson::Map{
+                            {"type", AkVariant("Effect")}, // Effect type
+                            {"name", AkVariant(pluginName)}, // Name of the effect
+                            {"classId", AkVariant(7733251)} // Class ID of the effect (replace with your plugin's class ID)
+                        }}
+                    }}
+                }}
+            }}
+        }
+
+    );
+
+    AkJson setEffectResult;
+    if (waapiClient.Call(ak::wwise::core::object::set, setEffectArgs, AkJson::Map{}, setEffectResult)) {
+        if (setEffectResult.HasKey("objects")) {
+            // Store the effect ID in the active effects map
+            auto& objects = setEffectResult["objects"].GetArray();
+            if (!objects.empty()) {
+                auto& effects = objects[0]["@Effects"].GetArray();
+                if (!effects.empty()) {
+                    std::string effectId = effects[0]["@Effect"]["id"].GetVariant().GetString();
+                    m_activeEffects[objectPath] = effectId;
+                    return true;
+                }
+            }
+        }
+    }
+
+    std::cerr << "Failed to set effect at slot 0 for object: " << objectPath << std::endl;
+    return false;
+}

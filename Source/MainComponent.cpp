@@ -1,4 +1,4 @@
-#include "MainComponent.h"
+ï»¿#include "MainComponent.h"
 #define NUM_VOICE_BUFFERS 4 
 
 
@@ -201,7 +201,7 @@ void MainComponent::updateWwiseTree() {
                 addedPaths.insert(event.path);
 
                 // Retrieve and add nested hierarchy (containers & SFX)
-                auto descendants = waapiManager.GetEventDescendants(event.name, event.path);
+                auto descendants = waapiManager.GetEventDescendants(event.guid, event.path);
                 addChildItems(eventItem, descendants, addedPaths);
 
                 // DEBUG: Store and print details for verification
@@ -422,13 +422,21 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
 
     if (vstPluginComponent.pluginInstance != nullptr) {
         try {
-            
+
             juce::MidiBuffer midiBuffer;
             auto busLayout = vstPluginComponent.pluginInstance->getBusesLayout();
             auto selectedFileName = audioFileNames[selectedFileIndex].toStdString();
             auto isBypassed = bypassStates.find(selectedFileName) != bypassStates.end() && bypassStates[selectedFileName];
+            // Get the currently playing Wwise playingID from shared memory
+            AkPlayingID currentPlayingID = sharedMemoryReader.getCurrentPlayingID();
 
-            if (!isBypassed) {
+            // Get the corresponding GUID from WAAPIManager
+            std::string currentWwiseEventGUID = waapiManager.getGUIDFromPlayingID(currentPlayingID);
+
+            bool isSelected = selectedWwiseEvents.find(currentWwiseEventGUID) != selectedWwiseEvents.end() &&
+                selectedWwiseEvents[currentWwiseEventGUID];
+
+            if (!isBypassed && isSelected) {
 
                 juce::ScopedLock lock(audioLock);
 
@@ -439,8 +447,8 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
                     return;
                 }
 
-                int numSamplesFromMemory = sharedMemoryReader.getNumSamples(); // Get Wwise’s buffer size
-                int numChannelsFromMemory = sharedMemoryReader.getNumChannels(); // Get Wwise’s buffer size
+                int numSamplesFromMemory = sharedMemoryReader.getNumSamples(); // Get Wwiseï¿½s buffer size
+                int numChannelsFromMemory = sharedMemoryReader.getNumChannels(); // Get Wwiseï¿½s buffer size
                 std::cout << "=========================================" << std::endl;
                 std::cout << "[VST Host] Shared memory buffer size from wwise: " << numSamplesFromMemory << " samples." << std::endl;
                 if (numSamplesFromMemory != bufferToFill.buffer->getNumSamples()) {
