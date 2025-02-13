@@ -358,6 +358,7 @@ void MainComponent::changeAudioDevice(bool isInput)
 //==============================================================================
 void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
+    samplesPerBlockExpected = 1024;
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
@@ -436,7 +437,7 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
             bool isSelected = selectedWwiseEvents.find(currentWwiseEventGUID) != selectedWwiseEvents.end() &&
                 selectedWwiseEvents[currentWwiseEventGUID];
 
-            if (!isBypassed && isSelected) {
+            if (!isBypassed || isSelected) {
 
                 juce::ScopedLock lock(audioLock);
 
@@ -447,14 +448,14 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
                     return;
                 }
 
-                int numSamplesFromMemory = sharedMemoryReader.getNumSamples(); // Get Wwise�s buffer size
-                int numChannelsFromMemory = sharedMemoryReader.getNumChannels(); // Get Wwise�s buffer size
-                std::cout << "=========================================" << std::endl;
-                std::cout << "[VST Host] Shared memory buffer size from wwise: " << numSamplesFromMemory << " samples." << std::endl;
-                if (numSamplesFromMemory != bufferToFill.buffer->getNumSamples()) {
-                    std::cerr << "[VST Host] WARNING: Mismatch in buffer sizes. Resizing to " << numSamplesFromMemory << " samples." << std::endl;
-                    bufferToFill.buffer->setSize(numChannelsFromMemory, numSamplesFromMemory, true, false, true);
-                }
+                //int numSamplesFromMemory = sharedMemoryReader.getNumSamples(); // Get Wwise�s buffer size
+                //int numChannelsFromMemory = sharedMemoryReader.getNumChannels(); // Get Wwise�s buffer size
+                //std::cout << "=========================================" << std::endl;
+                //std::cout << "[VST Host] Shared memory buffer size from wwise: " << numSamplesFromMemory << " samples." << std::endl;
+                //if (numSamplesFromMemory != bufferToFill.buffer->getNumSamples()) {
+                //    std::cerr << "[VST Host] WARNING: Mismatch in buffer sizes. Resizing to " << numSamplesFromMemory << " samples." << std::endl;
+                //    bufferToFill.buffer->setSize(numChannelsFromMemory, numSamplesFromMemory, true, false, true);
+                //}
 
                 sharedMemoryReader.readAudio(*bufferToFill.buffer);
 

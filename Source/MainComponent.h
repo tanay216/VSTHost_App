@@ -905,7 +905,7 @@ public:
     }
 
     bool mightContainSubItems() override { return !eventNode.children.empty(); }
-  //  bool setDefaultOpenness() const override { return false; } 
+
 
     void paintItem(juce::Graphics& g, int width, int height) override
     {

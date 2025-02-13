@@ -18,6 +18,7 @@
 
 struct SharedAudioBuffer {
     volatile bool updated;
+    volatile bool processing;
     AkPlayingID playingID;
     AkUInt32 numChannels;
     AkUInt32 numSamples;
@@ -46,26 +47,45 @@ public:
         return buffer && buffer->updated;
     }
 
+
     void readAudio(juce::AudioBuffer<float>& outputBuffer) {
-        if (!buffer || !buffer->updated) return;
+        if (!buffer || !buffer->updated) {
+            // outputBuffer.clear();
+            return;
+        }
 
-        const int numChannels = juce::jmin(outputBuffer.getNumChannels(),
+        int numChannels = juce::jmin(outputBuffer.getNumChannels(),
             static_cast<int>(buffer->numChannels));
-        const int numSamples = juce::jmin(outputBuffer.getNumSamples(),
-            static_cast<int>(buffer->numSamples));
+        int numSamples = outputBuffer.getNumSamples();
 
+        std::cout << "------" << std::endl;
+        std::cout << "[VST Host] Reading " << numSamples << " samples from shared memory." << std::endl;
+
+        if (numSamples > outputBuffer.getNumSamples()) {
+            std::cerr << "[VST Host] WARNING: Shared memory samples exceed buffer size! Clamping." << std::endl;
+            numSamples = outputBuffer.getNumSamples();
+        }
+
+        else {
+            std::cout << "[VST Host] Shared memory samples match buffer size." << std::endl;
+        }
         for (int ch = 0; ch < numChannels; ++ch) {
             outputBuffer.copyFrom(ch, 0, buffer->samples[ch], numSamples);
         }
 
         buffer->updated = false;  // Reset the flag
+        buffer->processing = true;
     }
 
     void writeProcessedAudio(const juce::AudioBuffer<float>& processedBuffer) {
         if (!buffer) return;
 
         int numChannels = juce::jmin(processedBuffer.getNumChannels(), static_cast<int>(buffer->numChannels));
+        // int numSamples = processedBuffer.getNumSamples();
         int numSamples = juce::jmin(processedBuffer.getNumSamples(), static_cast<int>(buffer->numSamples));
+        std::cout << "[VST Host] Writing " << numSamples << " samples to shared memory." << std::endl;
+        std::cout << " - First Sample (Channel 0): " << processedBuffer.getReadPointer(0)[0] << std::endl;
+        std::cout << "=========================================" << std::endl;
 
         for (int ch = 0; ch < numChannels; ++ch) {
             memcpy(buffer->samples[ch], processedBuffer.getReadPointer(ch), numSamples * sizeof(float));
@@ -91,7 +111,6 @@ public:
     int getNumChannels() {
         return buffer ? buffer->numChannels : 0;
     }
-
 private:
     HANDLE hMapFile;
     SharedAudioBuffer* buffer;

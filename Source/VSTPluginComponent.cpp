@@ -29,8 +29,8 @@ void VSTPluginComponent::initialiseAudio()
 void VSTPluginComponent::refereshAudioIODetails()
 {
     auto* device = audioDeviceManager->getCurrentAudioDevice();
-    sampleRate = device->getCurrentSampleRate();
-    blockSize = device->getCurrentBufferSizeSamples();
+   /* sampleRate = device->getCurrentSampleRate();
+    blockSize = device->getCurrentBufferSizeSamples();*/
     std::cout << "===============================" << std::endl;
     std::cout << "Audio Device Initialised:" << std::endl;
     std::cout << "  Device Name: " << device->getName() << std::endl;
@@ -117,11 +117,11 @@ void VSTPluginComponent::loadPlugin(int pluginIndex)
     audioDeviceManager.initialise(0, 2, nullptr, true);
     audioDeviceManager.getAudioDeviceSetup(deviceSetup);
 
-    // double sampleRate = 44100.0;
-     //int blockSize = 441;
+    /* double sampleRate = 44100.0;
+     int blockSize = 1024;*/
 
-    deviceSetup.sampleRate = sampleRate;
-    deviceSetup.bufferSize = blockSize;
+   /* deviceSetup.sampleRate = sampleRate;
+    deviceSetup.bufferSize = blockSize;*/
     audioDeviceManager.setAudioDeviceSetup(deviceSetup, true);
 
     String errorMessage;

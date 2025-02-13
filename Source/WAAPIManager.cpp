@@ -789,87 +789,6 @@ std::string WAAPIManager::getWwisePathFromID(const std::string& objectID)
     std::cerr << "[WAAPI] Failed to retrieve Wwise path for ID: " << objectID << std::endl;
     return "";
 }
-
-//void WAAPIManager::addWwisePluginToPath(const std::string& objectPath)
-//{
-//    using namespace AK::WwiseAuthoringAPI;
-//
-//    if (!waapiClient.IsConnected())
-//    {
-//        std::cerr << "Not connected to WAAPI!" << std::endl;
-//        return;
-//    }
-//
-//    AkJson args(AkJson::Map{
-//        { "object", AkVariant(objectPath) },
-//        { "pluginName", AkVariant("WwiseVSTHostBridge") } // Replace with your actual plugin name
-//        });
-//
-//    AkJson result;
-//    if (waapiClient.Call(ak::wwise::core::object::setProperty, args, AkJson(AkJson::Type::Map), result, 10))
-//    {
-//        std::cout << "[WAAPI] Plugin added to: " << objectPath << std::endl;
-//    }
-//    else
-//    {
-//        std::cerr << "[WAAPI] Failed to add plugin to: " << objectPath << std::endl;
-//    }
-//}
-
-/*void WAAPIManager::removeWwisePluginFromPath(const std::string& objectPath)
-{
-    using namespace AK::WwiseAuthoringAPI;
-
-    if (!waapiClient.IsConnected())
-    {
-        std::cerr << "Not connected to WAAPI!" << std::endl;
-        return;
-    }
-
-    AkJson args(AkJson::Map{
-        { "object", AkVariant(objectPath) },
-        { "pluginName", AkVariant("MyWwiseVSTPlugin") }
-        });
-
-    AkJson result;
-    if (waapiClient.Call(ak::wwise::core::object::setProperty, args, AkJson(AkJson::Type::Map), result, 10))
-    {
-        std::cout << "[WAAPI] Plugin removed from: " << objectPath << std::endl;
-    }
-    else
-    {
-        std::cerr << "[WAAPI] Failed to remove plugin from: " << objectPath << std::endl;
-    }
-}*/
-
-// WAAPIManager.cpp
-//bool WAAPIManager::AddEffectToObject(std::string& objectPath,
-//    const std::string& pluginName) {
-//    using namespace AK::WwiseAuthoringAPI;
-//
-//    std::cout << "Adding effect to object: " << objectPath << std::endl;
-//    // Check if effect already exists
-//    if (auto it = m_activeEffects.find(objectPath); it != m_activeEffects.end()) {
-//        std::cout << "Effect already exists for object: " << objectPath << std::endl;
-//        return true;
-//    }
-//
-//    AkJson args(AkJson::Map{
-//        {"object", AkVariant(objectPath)},
-//        {"reference", AkVariant("Bus")},
-//        {"value", AkVariant("{B09E43E4-A5DD-47F3-8288-64DA9891B72D}")}
-//        });
-//
-//    AkJson result;
-//    if (waapiClient.Call(ak::wwise::core::object::setReference, args, AkJson::Map{}, result)) {
-//        if (result.HasKey("id")) {
-//            m_activeEffects[objectPath] = result["id"].GetVariant().GetString();
-//            return true;
-//        }
-//    }
-//    return false;
-//}
-
 bool WAAPIManager::RemoveEffectFromObject( std::string& targetID) {
     using namespace AK::WwiseAuthoringAPI;
 
@@ -918,7 +837,6 @@ bool WAAPIManager::AddEffectToObject(std::string& objectPath, const std::string&
                 }}
             }}
         }
-
     );
 
     AkJson setEffectResult;

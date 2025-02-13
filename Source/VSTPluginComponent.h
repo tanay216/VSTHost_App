@@ -46,7 +46,7 @@ private:
 
     
     double sampleRate = 44100.0;
-    int blockSize = 512;
+    int blockSize = 1024;
     const PluginDescription* selectedPlugin = nullptr;
     bool isMono = false;
     AudioBuffer<float> pluginBuffer;
